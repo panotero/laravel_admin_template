@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Improve GPU rendering for smoother scrolling */
+* {
+  -webkit-font-smoothing: antialiased;
+  -webkit-overflow-scrolling: touch;
+}
+
+.smooth-container {
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform;
+}

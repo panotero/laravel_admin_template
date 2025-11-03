@@ -9,7 +9,7 @@ document.addEventListener("click", async function (event) {
     status.textContent = "⏳ Sending...";
 
     try {
-      const response = await fetch("/api/test-api", {
+      const response = await fetch(`${window.APP_URL}/api/test-api`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -60,7 +60,7 @@ document.addEventListener("submit", async function (e) {
 
   try {
     console.log(formData);
-    const response = await fetch("/api/send-mail", {
+    const response = await fetch(`${window.APP_URL}/api/send-mail`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -15,6 +15,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
+    <script>
+        window.APP_URL = "{{ config('app.url') }}";
+        window.API_URL = "{{ config('custom.api_url') }}";
+    </script>
+
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])

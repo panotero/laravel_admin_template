@@ -152,7 +152,7 @@
             }
 
             try {
-                const response = await fetch('/api/users/store', {
+                const response = await fetch(`${window.APP_URL}/api/users/store`, {
                     method: 'POST',
                     body: formData,
                     credentials: 'include', // include cookies/session if needed
@@ -184,7 +184,7 @@
             status.textContent = "⏳ Sending...";
 
             try {
-                const response = await fetch("/api/test-api", {
+                const response = await fetch(`${window.APP_URL}/api/test-api`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\MenusController;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ListingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -62,3 +63,14 @@ Route::post('/test-api', function (Request $request) {
         'message' => 'API successfully triggered!',
     ]);
 });
+
+
+// Store listing (used by modal form)
+Route::post('/listings', [ListingController::class, 'store'])->name('listings.store');
+Route::get('/listings', [ListingController::class, 'index']); // fetch all
+Route::get('/listings/{id}', [ListingController::class, 'show']); // fetch one
+Route::put('/listings/{id}', [ListingController::class, 'update']);
+
+// Optional API routes
+Route::get('/listings/{listing}', [ListingController::class, 'show'])->name('listings.show');
+Route::delete('/listings/{listing}', [ListingController::class, 'destroy'])->name('listings.destroy');

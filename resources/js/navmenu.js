@@ -1,5 +1,6 @@
 // resources/js/navmenu.js
 document.addEventListener("DOMContentLoaded", function () {
+  const AppURL = window.APP_URL;
   const sidebar = document.getElementById("sidebar-menu");
   if (!sidebar) return;
 
@@ -15,7 +16,9 @@ document.addEventListener("DOMContentLoaded", function () {
     if (titleEl) titleEl.textContent = menu.title;
 
     // Load page content
-    fetch(menu.link, { headers: { Accept: "application/json" } })
+    fetch(AppURL + menu.link, {
+      headers: { Accept: "application/json" },
+    })
       .then((res) => res.text())
       .then((data) => {
         const contentEl = document.getElementById("content");
@@ -136,7 +139,7 @@ document.addEventListener("DOMContentLoaded", function () {
     return wrapper;
   }
 
-  fetch("/api/debug_auth", {
+  fetch(`${AppURL}/api/debug_auth`, {
     credentials: "include", // send cookies for session-based auth
     headers: {
       Accept: "application/json",
@@ -156,7 +159,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
   // === FETCH MENUS ===
-  fetch("/api/load_menu", {
+  fetch(`${AppURL}/api/load_menu`, {
     credentials: "include", // IMPORTANT
     headers: {
       Accept: "application/json",

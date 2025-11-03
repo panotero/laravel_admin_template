@@ -142,11 +142,11 @@
                 parent_menu: fields.parent.value,
             };
 
-            let url = "/api/nav_menus";
+            let url = `${window.APP_URL}/api/nav_menus`;
             let method = "POST";
 
             if (fields.id.value) {
-                url = `/api/nav_menus/${fields.id.value}`;
+                url = `${window.APP_URL}/api/nav_menus/${fields.id.value}`;
                 method = "PUT";
             }
 
@@ -167,7 +167,7 @@
                 // If parent menu was updated, update all children roles
                 menusData.forEach(async (m) => {
                     if (m.parent_menu === currentMenuId) {
-                        await fetch(`/api/nav_menus/${m.id}`, {
+                        await fetch(`${window.APP_URL}/api/nav_menus/${m.id}`, {
                             method: "PUT",
                             headers: {
                                 "Content-Type": "application/json",
@@ -190,7 +190,7 @@
 
         // Load menus table
         async function loadMenus() {
-            const res = await fetch("/api/nav_menus_list", {
+            const res = await fetch(`${window.APP_URL}/api/nav_menus_list`, {
                 credentials: 'include',
                 headers: {
                     Accept: "application/json"
@@ -263,7 +263,7 @@
 
         // Load roles as checkboxes
         async function loadRoles() {
-            const res = await fetch("/api/roles", {
+            const res = await fetch(`${window.APP_URL}/api/roles`, {
                 headers: {
                     Accept: "application/json"
                 }

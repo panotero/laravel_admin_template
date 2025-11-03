@@ -2,7 +2,7 @@
 
 // document.addEventListener("DOMContentLoaded", () => {
 //   // Fetch nav menus dynamically
-//   fetch("/api/nav_menus", {
+//   fetch("/landwise_live/api/nav_menus", {
 //     headers: {
 //       Accept: "application/json",
 //       Authorization: "Bearer " + window.apiToken, // inject via Blade

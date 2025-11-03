@@ -43,6 +43,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/page_themes', [PageController::class, 'page_Themes']);
     Route::get('/page_users', [PageController::class, 'page_Users']);
     Route::get('/page_forms', [PageController::class, 'page_Forms']);
+    Route::get('/page_featuredHome', [PageController::class, 'page_featuredHome']);
 
 
     //mailing service

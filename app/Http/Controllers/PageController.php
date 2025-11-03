@@ -47,4 +47,9 @@ class PageController extends Controller
     {
         return view('pages.settings.forms');
     }
+
+    public function page_featuredHome()
+    {
+        return view('pages.featuredHome');
+    }
 }

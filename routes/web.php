@@ -7,6 +7,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\MailerController;
+use App\Http\Middleware\CheckUserStatus;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,7 +25,7 @@ Route::get('/', function () {
 });
 
 // Protected routes
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'check.status'])->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
@@ -44,6 +45,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/page_users', [PageController::class, 'page_Users']);
     Route::get('/page_forms', [PageController::class, 'page_Forms']);
     Route::get('/page_featuredHome', [PageController::class, 'page_featuredHome']);
+    Route::get('/page_settings', [PageController::class, 'page_settings']);
 
 
     //mailing service

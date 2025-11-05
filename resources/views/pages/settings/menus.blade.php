@@ -69,7 +69,6 @@
 </div>
 <script>
     (function() {
-        console.log('menus initialized');
         const modal = document.getElementById("menuModal");
         const cancelBtn = document.getElementById("cancelModalBtn");
         const form = document.getElementById("menuForm");
@@ -245,7 +244,6 @@
 
             // Load parent menus dropdown
             async function loadParentMenus() {
-                console.log(menusData);
                 const parentSelect = fields.parent;
                 parentSelect.innerHTML = `<option value="0">Main Menu</option>`;
                 menusData.forEach(menu => {
@@ -263,7 +261,7 @@
 
         // Load roles as checkboxes
         async function loadRoles() {
-            const res = await fetch(`${window.APP_URL}/api/roles`, {
+            const res = await fetch(`${window.APP_URL}/api/userconfigs`, {
                 headers: {
                     Accept: "application/json"
                 }
@@ -276,8 +274,8 @@
                 const wrapper = document.createElement("label");
                 wrapper.classList.add("flex", "items-center", "gap-2");
                 wrapper.innerHTML = `
-                <input type="checkbox" value="${role.role_name}" class="roleCheckbox">
-                <span>${role.role_name}</span>
+                <input type="checkbox" value="${role.designation}" class="roleCheckbox">
+                <span>${role.designation}</span>
             `;
                 container.appendChild(wrapper);
             });

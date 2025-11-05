@@ -1,7 +1,6 @@
 document.addEventListener("click", async function (event) {
   if (event.target && event.target.id === "triggerApiBtn") {
     const status = document.getElementById("apiStatus");
-    console.log("trigger clicked");
 
     status.style.display = "block";
     status.style.background = "#eee";
@@ -59,7 +58,6 @@ document.addEventListener("submit", async function (e) {
   statusBox.classList.remove("hidden");
 
   try {
-    console.log(formData);
     const response = await fetch(`${window.APP_URL}/api/send-mail`, {
       method: "POST",
       headers: {

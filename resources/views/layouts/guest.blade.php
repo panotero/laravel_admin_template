@@ -49,13 +49,6 @@
 
 
 
-    {{-- <div class="bg-black h-full">
-        <a href="/">
-            <img class="h-28 w-28" src="{{ asset('/assets/images/TESDA_Logo.png') }}" {{ $attributes }}
-                alt="Logo">
-        </a>
-    </div>
- --}}
 </body>
 
 </html>

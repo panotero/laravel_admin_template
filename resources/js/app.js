@@ -9,3 +9,4 @@ Alpine.start();
 import "./dashboard";
 import "./navmenu";
 import "./mailer";
+import "./modalController";

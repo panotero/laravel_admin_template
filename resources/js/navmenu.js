@@ -151,9 +151,6 @@ document.addEventListener("DOMContentLoaded", function () {
       }
       return res.json(); // parse JSON response
     })
-    .then((data) => {
-      console.log("API Response:", data); // log the response
-    })
     .catch((err) => {
       console.error("Fetch error:", err);
     });

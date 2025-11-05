@@ -9,6 +9,8 @@ use App\Http\Controllers\MenusController;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ListingController;
+use App\Http\Controllers\OfficeController;
+use App\Http\Controllers\UserConfigController;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,9 +39,19 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/load_menu', [MenusController::class, 'index']);
 });
 
-Route::post('/users/store', [UserController::class, 'store']);
+
+Route::get('/offices', [OfficeController::class, 'index']);
+Route::post('/offices', [OfficeController::class, 'store']);
+Route::delete('/offices/{id}', [OfficeController::class, 'destroy']);
+Route::get('/userconfigs', [UserConfigController::class, 'index']);
+Route::post('/userconfigs', [UserConfigController::class, 'store']);
+Route::delete('/userconfigs/{id}', [UserConfigController::class, 'destroy']);
+
+Route::post('/users', [UserController::class, 'store']);
 Route::get('/users', [UserController::class, 'index']);
-Route::delete('/users/{id}', [UserController::class, 'destroy']);
+Route::get('/users/{id}', [UserController::class, 'show']);
+Route::patch('/deactivate_users/{id}', [UserController::class, 'deactivate']);
+Route::patch('/reactivate_users/{id}', [UserController::class, 'reactivate']);
 
 
 Route::post('/send-mail', [MailerController::class, 'send']);

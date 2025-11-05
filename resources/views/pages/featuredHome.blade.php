@@ -391,11 +391,6 @@
                 }
             });
 
-            // ✅ Debug logs
-            console.log('📂 Files array before submit:', files);
-            for (let [key, value] of formData.entries()) {
-                console.log(`${key}:`, value);
-            }
 
             const token =
                 document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
@@ -412,7 +407,6 @@
                 });
 
                 const data = await res.json();
-                console.log('📤 Response:', data);
 
                 if (!res.ok) {
                     throw new Error(data.message || 'Upload failed');
@@ -542,7 +536,6 @@
                 }
 
                 document.getElementById('saveChangesBtn').classList.remove('hidden');
-                console.log(deletedImages);
             }
         });
 
@@ -572,7 +565,6 @@
                 deleted_images: deletedImages,
             };
 
-            console.log(payload);
 
             fetch(`${window.APP_URL}/api/listings/${currentListingId}`, {
                     method: 'PUT',

@@ -5,17 +5,18 @@ document.addEventListener("DOMContentLoaded", function () {
   if (!sidebar) return;
 
   // === PAGE LOADER FUNCTION ===
-  function loadPage(menu) {
+  async function loadPage(menu) {
     if (!menu) return;
 
     // Save the last visited menu
     localStorage.setItem("lastMenu", JSON.stringify(menu));
-    // console.log(menu.title);
+
     const menulist = document.querySelectorAll(".menu");
     const activemenu = document.querySelectorAll(".menu.active");
     const activepage = Array.from(menulist).find(
       (btn) => btn.textContent.trim() === menu.title
     );
+
     activemenu.forEach((activebttn) => {
       activebttn.classList.remove(
         "bg-blue-400",
@@ -26,54 +27,73 @@ document.addEventListener("DOMContentLoaded", function () {
       );
       activebttn.classList.add("text-black", "hover:bg-gray-200");
     });
-    activepage.classList.add(
-      "bg-blue-400",
-      "hover:dark:bg-blue-600",
-      "text-white",
-      "active",
-      "hover:bg-blue-600"
-    );
-    activepage.classList.remove("hover:bg-gray-200", "text-black");
-    // console.log(activepage);
+
+    if (activepage) {
+      activepage.classList.add(
+        "bg-blue-400",
+        "hover:dark:bg-blue-600",
+        "text-white",
+        "active",
+        "hover:bg-blue-600"
+      );
+      activepage.classList.remove("hover:bg-gray-200", "text-black");
+    }
 
     // Update page title
     const titleEl = document.getElementById("page-title");
     if (titleEl) titleEl.textContent = menu.title;
 
-    // Load page content
-    fetch(AppURL + menu.link, {
-      headers: { Accept: "application/json" },
-    })
-      .then((res) => res.text())
-      .then((data) => {
-        const contentEl = document.getElementById("content");
+    const contentEl = document.getElementById("content");
 
-        // Inject the HTML
-        // contentEl.innerHTML = `<div class="p-4 bg-white dark:bg-gray-800 rounded shadow">${data}</div>`;
-        contentEl.innerHTML = `<div class="dark p-4 dark:bg-gray-800 rounded shadow">${data}</div>`;
+    // Show card-style loading skeleton
+    contentEl.innerHTML = `
+    <div class="mx-auto w-full rounded-md p-4 animate-pulse mt-4">
+      <div class="w-full flex space-x-4">
+        <div class="h-10 w-10 rounded-full bg-gray-200"></div>
+        <div class="flex-1 space-y-6 py-1">
+          <div class="h-2 rounded bg-gray-200"></div>
+          <div class="space-y-3">
+            <div class="grid grid-cols-3 gap-4">
+              <div class="col-span-2 h-2 rounded bg-gray-200"></div>
+              <div class="col-span-1 h-2 rounded bg-gray-200"></div>
+            </div>
+            <div class="h-2 rounded bg-gray-200"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
 
-        // ✅ Find and execute any inline/external scripts inside the loaded HTML
-        const scripts = contentEl.querySelectorAll("script");
-        scripts.forEach((oldScript) => {
-          const newScript = document.createElement("script");
-
-          if (oldScript.src) {
-            // If external script (with src="")
-            newScript.src = oldScript.src;
-          } else {
-            // Inline script content
-            newScript.textContent = oldScript.textContent;
-          }
-
-          document.body.appendChild(newScript);
-          oldScript.remove();
-        });
-      })
-      .catch(() => {
-        document.getElementById(
-          "content"
-        ).innerHTML = `<div class="p-4 bg-red-200 text-red-800 rounded">Failed to load ${menu.title}</div>`;
+    try {
+      const res = await fetch(AppURL + menu.link, {
+        headers: { Accept: "application/json" },
       });
+
+      if (!res.ok) {
+        throw new Error(`Failed to load page: ${res.status} ${res.statusText}`);
+      }
+
+      const data = await res.text();
+      contentEl.innerHTML = `<div class="dark p-4 dark:bg-gray-800 rounded shadow">${data}</div>`;
+
+      // Execute any inline/external scripts
+      const scripts = contentEl.querySelectorAll("script");
+      scripts.forEach((oldScript) => {
+        const newScript = document.createElement("script");
+        if (oldScript.src) {
+          newScript.src = oldScript.src;
+        } else {
+          newScript.textContent = oldScript.textContent;
+        }
+        document.body.appendChild(newScript);
+        document.body.removeChild(newScript);
+      });
+    } catch (err) {
+      contentEl.innerHTML = `<div class="bg-red-600 text-white rounded p-4">
+      <strong>Error:</strong> ${err.message}
+    </div>`;
+      console.error(err);
+    }
   }
 
   window.loadPage = loadPage; // expose globally for other JS
@@ -136,7 +156,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }`;
         childBtn.addEventListener("click", (e) => {
           e.stopPropagation();
-          loadPage(child); // ✅ loads child + saves as lastMenu
+          loadPage(child); // loads child + saves as lastMenu
           if (window.innerWidth < 1024) toggleSidebar();
         });
         sub.appendChild(childBtn);
@@ -204,7 +224,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       });
 
-      // 🔥 Restore last visited page
+      // Restore last visited page
       let lastMenu = localStorage.getItem("lastMenu");
       console.log(lastMenu);
       if (lastMenu) {

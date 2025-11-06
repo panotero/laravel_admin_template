@@ -382,7 +382,7 @@
             formData.append('link', document.getElementById('link').value);
             formData.append('status', document.getElementById('status').value);
 
-            // ✅ Append each selected file as images[]
+            // Append each selected file as images[]
             files.forEach((file) => {
                 if (file instanceof File) {
                     formData.append('images[]', file, file.name);
@@ -417,7 +417,7 @@
                 clearAllFiles();
                 hideModal();
             } catch (err) {
-                console.error('❌ Error uploading listing:', err);
+                console.error('Error uploading listing:', err);
                 alert('Error: ' + err.message);
             } finally {
                 submitBtn.disabled = false;
@@ -433,7 +433,7 @@
         }
 
 
-        // ✅ Fetch and display all listings
+        // Fetch and display all listings
         function loadListings() {
             fetch(`${window.APP_URL}/api/listings`)
                 .then(response => response.json())
@@ -524,7 +524,7 @@
                 });
         }
 
-        // 🧩 Handle delete clicks via event delegation
+        // Handle delete clicks via event delegation
         document.addEventListener('click', function(e) {
             if (e.target && e.target.classList.contains('delete-image-btn')) {
                 const path = e.target.getAttribute('data-img');
@@ -544,14 +544,14 @@
             document.getElementById('listingDetailsModal').classList.add('hidden');
         });
 
-        // 🧩 Event listener for Save Changes button
+        // Event listener for Save Changes button
         document.addEventListener('click', function(e) {
             if (e.target && e.target.id === 'saveChangesBtn') {
                 saveListingChanges();
             }
         });
 
-        // 🧩 Save Listing Changes
+        // Save Listing Changes
         function saveListingChanges() {
             if (!currentListingId) return;
 
@@ -592,7 +592,7 @@
 
 
 
-        // ✅ Close modal
+        // Close modal
         function closeDetailsModal() {
             document.querySelector('#listingDetailsModal').classList.add('hidden');
             deletedImages = [];

@@ -5,7 +5,7 @@ document.addEventListener("click", async function (event) {
     status.style.display = "block";
     status.style.background = "#eee";
     status.style.color = "#000";
-    status.textContent = "⏳ Sending...";
+    status.textContent = "Sending...";
 
     try {
       const response = await fetch(`${window.APP_URL}/api/test-api`, {
@@ -22,21 +22,21 @@ document.addEventListener("click", async function (event) {
       if (response.ok && result.success) {
         status.style.background = "#d4edda";
         status.style.color = "#155724";
-        status.textContent = "✅ " + result.message;
+        status.textContent = result.message;
       } else {
         status.style.background = "#f8d7da";
         status.style.color = "#721c24";
-        status.textContent = "❌ " + (result.message || "Failed");
+        status.textContent = result.message || "Failed";
       }
     } catch (err) {
       status.style.background = "#f8d7da";
       status.style.color = "#721c24";
-      status.textContent = "⚠️ Error: " + err.message;
+      status.textContent = "rror: " + err.message;
     }
   }
 });
 
-// ✅ Submit listener OUTSIDE the click handler
+// Submit listener OUTSIDE the click handler
 document.addEventListener("submit", async function (e) {
   const form = e.target;
 
@@ -54,7 +54,7 @@ document.addEventListener("submit", async function (e) {
   };
 
   statusBox.className = "p-2 rounded mb-3 bg-gray-100 text-gray-700";
-  statusBox.textContent = "⏳ Sending...";
+  statusBox.textContent = "Sending...";
   statusBox.classList.remove("hidden");
 
   try {
@@ -72,16 +72,15 @@ document.addEventListener("submit", async function (e) {
 
     if (response.ok && result.success) {
       statusBox.className = "p-2 rounded mb-3 bg-green-100 text-green-700";
-      statusBox.textContent = "✅ " + result.message;
+      statusBox.textContent = result.message;
       form.reset();
     } else {
       statusBox.className = "p-2 rounded mb-3 bg-red-100 text-red-700";
-      statusBox.textContent =
-        "❌ " + (result.message || "Failed to send mail.");
+      statusBox.textContent = result.message || "Failed to send mail.";
     }
   } catch (err) {
     statusBox.className = "p-2 rounded mb-3 bg-red-100 text-red-700";
-    statusBox.textContent = "⚠️ Error: " + err.message;
+    statusBox.textContent = "Error: " + err.message;
   }
 
   setTimeout(() => statusBox.classList.add("hidden"), 5000);

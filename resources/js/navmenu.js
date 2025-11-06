@@ -10,6 +10,31 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Save the last visited menu
     localStorage.setItem("lastMenu", JSON.stringify(menu));
+    // console.log(menu.title);
+    const menulist = document.querySelectorAll(".menu");
+    const activemenu = document.querySelectorAll(".menu.active");
+    const activepage = Array.from(menulist).find(
+      (btn) => btn.textContent.trim() === menu.title
+    );
+    activemenu.forEach((activebttn) => {
+      activebttn.classList.remove(
+        "bg-blue-400",
+        "hover:dark:bg-blue-600",
+        "text-white",
+        "active",
+        "hover:bg-blue-600"
+      );
+      activebttn.classList.add("text-black", "hover:bg-gray-200");
+    });
+    activepage.classList.add(
+      "bg-blue-400",
+      "hover:dark:bg-blue-600",
+      "text-white",
+      "active",
+      "hover:bg-blue-600"
+    );
+    activepage.classList.remove("hover:bg-gray-200", "text-black");
+    // console.log(activepage);
 
     // Update page title
     const titleEl = document.getElementById("page-title");
@@ -25,7 +50,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Inject the HTML
         // contentEl.innerHTML = `<div class="p-4 bg-white dark:bg-gray-800 rounded shadow">${data}</div>`;
-        contentEl.innerHTML = `<div class="dark p-4 bg-white dark:bg-gray-800 rounded shadow">${data}</div>`;
+        contentEl.innerHTML = `<div class="dark p-4 dark:bg-gray-800 rounded shadow">${data}</div>`;
 
         // ✅ Find and execute any inline/external scripts inside the loaded HTML
         const scripts = contentEl.querySelectorAll("script");
@@ -76,7 +101,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className =
-      "w-full text-left px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-between gap-2";
+      "w-full text-left px-3 py-2 rounded hover:bg-gray-200 dark:text-white dark:hover:bg-gray-700 flex items-center justify-between gap-2 menu";
 
     const left = document.createElement("span");
     left.className = "flex items-center gap-2";
@@ -96,7 +121,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (menu.children && menu.children.length) {
       const sub = document.createElement("div");
       sub.className =
-        "space-y-1 bg-gray-500 dark:bg-gray-700 dark:text-gray-300";
+        "space-y-1 bg-gray-100 dark:bg-gray-800 dark:text-gray-300";
       sub.style.maxHeight = "0px";
       sub.style.overflow = "hidden";
       sub.style.transition = "max-height 250ms ease";
@@ -105,7 +130,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const childBtn = document.createElement("button");
         childBtn.type = "button";
         childBtn.className =
-          "w-full text-left px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center gap-2";
+          "w-full text-left px-3 py-2 rounded hover:bg-gray-200 dark:text-white dark:hover:bg-gray-700 flex items-center gap-2 menu child-menu";
         childBtn.innerHTML = `<i class="${child.icon || ""}"></i> ${
           child.title || ""
         }`;
@@ -181,6 +206,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // 🔥 Restore last visited page
       let lastMenu = localStorage.getItem("lastMenu");
+      console.log(lastMenu);
       if (lastMenu) {
         try {
           lastMenu = JSON.parse(lastMenu);
@@ -197,12 +223,13 @@ document.addEventListener("DOMContentLoaded", function () {
     })
     .catch((err) => console.error("Failed to load nav menus", err));
 
-  //function for mobile nav menu
+  // Elements
   const sidebarWrapper = document.getElementById("sidebar-wrapper");
   const sidebarToggle = document.getElementById("sidebar-toggle");
   const sidebarOverlay = document.getElementById("sidebar-overlay");
-  const mainContent = document.getElementById("main-content");
+  const sidebarMenu = document.getElementById("sidebar-menu");
 
+  // Toggle sidebar open/close
   function toggleSidebar() {
     const isHidden = sidebarWrapper.classList.contains("-translate-x-full");
 
@@ -219,4 +246,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
   sidebarToggle.addEventListener("click", toggleSidebar);
   sidebarOverlay.addEventListener("click", toggleSidebar);
+
+  // Hide sidebar when a menu link is clicked (mobile only)
+  sidebarMenu.addEventListener("click", (e) => {
+    const link = e.target.closest("a");
+    if (!link) return; // only proceed if a link is clicked
+
+    if (window.innerWidth < 1024) {
+      // mobile breakpoint
+      sidebarWrapper.classList.add("-translate-x-full");
+      sidebarOverlay.classList.add("hidden");
+    }
+  });
+
+  // Optional: reset sidebar visibility on window resize
+  window.addEventListener("resize", () => {
+    if (window.innerWidth >= 1024) {
+      sidebarWrapper.classList.remove("-translate-x-full");
+      sidebarOverlay.classList.add("hidden");
+    } else {
+      sidebarWrapper.classList.add("-translate-x-full");
+    }
+  });
 });

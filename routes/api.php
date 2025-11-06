@@ -66,6 +66,7 @@ Route::get('/nav_menus_list', [MenusController::class, 'menulist']);
 Route::post('/nav_menus', [MenusController::class, 'store']);
 Route::put('/nav_menus/{id}', [MenusController::class, 'update']);
 Route::delete('/nav_menus/{id}', [MenusController::class, 'destroy']);
+Route::post('/menus/swap', [MenusController::class, 'swapMenuOrder']);
 
 Route::post('/test-api', function (Request $request) {
     \Log::info('Test API triggered', $request->all());

@@ -46,6 +46,8 @@ Route::middleware(['auth', 'check.status'])->group(function () {
     Route::get('/page_forms', [PageController::class, 'page_Forms']);
     Route::get('/page_featuredHome', [PageController::class, 'page_featuredHome']);
     Route::get('/page_settings', [PageController::class, 'page_settings']);
+    Route::get('/profile', [PageController::class, 'profile'])->name('profile');
+    Route::get('/settings', [PageController::class, 'settings'])->name('settings');
 
 
     //mailing service
@@ -55,10 +57,5 @@ Route::middleware(['auth', 'check.status'])->group(function () {
 
 
     Route::resource('users', UserController::class)->middleware('can:isSuperAdmin');
-    Route::get('/profile', function () {
-        return view('profile.edit', [
-            'user' => Auth::user(), // ✅ use Auth facade
-        ]);
-    })->name('profile.edit');
 });
 require __DIR__ . '/auth.php';

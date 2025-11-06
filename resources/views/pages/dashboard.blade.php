@@ -1,12 +1,11 @@
 <div class="min-h-screen">
-    <div class="max-w-7xl mx-auto">
+    <div class="w-full mx-auto dark:text-gray-200 text-gray-900">
 
 
         {{-- Top row: 3 stat cards --}}
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-black">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 ">
             {{-- Total Files --}}
-            <div
-                class="relative rounded-2xl border border-white/6 bg-white/4 backdrop-blur-lg p-4 shadow-lg  dark:bg-white">
+            <div class="relative rounded-2xl  backdrop-blur-lg p-4 shadow-lg dark:bg-gray-600  bg-white">
                 <div class="flex justify-between items-start">
                     <div>
                         <p class="text-sm ">Total Files</p>
@@ -18,8 +17,7 @@
 
                     {{-- pill button --}}
                     <div class="flex flex-col items-end gap-2">
-                        <button
-                            class="px-3 py-1 rounded-full bg-white/8 text-xs font-medium hover:bg-white/12 transition">
+                        <button class="px-3 py-1 rounded-full  text-xs font-medium hover:bg-white/12 transition">
                             View
                         </button>
                     </div>
@@ -27,8 +25,7 @@
             </div>
 
             {{-- Priority Files --}}
-            <div
-                class="relative rounded-2xl border border-white/6 bg-white/4 backdrop-blur-lg p-4 shadow-lg dark:bg-white">
+            <div class="relative rounded-2xl  -white/6  backdrop-blur-lg p-4 shadow-lg dark:bg-gray-600 bg-white">
                 <div class="flex justify-between items-start">
                     <div>
                         <p class="text-sm">Priority Files</p>
@@ -39,8 +36,7 @@
                     </div>
 
                     <div class="flex flex-col items-end gap-2">
-                        <button
-                            class="px-3 py-1 rounded-full bg-white/8 text-xs font-medium  hover:bg-white/12 transition">
+                        <button class="px-3 py-1 rounded-full text-xs font-medium  hover:bg-white/12 transition">
                             Manage
                         </button>
                     </div>
@@ -48,8 +44,7 @@
             </div>
 
             {{-- Overdue Files --}}
-            <div
-                class="relative rounded-2xl border border-white/6 bg-white/4 backdrop-blur-lg p-4 shadow-lg dark:bg-white">
+            <div class="relative rounded-2xl  -white/6 backdrop-blur-lg p-4 shadow-lg dark:bg-gray-600 bg-white">
                 <div class="flex justify-between items-start">
                     <div>
                         <p class="text-sm ">Overdue Files</p>
@@ -60,8 +55,7 @@
                     </div>
 
                     <div class="flex flex-col items-end gap-2">
-                        <button
-                            class="px-3 py-1 rounded-full bg-white/8 text-xs font-medium  hover:bg-white/12 transition">
+                        <button class="px-3 py-1 rounded-full  text-xs font-medium  hover:bg-white/12 transition">
                             Action
                         </button>
                     </div>
@@ -72,14 +66,14 @@
         {{-- Graph area: below cards, centered, ~60% width --}}
         <div class="mt-8 flex justify-center ">
             <div class="w-full ">
-                <div
-                    class="rounded-2xl border border-white/6 bg-white/4 backdrop-blur-lg p-4 shadow-lg text-black dark:bg-white">
+                <div class="rounded-2xl  -white/6 backdrop-blur-lg p-4 shadow-lg  dark:bg-gray-600">
                     <div class="flex items-center justify-between mb-3">
                         <h3 class="text-lg font-medium ">File Activity</h3>
-                        <div class="flex items-center gap-2">
-                            <label for="graph-range" class="text-xs ">Range</label>
+                        <div class="flex items-center gap-2  >
+                            <label for="graph-range"
+                            class="text-xs ">Range</label>
                             <select id="graph-range"
-                                class="text-xs rounded-full px-3 py-1 bg-white/6focus:outline-none">
+                                class="text-xs rounded-full px-3 py-1 focus:outline-none bg-white text-black">
                                 <option value="week">Week</option>
                                 <option value="month">Month</option>
                                 <option value="year">Year</option>
@@ -98,107 +92,107 @@
         {{-- Two-column area: Recent updates + Top 5 priority (table) --}}
         <div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
             {{-- Recent updates (span 2 columns on large screens) --}}
-            <div class="lg:col-span-2 rounded-2xl border border-white/6 bg-white/4 backdrop-blur-lg p-4 shadow-lg">
+            <div class="lg:col-span-2 rounded-2xl dark:bg-gray-600 bg-white backdrop-blur-lg p-4 shadow-lg">
                 <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-lg font-medium text-white">Recent Updates</h3>
-                    <span class="text-xs text-gray-300">Latest 10</span>
+                    <h3 class="text-lg font-medium ">Recent Updates</h3>
+                    <span class="text-xs ">Latest 10</span>
                 </div>
 
-                <div class="max-h-64 overflow-y-auto pr-2 scroll-smooth">
+                <div class="max-h-64 overflow-y-auto pr-2 scroll-smooth ">
                     <ul class="divide-y divide-white/6 text-sm">
                         <li class="py-3 flex justify-between items-start">
                             <div>
-                                <div class="text-sm text-white font-medium">File ABC123</div>
-                                <div class="text-xs text-gray-300 mt-1">Marked as Priority by <span
-                                        class="text-gray-200">Anna</span></div>
+                                <div class="text-sm  font-medium">File ABC123</div>
+                                <div class="text-xs  mt-1">Marked as Priority by <span class="">Anna</span></div>
                             </div>
-                            <div class="text-xs text-gray-400">2h ago</div>
+                            <div class="text-xs \">2h ago</div>
+                        </li>
+                        <li class="py-3
+                                flex justify-between items-start">
+                                <div>
+                                    <div class="text-sm  font-medium">File XYZ789</div>
+                                    <div class="text-xs  mt-1">Deadline missed — Overdue</div>
+                                </div>
+                                <div class="text-xs ">1d ago</div>
                         </li>
                         <li class="py-3 flex justify-between items-start">
                             <div>
-                                <div class="text-sm text-white font-medium">File XYZ789</div>
-                                <div class="text-xs text-gray-300 mt-1">Deadline missed — Overdue</div>
+                                <div class="text-sm e font-medium">File LMN456</div>
+                                <div class="text-xs  mt-1">Status changed to Closed</div>
                             </div>
-                            <div class="text-xs text-gray-400">1d ago</div>
+                            <div class="text-xs ">3d ago</div>
                         </li>
                         <li class="py-3 flex justify-between items-start">
                             <div>
-                                <div class="text-sm text-white font-medium">File LMN456</div>
-                                <div class="text-xs text-gray-300 mt-1">Status changed to Closed</div>
+                                <div class="text-sm  font-medium">File LMN456</div>
+                                <div class="text-xs  mt-1">Status changed to Closed</div>
                             </div>
-                            <div class="text-xs text-gray-400">3d ago</div>
+                            <div class="text-xs ">3d ago</div>
                         </li>
                         <li class="py-3 flex justify-between items-start">
                             <div>
-                                <div class="text-sm text-white font-medium">File LMN456</div>
-                                <div class="text-xs text-gray-300 mt-1">Status changed to Closed</div>
+                                <div class="text-sm  font-medium">File LMN456</div>
+                                <div class="text-xs  mt-1">Status changed to Closed</div>
                             </div>
-                            <div class="text-xs text-gray-400">3d ago</div>
+                            <div class="text-xs ">3d ago</div>
                         </li>
                         <li class="py-3 flex justify-between items-start">
                             <div>
-                                <div class="text-sm text-white font-medium">File LMN456</div>
-                                <div class="text-xs text-gray-300 mt-1">Status changed to Closed</div>
+                                <div class="text-sm  font-medium">File LMN456</div>
+                                <div class="text-xs  mt-1">Status changed to Closed</div>
                             </div>
-                            <div class="text-xs text-gray-400">3d ago</div>
+                            <div class="text-xs ">3d ago</div>
                         </li>
                         <li class="py-3 flex justify-between items-start">
                             <div>
-                                <div class="text-sm text-white font-medium">File LMN456</div>
-                                <div class="text-xs text-gray-300 mt-1">Status changed to Closed</div>
+                                <div class="text-sm  font-medium">File LMN456</div>
+                                <div class="text-xs  mt-1">Status changed to Closed</div>
                             </div>
-                            <div class="text-xs text-gray-400">3d ago</div>
+                            <div class="text-xs ">3d ago</div>
                         </li>
                         <li class="py-3 flex justify-between items-start">
                             <div>
-                                <div class="text-sm text-white font-medium">File LMN456</div>
-                                <div class="text-xs text-gray-300 mt-1">Status changed to Closed</div>
+                                <div class="text-sm  font-medium">File LMN456</div>
+                                <div class="text-xs mt-1">Status changed to Closed</div>
                             </div>
-                            <div class="text-xs text-gray-400">3d ago</div>
-                        </li>
-                        <li class="py-3 flex justify-between items-start">
-                            <div>
-                                <div class="text-sm text-white font-medium">File LMN456</div>
-                                <div class="text-xs text-gray-300 mt-1">Status changed to Closed</div>
-                            </div>
-                            <div class="text-xs text-gray-400">3d ago</div>
+                            <div class="text-xs ">3d ago</div>
                         </li>
                     </ul>
                 </div>
             </div>
 
             {{-- Top 5 priority (compact table) --}}
-            <div class="rounded-2xl border border-white/6 bg-white/4 backdrop-blur-lg p-4 shadow-lg">
+            <div class="rounded-2xl backdrop-blur-lg p-4 shadow-lg bg-white dark:bg-gray-600 ">
                 <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-lg font-medium text-white">Top 5 Priority</h3>
-                    <span class="text-xs text-gray-300">By priority</span>
+                    <h3 class="text-lg font-medium ">Top 5 Priority</h3>
+                    <span class="text-xs ">By priority</span>
                 </div>
 
                 <table class="w-full text-sm">
-                    <thead class="text-xs text-gray-300 border-b border-white/6">
+                    <thead class="text-xs -b -white/6">
                         <tr>
                             <th class="py-2 text-left">File</th>
                             <th class="py-2 text-left">Priority</th>
                             <th class="py-2 text-left">Due</th>
                         </tr>
                     </thead>
-                    <tbody class="text-white/90">
-                        <tr class="border-b border-white/6">
+                    <tbody class="">
+                        <tr class="-b -white/6">
                             <td class="py-2">ABC123</td>
                             <td class="py-2 text-sm">High</td>
                             <td class="py-2 text-sm">Oct 20</td>
                         </tr>
-                        <tr class="border-b border-white/6">
+                        <tr class="-b -white/6">
                             <td class="py-2">DEF234</td>
                             <td class="py-2 text-sm">High</td>
                             <td class="py-2 text-sm">Oct 22</td>
                         </tr>
-                        <tr class="border-b border-white/6">
+                        <tr class="-b -white/6">
                             <td class="py-2">GHI345</td>
                             <td class="py-2 text-sm">Medium</td>
                             <td class="py-2 text-sm">Oct 25</td>
                         </tr>
-                        <tr class="border-b border-white/6">
+                        <tr class="-b -white/6">
                             <td class="py-2">JKL456</td>
                             <td class="py-2 text-sm">Medium</td>
                             <td class="py-2 text-sm">Oct 27</td>
@@ -211,7 +205,7 @@
                     </tbody>
                 </table>
 
-                <div class="mt-3 text-xs text-gray-400">Minimal columns for compact view.</div>
+                <div class="mt-3 text-xs ">Minimal columns for compact view.</div>
             </div>
         </div>
 

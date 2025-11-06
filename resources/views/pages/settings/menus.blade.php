@@ -1,4 +1,4 @@
-<div class="p-6">
+<div class="lg:m-5 p-5 rounded-lg bg-white">
     <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-semibold">Navigation Menus</h2>
         <button id="addMenuBtn" onclick="add_menu()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
@@ -15,6 +15,7 @@
                 <th class="p-2 border">Link</th>
                 <th class="p-2 border">Allowed Roles</th>
                 <th class="p-2 border">Parent</th>
+                <th class="p-2 border text-center">Order</th>
             </tr>
         </thead>
         <tbody id="navMenuTbody">
@@ -187,77 +188,131 @@
             loadRoles();
         });
 
-        // Load menus table
+        // Function: Load Menus
         async function loadMenus() {
             const res = await fetch(`${window.APP_URL}/api/nav_menus_list`, {
                 credentials: 'include',
                 headers: {
                     Accept: "application/json"
-                },
+                }
             });
-            menusData = await res.json(); // store globally
+            menusData = await res.json();
+
             tableBody.innerHTML = "";
 
             const menuMap = {};
             menusData.forEach(menu => menuMap[menu.id] = menu.title);
 
-            menusData.forEach((menu) => {
+            menusData.forEach(menu => {
                 const tr = document.createElement("tr");
                 tr.classList.add("cursor-pointer", "hover:bg-gray-100");
 
-                const parentName = menu.parent_menu === 0 ? "Main Menu" : (menuMap[menu.parent_menu] ||
-                    "Unknown");
+                const parentName = menu.parent_menu === 0 ?
+                    "Main Menu" :
+                    (menuMap[menu.parent_menu] || "Unknown");
 
                 tr.innerHTML = `
-                <td class="border p-2">${menu.title}</td>
-                <td class="border p-2">${menu.icon || ""}</td>
-                <td class="border p-2">${menu.link || ""}</td>
-                <td class="border p-2">${menu.allowed_roles || ""}</td>
-                <td class="border p-2">${parentName}</td>
-            `;
-
-                tr.addEventListener("click", () => {
-                    modalTitle.textContent = "Modify Menu";
-                    saveBtn.textContent = "Modify";
-
-                    // Populate all fields
-                    fields.id.value = menu.id;
-                    fields.title.value = menu.title || "";
-                    fields.icon.value = menu.icon || "";
-                    fields.link.value = menu.link || "";
-                    fields.parent.value = menu.parent_menu || 0;
-
-                    // Populate roles checkboxes
-                    const allowedRoles = JSON.parse(menu.allowed_roles || "[]");
-                    document.querySelectorAll('.roleCheckbox').forEach(cb => {
-                        cb.checked = allowedRoles.includes(cb.value);
-                        // Disable if menu has parent
-                        // cb.disabled = menu.parent_menu !== 0;
-                    });
-
-                    modal.classList.remove("hidden");
-                    modal.classList.add("flex");
-                });
-
+            <td class="border p-2">${menu.title}</td>
+            <td class="border p-2">${menu.icon || ""}</td>
+            <td class="border p-2">${menu.link || ""}</td>
+            <td class="border p-2">${menu.allowed_roles || ""}</td>
+            <td class="border p-2">${parentName}</td>
+            <td class="border p-2 text-center">
+                <button class="move-up text-blue-600 hover:text-blue-800" data-id="${menu.id}">⬆️</button>
+                <button class="move-down text-blue-600 hover:text-blue-800" data-id="${menu.id}">⬇️</button>
+            </td>
+        `;
                 tableBody.appendChild(tr);
             });
+        }
 
-            // Load parent menus dropdown
-            async function loadParentMenus() {
-                const parentSelect = fields.parent;
-                parentSelect.innerHTML = `<option value="0">Main Menu</option>`;
-                menusData.forEach(menu => {
-                    if (menu.parent_menu === 0) {
-                        const opt = document.createElement("option");
-                        opt.value = menu.id;
-                        opt.textContent = menu.title;
-                        parentSelect.appendChild(opt);
-                    }
-                });
+        // ✅ Attach this ONCE — outside of loadMenus()
+        tableBody.addEventListener('click', async (e) => {
+            const btn = e.target.closest('button');
+            if (!btn) return;
+
+            const id = parseInt(btn.dataset.id);
+            if (btn.classList.contains('move-up')) {
+                await moveMenuUp(id);
+            } else if (btn.classList.contains('move-down')) {
+                await moveMenuDown(id);
+            }
+        });
+
+
+        // ✅ Function to move menu up
+        async function moveMenuUp(id) {
+            const current = menusData.find(m => m.id === id);
+            const siblings = menusData
+                .filter(m => m.parent_menu === current.parent_menu)
+                .sort((a, b) => a.menu_order - b.menu_order);
+
+            const currentIndex = siblings.findIndex(m => m.id === id);
+
+            if (currentIndex === 0) {
+                alert('This menu is already at the top.');
+                return;
             }
 
-            loadParentMenus();
+            const swapWith = siblings[currentIndex - 1];
+
+            // 🔁 Call backend to swap
+            await fetch(`${window.APP_URL}/api/menus/swap`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json"
+                },
+                body: JSON.stringify({
+                    id1: current.id,
+                    id2: swapWith.id
+                }),
+                credentials: "include"
+            });
+
+            // 🔄 Reload table
+            loadMenus();
         }
+
+
+        // ✅ Function to move menu down
+        async function moveMenuDown(id) {
+            const current = menusData.find(m => m.id === id);
+            const siblings = menusData
+                .filter(m => m.parent_menu === current.parent_menu)
+                .sort((a, b) => a.menu_order - b.menu_order);
+
+            const currentIndex = siblings.findIndex(m => m.id === id);
+
+            if (currentIndex === siblings.length - 1) {
+                alert('This menu is already at the bottom.');
+                return;
+            }
+
+            const swapWith = siblings[currentIndex + 1];
+
+            // 🔁 Call backend to swap
+            await fetch(`${window.APP_URL}/api/menus/swap`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json"
+                },
+                body: JSON.stringify({
+                    id1: current.id,
+                    id2: swapWith.id
+                }),
+                credentials: "include"
+            });
+
+            // 🔄 Reload table
+            loadMenus();
+        }
+
+
+        // Load on start
+        loadMenus();
+
 
         // Load roles as checkboxes
         async function loadRoles() {

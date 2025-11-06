@@ -1,59 +1,153 @@
 <x-app-layout>
-    <div class="flex h-screen bg-gray-100 dark:bg-gray-900">
-        <div class="flex h-screen">
+    <div class="flex h-screen dark:bg-gray-900">
+        <!-- Sidebar Wrapper -->
+        <aside id="sidebar-wrapper"
+            class="bg-white dark:bg-gray-900 shadow-lg w-64 fixed left-0 top-0 h-full flex flex-col transition-transform duration-300 transform -translate-x-full lg:translate-x-0 z-40">
 
-            <!-- Mobile Toggle Button -->
-            <button id="sidebar-toggle" class="lg:hidden absolute top-2 left-2 p-2 bg-gray-800 text-white rounded">
-                ☰
-            </button>
-            <!-- Sidebar (Collapsible) -->
-            <aside id="sidebar-wrapper"
-                class="bg-white dark:bg-gray-900 shadow-lg w-64 lg:w-64 fixed lg:static left-0 top-0 h-full transform -translate-x-full lg:translate-x-0 transition-all duration-300 z-40">
+            <!-- Header -->
+            <div class="w-full p-5">
+                <h1 class="font-semibold text-sm">ODDG-PP</h1>
+                <h1 class="text-md md:text-md font-bold">Document Monitoring Tool</h1>
+            </div>
 
-
+            <!-- Main content area (fills remaining height) -->
+            <div class="w-full flex flex-col justify-between flex-grow">
                 <nav id="sidebar-menu" class="p-4 space-y-2 text-black dark:text-white font-semibold">
                     <!-- JS will populate here -->
                 </nav>
-            </aside>
+                <div class="w-full p-5 flex justify-center dark:bg-gray-800">
+                    <img class="h-10 w-auto mx-auto" src="{{ asset('/assets/images/TESDA_Logo.png') }}" alt="Logo">
+                    <img class="h-12 w-auto mx-auto" src="{{ asset('/assets/images/bagong_pilipinas.png') }}"
+                        alt="Logo">
+                    <img class="h-5 w-auto m-auto" src="{{ asset('/assets/images/tesda_kayang_kaya.png') }}"
+                        alt="Logo">
+                </div>
+            </div>
+        </aside>
 
-            <!-- Overlay for mobile -->
-            <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-30 lg:hidden"></div>
+        <!-- Overlay for mobile -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-30 lg:hidden"></div>
 
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col lg:ml-64 transition-all duration-300">
+            <!-- Mobile Toggle Button -->
+            <button id="sidebar-toggle" class="lg:hidden absolute top-2 left-2 p-2 bg-gray-800 text-white rounded z-50">
+                ☰
+            </button>
 
-        </div>
-
-
-
-        <!-- Main content -->
-        <div class="flex-1 flex flex-col">
             <!-- Header -->
             <header class="bg-white dark:bg-gray-800 shadow px-6 py-4 flex justify-between items-center">
                 <h2 id="page-title" class="text-xl font-semibold text-gray-800 dark:text-gray-200 max-lg:pl-5">
                     Dashboard
                 </h2>
-                <div>
+
+                <div class="flex items-center space-x-4">
+                    <!-- Notification Dropdown -->
+                    <div class="relative" x-data="{ open: false }" @click.outside="open = false">
+                        <!-- Trigger Button -->
+                        <button @click="open = !open"
+                            class="relative p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                            <svg class="h-6 w-6 text-gray-800 dark:text-gray-200" fill="none" stroke="currentColor"
+                                stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
+                                </path>
+                            </svg>
+                            <!-- Optional red dot for unread notifications -->
+                            <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
+                        </button>
+
+                        <!-- Dropdown Content -->
+                        <div x-show="open" x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                            x-transition:leave="transition ease-in duration-75"
+                            x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+                            class="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto rounded-md shadow-lg bg-white dark:bg-gray-700 z-50"
+                            style="display: none;">
+                            <div class="py-2">
+                                <p
+                                    class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 border-b border-gray-200 dark:border-gray-600">
+                                    Notifications
+                                </p>
+
+                                <!-- Notification Items -->
+                                <a href="#"
+                                    class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded">
+                                    New message from John
+                                </a>
+                                <a href="#"
+                                    class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded">
+                                    Server maintenance scheduled
+                                </a>
+                                <a href="#"
+                                    class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded">
+                                    Password changed successfully
+                                </a>
+                                <a href="#"
+                                    class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded">
+                                    Password changed successfully
+                                </a>
+                                <a href="#"
+                                    class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded">
+                                    Password changed successfully
+                                </a>
+                                <a href="#"
+                                    class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded">
+                                    Password changed successfully
+                                </a>
+                                <a href="#"
+                                    class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded">
+                                    Password changed successfully
+                                </a>
+                                <a href="#"
+                                    class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded">
+                                    Password changed successfully
+                                </a>
+                                <a href="#"
+                                    class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded">
+                                    Password changed successfully
+                                </a>
+                                <a href="#"
+                                    class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded">
+                                    Password changed successfully
+                                </a>
+
+                                <!-- Optional "See all" -->
+                                <a href="#"
+                                    class="block px-4 py-2 text-sm text-blue-600 dark:text-blue-400 hover:underline text-center">
+                                    See all notifications
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- Profile Dropdown -->
                     <x-dropdown align="right" width="48">
                         <x-slot name="trigger">
-                            <button class="text-gray-800 dark:text-gray-200">Menu</button>
+                            <button class="text-gray-800 dark:text-gray-200">
+                                <div class="flex flex-col items-center justify-center">
+                                    <img src="{{ Auth::user()->profile_photo_url ?? asset('default-avatar.png') }}"
+                                        alt="Avatar" class="h-5 w-5 rounded-full object-cover mb-2">
+                                    <p class="text-sm text-gray-700 dark:text-gray-300 text-center">
+                                        {{ Auth::user()->name }}
+                                    </p>
+                                </div>
+                            </button>
                         </x-slot>
                         <x-slot name="content">
-                            <!-- Logout -->
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault(); this.closest('form').submit();">
-                                    {{ __('Log Out') }}
-                                </x-dropdown-link>
-                            </form>
+                            <!-- Dropdown content goes here -->
                         </x-slot>
                     </x-dropdown>
                 </div>
             </header>
 
+
             <!-- Content Area -->
-            <main id="content" class="flex-1 overflow-y-auto text-gray-800 dark:text-gray-200 ">
+            <main id="content" class="flex-1 overflow-y-auto text-gray-800 dark:text-gray-200">
             </main>
         </div>
     </div>
+
 
 </x-app-layout>

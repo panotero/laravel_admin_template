@@ -59,4 +59,14 @@ class PageController extends Controller
     {
         return view('pages.settings.settings');
     }
+
+    public function profile()
+    {
+        return "page profile";
+    }
+
+    public function settings()
+    {
+        return "page settings";
+    }
 }

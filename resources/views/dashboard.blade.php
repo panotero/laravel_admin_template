@@ -5,7 +5,7 @@
             class="bg-white dark:bg-gray-900 shadow-lg w-64 fixed left-0 top-0 h-full flex flex-col transition-transform duration-300 transform -translate-x-full lg:translate-x-0 z-40">
 
             <!-- Header -->
-            <div class="w-full p-5">
+            <div class="w-full p-5 dark:text-white">
                 <h1 class="font-semibold text-sm">ODDG-PP</h1>
                 <h1 class="text-md md:text-md font-bold">Document Monitoring Tool</h1>
             </div>
@@ -31,7 +31,7 @@
         <!-- Main Content -->
         <div class="flex-1 flex flex-col lg:ml-64 transition-all duration-300">
             <!-- Mobile Toggle Button -->
-            <button id="sidebar-toggle" class="lg:hidden absolute top-2 left-2 p-2 bg-gray-800 text-white rounded z-50">
+            <button id="sidebar-toggle" class="lg:hidden absolute top-2 left-2 p-2 bg-gray-800 text-white rounded z-10">
                 ☰
             </button>
 
@@ -129,7 +129,7 @@
                                 <div class="flex flex-col items-center justify-center">
                                     <img src="{{ Auth::user()->profile_photo_url ?? asset('default-avatar.png') }}"
                                         alt="Avatar" class="h-5 w-5 rounded-full object-cover mb-2">
-                                    <p class="text-sm text-gray-700 dark:text-gray-300 text-center">
+                                    <p class="text-sm text-gray-700 dark:text-gray-300 text-center max-md:hidden">
                                         {{ Auth::user()->name }}
                                     </p>
                                 </div>

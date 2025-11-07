@@ -88,6 +88,57 @@ class UserController extends Controller
         }
     }
 
+    public function save_info($id = false, Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'nullable|string|max:255',
+            'email' => 'nullable|email|unique:users,email,' . $id,
+            'password' => 'nullable|string|min:6',
+            'role' => 'nullable|string',
+            'office_id' => 'nullable|integer',
+            'role_id' => 'nullable|integer',
+        ]);
+
+        Log::info('save user info triggered', [
+            'inputs' => $request->all(),
+            'id' => $id,
+        ]);
+
+        try {
+            // Remove null values so they won't overwrite existing columns
+            $data = array_filter($validated, function ($value) {
+                return !is_null($value) && $value !== '';
+            });
+
+            // If password is provided, hash it
+            if (isset($data['password'])) {
+                $data['password'] = Hash::make($data['password']);
+            }
+
+            if ($id) {
+                // Update existing record
+                $user = User::findOrFail($id);
+                $user->update($data);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'User updated successfully',
+                'data' => $user,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Failed to save user', [
+                'error' => $e->getMessage(),
+                'data' => $validated,
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to save user information',
+            ], 500);
+        }
+    }
+
     public function store(Request $request)
     {
         // Validate request

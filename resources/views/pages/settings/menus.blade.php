@@ -159,7 +159,7 @@
                 body: JSON.stringify(payload),
             });
 
-            // ✅ If updating parent, also update child menus
+            // If updating parent, also update child menus
             if (fields.id.value) {
                 const currentMenuId = parseInt(fields.id.value);
                 const updatedMenu = await res.json();
@@ -212,21 +212,64 @@
                     (menuMap[menu.parent_menu] || "Unknown");
 
                 tr.innerHTML = `
-            <td class="border p-2">${menu.title}</td>
-            <td class="border p-2">${menu.icon || ""}</td>
-            <td class="border p-2">${menu.link || ""}</td>
-            <td class="border p-2">${menu.allowed_roles || ""}</td>
-            <td class="border p-2">${parentName}</td>
-            <td class="border p-2 text-center">
+            <td class="border  p-2">${menu.title}</td>
+            <td class="border  p-2">${menu.icon || ""}</td>
+            <td class="border  p-2">${menu.link || ""}</td>
+            <td class="border  p-2">${menu.allowed_roles || ""}</td>
+            <td class="border  p-2">${parentName}</td>
+            <td class="border menubuttons p-2 text-center">
                 <button class="move-up text-blue-600 hover:text-blue-800" data-id="${menu.id}">⬆️</button>
                 <button class="move-down text-blue-600 hover:text-blue-800" data-id="${menu.id}">⬇️</button>
             </td>
         `;
+                tr.addEventListener("click", function(e) {
+                    modalTitle.textContent = "Modify Menu";
+                    saveBtn.textContent = "Modify";
+                    if (e.target.closest(".menubuttons")) {
+                        console.log("You clicked inside menu buttons column");
+                        return;
+                    }
+
+                    // Populate all fields
+                    fields.id.value = menu.id;
+                    fields.title.value = menu.title || "";
+                    fields.icon.value = menu.icon || "";
+                    fields.link.value = menu.link || "";
+                    fields.parent.value = menu.parent_menu || 0;
+
+                    // Populate roles checkboxes
+                    const allowedRoles = JSON.parse(menu.allowed_roles || "[]");
+                    document.querySelectorAll('.roleCheckbox').forEach(cb => {
+                        cb.checked = allowedRoles.includes(cb.value);
+                        // Disable if menu has parent
+                        // cb.disabled = menu.parent_menu !== 0;
+                    });
+
+                    modal.classList.remove("hidden");
+                    modal.classList.add("flex");
+                });
                 tableBody.appendChild(tr);
             });
+
+            // Load parent menus dropdown
+            async function loadParentMenus() {
+                console.log(menusData);
+                const parentSelect = fields.parent;
+                parentSelect.innerHTML = `<option value="0">Main Menu</option>`;
+                menusData.forEach(menu => {
+                    if (menu.parent_menu === 0) {
+                        const opt = document.createElement("option");
+                        opt.value = menu.id;
+                        opt.textContent = menu.title;
+                        parentSelect.appendChild(opt);
+                    }
+                });
+            }
+
+            loadParentMenus();
         }
 
-        // ✅ Attach this ONCE — outside of loadMenus()
+        // Attach this ONCE — outside of loadMenus()
         tableBody.addEventListener('click', async (e) => {
             const btn = e.target.closest('button');
             if (!btn) return;
@@ -325,14 +368,31 @@
             const container = fields.rolesContainer;
             container.innerHTML = "";
 
+            // 🟦 Add "Check All" option at the top
+            const checkAllWrapper = document.createElement("label");
+            checkAllWrapper.classList.add("flex", "items-center", "gap-2", "mb-2");
+            checkAllWrapper.innerHTML = `
+    <input type="checkbox" id="checkAllRoles" class="cursor-pointer">
+    <span class="font-medium text-gray-700">Check All</span>
+`;
+            container.appendChild(checkAllWrapper);
+
+            // 🧩 Render role checkboxes
             roles.forEach(role => {
                 const wrapper = document.createElement("label");
                 wrapper.classList.add("flex", "items-center", "gap-2");
                 wrapper.innerHTML = `
-                <input type="checkbox" value="${role.designation}" class="roleCheckbox">
-                <span>${role.designation}</span>
-            `;
+        <input type="checkbox" value="${role.designation}" class="roleCheckbox cursor-pointer">
+        <span>${role.designation}</span>
+    `;
                 container.appendChild(wrapper);
+            });
+
+            // 🟢 Add event listener to "Check All"
+            const checkAllBox = container.querySelector("#checkAllRoles");
+            checkAllBox.addEventListener("change", () => {
+                const roleCheckboxes = container.querySelectorAll(".roleCheckbox");
+                roleCheckboxes.forEach(cb => (cb.checked = checkAllBox.checked));
             });
         }
 

@@ -50,6 +50,7 @@ Route::delete('/userconfigs/{id}', [UserConfigController::class, 'destroy']);
 Route::post('/users', [UserController::class, 'store']);
 Route::get('/users', [UserController::class, 'index']);
 Route::get('/users/{id}', [UserController::class, 'show']);
+Route::patch('/save_user/{id}', [UserController::class, 'save_info']);
 Route::patch('/deactivate_users/{id}', [UserController::class, 'deactivate']);
 Route::patch('/reactivate_users/{id}', [UserController::class, 'reactivate']);
 

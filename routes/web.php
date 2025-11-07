@@ -46,6 +46,10 @@ Route::middleware(['auth', 'check.status'])->group(function () {
     Route::get('/page_forms', [PageController::class, 'page_Forms']);
     Route::get('/page_featuredHome', [PageController::class, 'page_featuredHome']);
     Route::get('/page_settings', [PageController::class, 'page_settings']);
+    Route::get('/page_documents', [PageController::class, 'page_documents']);
+    Route::get('/page_approvals', [PageController::class, 'page_approvals']);
+    Route::get('/page_reports_documents', [PageController::class, 'page_reports_documents']);
+    Route::get('/page_reports_users', [PageController::class, 'page_reports_users']);
     Route::get('/profile', [PageController::class, 'profile'])->name('profile');
     Route::get('/settings', [PageController::class, 'settings'])->name('settings');
 

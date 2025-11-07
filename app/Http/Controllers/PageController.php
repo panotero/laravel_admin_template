@@ -59,6 +59,27 @@ class PageController extends Controller
     {
         return view('pages.settings.settings');
     }
+    public function page_documents()
+    {
+        return view('pages.documents');
+    }
+
+    public function page_approvals()
+    {
+
+        return view('pages.approvals');
+    }
+
+    public function page_reports_documents()
+    {
+
+        return view('pages.reports.documents');
+    }
+
+    public function page_reports_users()
+    {
+        return view('pages.reports.users');
+    }
 
     public function profile()
     {

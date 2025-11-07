@@ -16,11 +16,11 @@ class MenusController extends Controller
     {
         $user = Auth::user();
 
-        Log::info('Authenticated user:', [
-            'id' => $user->id,
-            'email' => $user->email,
-            'role' => $user->role, // should show "superadmin"
-        ]);
+        // Log::info('Authenticated user:', [
+        //     'id' => $user->id,
+        //     'email' => $user->email,
+        //     'role' => $user->role, // should show "superadmin"
+        // ]);
 
         // Fetch menus ordered by parent and order
         $menus = NavMenu::orderBy('parent_menu', 'asc')
@@ -47,10 +47,10 @@ class MenusController extends Controller
             ];
         })->values();
 
-        Log::info('Filtered and grouped menus:', [
-            'total' => $grouped->count(),
-            'menus' => $grouped
-        ]);
+        // Log::info('Filtered and grouped menus:', [
+        //     'total' => $grouped->count(),
+        //     'menus' => $grouped
+        // ]);
 
         return response()->json($grouped);
     }

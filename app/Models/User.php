@@ -23,6 +23,8 @@ class User extends Authenticatable
         'password',
         'role_id',
         'role',
+        'office_id',
+
     ];
 
     /**
@@ -48,5 +50,16 @@ class User extends Authenticatable
     public function role()
     {
         return $this->belongsTo(SettingRole::class, 'role_id');
+    }
+    public function office()
+    {
+        return $this->belongsTo(Office::class, 'office_id', 'office_id');
+    }
+
+
+    public function userConfig()
+    {
+
+        return $this->belongsTo(UserConfig::class, 'role_id', 'id');
     }
 }

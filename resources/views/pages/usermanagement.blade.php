@@ -31,7 +31,7 @@
 
         <!-- Form -->
         <form id="userForm" class="space-y-4">
-            <input type="hidden" id="userId" />
+            <input type="text" id="userId" />
 
             <div>
                 <label class="block text-sm text-gray-600 mb-1">Name</label>
@@ -49,7 +49,7 @@
                 <label class="block text-sm text-gray-600 mb-1">Password</label>
                 <input id="userPassword" type="password"
                     class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200" placeholder="Password"
-                    minlength="6" required />
+                    minlength="6" />
             </div>
 
             <div>
@@ -83,6 +83,7 @@
         const apiUsers = "/api/users";
         const apiOffices = "/api/offices";
         const apiConfigs = "/api/userconfigs";
+        const patchsaveinfo = "/api/save_user";
 
         const userTableBody = document.getElementById("userTableBody");
         const userModal = document.getElementById("userModal");
@@ -154,6 +155,7 @@
         function openModal(edit = false, user = null) {
             userModal.classList.remove("hidden");
             saveBtn.classList.add("hidden");
+            // console.log(user);
 
             if (edit && user) {
                 modalTitle.textContent = "Edit User";
@@ -161,7 +163,7 @@
                 userName.value = user.name;
                 userEmail.value = user.email;
                 officeSelect.value = user.office_id ?? "";
-                configSelect.value = user.config_id ?? "";
+                configSelect.value = user.role_id ?? "";
             } else {
                 modalTitle.textContent = "Add New User";
                 userForm.reset();
@@ -179,7 +181,7 @@
         userForm.addEventListener("input", () => {
             saveBtn.classList.remove("hidden");
         });
-
+        //test the save api
         // Handle submit
         userForm.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -192,8 +194,9 @@
                 role: configSelect.selectedOptions[0].text,
             };
 
-            const method = userId.value ? "PUT" : "POST";
-            const url = userId.value ? `${apiUsers}/${userId.value}` : apiUsers;
+            const method = userId.value ? "PATCH" : "POST";
+            const url = userId.value ? `${patchsaveinfo}/${userId.value}` : apiUsers;
+            console.log(url);
             await fetch(url, {
                 method,
                 headers: {
@@ -210,6 +213,7 @@
         document.addEventListener("click", (e) => {
             if (e.target.matches(".editBtn")) {
                 const id = e.target.dataset.id;
+                // console.log(id);
                 fetch(`${apiUsers}/${id}`)
                     .then((res) => res.json())
                     .then((data) => openModal(true, data));

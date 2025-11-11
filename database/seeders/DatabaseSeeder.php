@@ -2,8 +2,10 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class DatabaseSeeder extends Seeder
 {
@@ -19,11 +21,16 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
         // $this->call(UserSeeder::class);
-
-        $this->call(Setting_roleSeeder::class);
-        $this->call(seeding_role::class);
-        $this->call(ThemeSeeder::class);
-        $this->call(UserSeeder::class);
-        $this->call(NavMenuSeeder::class);
+        $this->call([
+            DocumentsTableSeeder::class,
+            // OfficesTableSeeder::class,
+            FilesTableSeeder::class,
+            ModificationsTableSeeder::class,
+            NotificationsTableSeeder::class,
+            // NavMenuSeeder::class,
+            // UserSeeder::class,
+            // ThemeSeeder::class,
+            // Setting_roleSeeder::class
+        ]);
     }
 }

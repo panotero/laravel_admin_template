@@ -21,6 +21,8 @@
             </thead>
             <tbody id="userTableBody"></tbody>
         </table>
+        <!-- Mobile Card Container -->
+        <div id="userCardList" class="hidden md:hidden overflow-y-auto max-h-[400px] p-3 space-y-3"></div>s
     </div>
 </div>
 
@@ -68,7 +70,7 @@
 
             <div class="flex justify-end space-x-3 mt-6">
                 <button type="button" id="cancelBtn"
-                    class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg">Cancel</button>
+                    class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg modal-close">Cancel</button>
                 <button type="submit" id="saveBtn"
                     class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg hidden">Save</button>
             </div>
@@ -79,12 +81,17 @@
 <!-- Script -->
 <script>
     (function() {
-
+        // ==========================
+        // API Endpoints
+        // ==========================
         const apiUsers = "/api/users";
         const apiOffices = "/api/offices";
         const apiConfigs = "/api/userconfigs";
         const patchsaveinfo = "/api/save_user";
 
+        // ==========================
+        // DOM Elements
+        // ==========================
         const userTableBody = document.getElementById("userTableBody");
         const userModal = document.getElementById("userModal");
         const modalTitle = document.getElementById("modalTitle");
@@ -100,62 +107,91 @@
         const officeSelect = document.getElementById("officeSelect");
         const configSelect = document.getElementById("configSelect");
 
-        // Fetch all users
+        // ==========================
+        // Load Users Table
+        // ==========================
         async function loadUsers() {
-            const res = await fetch(apiUsers);
-            const users = await res.json();
-            userTableBody.innerHTML = "";
+            try {
+                const res = await fetch(apiUsers);
+                const users = await res.json();
 
-            users.forEach((u) => {
-                const actionLabel = u.status === 'deactivated' ? 'Reactivate' : 'Deactivate';
-                const actionClass = u.status === 'deactivated' ? 'reactivateBtn bg-green-400' :
-                    'deactivateBtn bg-red-500';
+                userTableBody.innerHTML = "";
 
-                userTableBody.insertAdjacentHTML(
-                    "beforeend",
-                    `
-      <tr class="border-t hover:bg-gray-50 transition">
-        <td class="px-6 py-3">${u.id}</td>
-        <td class="px-6 py-3">${u.name}</td>
-        <td class="px-6 py-3">${u.email}</td>
-        <td class="px-6 py-3">${u.role ?? '-'}</td>
-        <td class="px-6 py-3">${u.office_name ?? '-'}</td>
-        <td class="px-6 py-3 text-center">
-          <button class="text-blue-500 hover:underline editBtn" data-id="${u.id}">Edit</button> |
-          <button class="text-white px-5 py-2 rounded ${actionClass}" data-id="${u.id}">${actionLabel}</button>
-        </td>
-      </tr>
-    `
-                );
-            });
+                users.forEach((u) => {
+                    const actionLabel = u.status === "deactivated" ? "Reactivate" : "Deactivate";
+                    const actionClass =
+                        u.status === "deactivated" ?
+                        "reactivateBtn bg-green-400" :
+                        "deactivateBtn bg-red-500";
+
+                    userTableBody.insertAdjacentHTML(
+                        "beforeend",
+                        `
+                    <tr class="border-t hover:bg-gray-50 transition">
+                        <td class="px-6 py-3">${u.id}</td>
+                        <td class="px-6 py-3">${u.name}</td>
+                        <td class="px-6 py-3">${u.email}</td>
+                        <td class="px-6 py-3">${u.role ?? "-"}</td>
+                        <td class="px-6 py-3">${u.office_name ?? "-"}</td>
+                        <td class="px-6 py-3 text-center">
+                            <button class="text-blue-500 hover:underline editBtn" data-id="${u.id}">Edit</button> |
+                            <button class="text-white px-5 py-2 rounded ${actionClass}" data-id="${u.id}">${actionLabel}</button>
+                        </td>
+                    </tr>
+                `
+                    );
+                });
+
+                logTableContent();
+            } catch (error) {
+                console.error("Error loading users:", error);
+            }
         }
 
-        // Fetch dropdown data
+        // ==========================
+        // Log Table Content
+        // ==========================
+        function logTableContent() {
+            const rows = userTableBody.querySelectorAll("tr");
+            const tableData = Array.from(rows).map((row) =>
+                Array.from(row.querySelectorAll("td")).map((cell) => cell.textContent.trim())
+            );
+
+            console.log(" Table data:", tableData);
+        }
+
+        // ==========================
+        // Load Dropdowns
+        // ==========================
         async function loadDropdowns() {
-            const [officesRes, configsRes] = await Promise.all([
-                fetch(apiOffices),
-                fetch(apiConfigs),
-            ]);
+            try {
+                const [officesRes, configsRes] = await Promise.all([
+                    fetch(apiOffices),
+                    fetch(apiConfigs),
+                ]);
+                const [offices, configs] = await Promise.all([
+                    officesRes.json(),
+                    configsRes.json(),
+                ]);
 
-            const [offices, configs] = await Promise.all([
-                officesRes.json(),
-                configsRes.json(),
-            ]);
+                officeSelect.innerHTML =
+                    '<option value="">Select Office</option>' +
+                    offices.map((o) => `<option value="${o.office_id}">${o.office_name}</option>`).join("");
 
-            officeSelect.innerHTML =
-                '<option value="">Select Office</option>' +
-                offices.map((o) => `<option value="${o.office_id}">${o.office_name}</option>`).join("");
-
-            configSelect.innerHTML =
-                '<option value="">Select Config</option>' +
-                configs.map((c) => `<option value="${c.id}">${c.designation}</option>`).join("");
+                configSelect.innerHTML =
+                    '<option value="">Select Config</option>' +
+                    configs.map((c) => `<option value="${c.id}">${c.designation}</option>`).join("");
+            } catch (error) {
+                console.error("Error loading dropdowns:", error);
+            }
         }
 
-        // Show modal
+        // ==========================
+        // Modal Handling
+        // ==========================
         function openModal(edit = false, user = null) {
             userModal.classList.remove("hidden");
             saveBtn.classList.add("hidden");
-            // console.log(user);
 
             if (edit && user) {
                 modalTitle.textContent = "Edit User";
@@ -170,92 +206,89 @@
             }
         }
 
-        // Hide modal
         function closeModal() {
             userModal.classList.add("hidden");
             userForm.reset();
             userId.value = "";
         }
 
-        // Detect form change
+        // ==========================
+        // Event Listeners
+        // ==========================
+
+        // Detect form input changes
         userForm.addEventListener("input", () => {
             saveBtn.classList.remove("hidden");
         });
-        //test the save api
-        // Handle submit
+
+        // Submit (Add or Edit)
         userForm.addEventListener("submit", async (e) => {
             e.preventDefault();
+
             const data = {
                 name: userName.value,
                 email: userEmail.value,
                 password: userPassword.value,
                 office_id: officeSelect.value,
                 role_id: configSelect.value,
-                role: configSelect.selectedOptions[0].text,
+                role: configSelect.selectedOptions[0]?.text ?? "",
             };
 
             const method = userId.value ? "PATCH" : "POST";
             const url = userId.value ? `${patchsaveinfo}/${userId.value}` : apiUsers;
-            console.log(url);
-            await fetch(url, {
-                method,
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(data),
-            });
 
-            closeModal();
-            loadUsers();
+            try {
+                await fetch(url, {
+                    method,
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                closeModal();
+                loadUsers();
+            } catch (error) {
+                console.error("Error saving user:", error);
+            }
         });
 
-        // Handle click events
-        document.addEventListener("click", (e) => {
+        // Global click handler
+        document.addEventListener("click", async (e) => {
+            const id = e.target.dataset.id;
+
+            // Edit
             if (e.target.matches(".editBtn")) {
-                const id = e.target.dataset.id;
-                // console.log(id);
-                fetch(`${apiUsers}/${id}`)
-                    .then((res) => res.json())
-                    .then((data) => openModal(true, data));
+                const res = await fetch(`${apiUsers}/${id}`);
+                const data = await res.json();
+                openModal(true, data);
             }
 
-            if (e.target.matches(".deactivateBtn")) {
-                const id = e.target.dataset.id;
-                if (confirm("Deactivate this user?")) {
-                    // Deactivate a user
-                    fetch(`/api/deactivate_users/${id}`, {
-                            method: 'PATCH'
-                        })
-                        .then(res => res.json())
-                        .then(data => {
-                            loadUsers(); // refresh table
-                        });
-
-                }
+            // Deactivate
+            if (e.target.matches(".deactivateBtn") && confirm("Deactivate this user?")) {
+                await fetch(`/api/deactivate_users/${id}`, {
+                    method: "PATCH"
+                });
+                loadUsers();
             }
-            if (e.target.matches(".reactivateBtn")) {
-                const id = e.target.dataset.id;
-                if (confirm("Reactivate this user?")) {
-                    // Deactivate a user
-                    fetch(`/api/reactivate_users/${id}`, {
-                            method: 'PATCH'
-                        })
-                        .then(res => res.json())
-                        .then(data => {
-                            loadUsers(); // refresh table
-                        });
 
-                }
+            // Reactivate
+            if (e.target.matches(".reactivateBtn") && confirm("Reactivate this user?")) {
+                await fetch(`/api/reactivate_users/${id}`, {
+                    method: "PATCH"
+                });
+                loadUsers();
             }
         });
 
-        // Modal triggers
+        // Modal buttons
         addUserBtn.addEventListener("click", () => openModal());
         cancelBtn.addEventListener("click", closeModal);
 
-        // Init
+        // ==========================
+        // Initialize
+        // ==========================
         loadUsers();
         loadDropdowns();
-
     })();
 </script>

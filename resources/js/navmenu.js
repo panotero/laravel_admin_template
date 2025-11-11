@@ -226,7 +226,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Restore last visited page
       let lastMenu = localStorage.getItem("lastMenu");
-      console.log(lastMenu);
+      //   console.log(lastMenu);
       if (lastMenu) {
         try {
           lastMenu = JSON.parse(lastMenu);

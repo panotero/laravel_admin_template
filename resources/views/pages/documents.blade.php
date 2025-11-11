@@ -135,20 +135,30 @@
     <!-- Modal: New Document -->
     <div id="modalNewDocument" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl p-6 overflow-y-auto max-h-[90vh]">
-            <h2 class="text-lg font-semibold text-gray-700 mb-4">📁 Upload New Document</h2>
+            <h2 class="text-lg font-semibold text-gray-700 mb-4">Upload New Document</h2>
 
-            <!-- Upload Area -->
-            <div
+            <!-- PDF Upload Area -->
+            <div id="dropzone"
                 class="border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center p-6 text-gray-500 cursor-pointer hover:border-blue-400 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mb-2" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M7 16V4m0 0L3 8m4-4l4 4m-4 8h10a2 2 0 002-2V8a2 2 0 00-2-2h-3" />
                 </svg>
-                <p class="text-sm">Drag & drop a PDF file here or <span class="text-blue-600 underline">click to
-                        browse</span></p>
-                <input type="file" accept="application/pdf" class="hidden" id="documentFileInput" />
+                <p class="text-sm">
+                    Drag & drop a PDF file here or
+                    <span class="text-blue-600 underline">click to browse</span>
+                </p>
+                <input type="file" accept="application/pdf" class="hidden" id="fileInput" />
             </div>
+
+            <!-- Display selected file info -->
+            <p id="fileInfo" class="text-sm text-gray-600 mt-3 text-center"></p>
+
+            <!-- Clear button -->
+            <button id="clearSelectionBtn"
+                class="mt-3 bg-gray-200 px-3 py-1 rounded hidden hover:bg-gray-300 transition">Clear</button>
+
 
             <!-- Input Fields -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
@@ -200,7 +210,8 @@
 
             <!-- Actions -->
             <div class="flex justify-end mt-8 space-x-3">
-                <button id="btnCancelModal" class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">
+                <button id="btnCancelModal"
+                    class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 modal-close">
                     Cancel
                 </button>
                 <button class="px-5 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
@@ -212,13 +223,21 @@
 </div>
 
 <script>
-    const modal = document.getElementById("modalNewDocument");
-    const btn = document.getElementById("btnNewDocument");
-    const cancel = document.getElementById("btnCancelModal");
+    (function() {
+        initModal({
+            modalId: "modalNewDocument",
+            openBtnId: "btnNewDocument",
+            closeBtnId: "btnCancelModal",
+        });
 
-    btn.onclick = () => modal.classList.remove("hidden");
-    cancel.onclick = () => modal.classList.add("hidden");
-    window.onclick = (e) => {
-        if (e.target === modal) modal.classList.add("hidden");
-    };
+        initPDFDropzone({
+            dropzoneId: "dropzone",
+            fileInputId: "fileInput",
+            fileInfoId: "fileInfo",
+            clearBtnId: "clearSelectionBtn",
+        });
+
+    })();
 </script>
+
+<script></script>

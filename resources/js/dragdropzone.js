@@ -76,9 +76,9 @@ function initPDFDropzone({ dropzoneId, fileInputId, fileInfoId, clearBtnId }) {
 }
 
 //function for modal operations
-function initModal({ modalId, openBtnId, closeBtnId }) {
+function initModal({ modalId }) {
   const modal = document.getElementById(modalId);
-  const openBtn = document.getElementById(openBtnId);
+  const openBtn = document.querySelector(".modal-open");
   const closeBtn = document.querySelector(".modal-close");
   //   console.log(closeBtn);
 

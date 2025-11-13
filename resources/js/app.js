@@ -12,3 +12,5 @@ import "./mailer";
 import "./modalController";
 import "./dragdropzone";
 import "./mobileCardRenderer";
+import "./toast";
+import "./customAlert";

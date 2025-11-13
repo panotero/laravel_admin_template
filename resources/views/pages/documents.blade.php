@@ -5,7 +5,7 @@
     <div class="container mx-auto p-6 space-y-10">
         <!-- Table 1: Assigned to You -->
         <div><button id="btnNewDocument"
-                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition">
+                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition modal-open">
                 + New Document
             </button>
             <h2 class="text-lg font-semibold text-gray-700 mb-3">
@@ -226,8 +226,6 @@
     (function() {
         initModal({
             modalId: "modalNewDocument",
-            openBtnId: "btnNewDocument",
-            closeBtnId: "btnCancelModal",
         });
 
         initPDFDropzone({

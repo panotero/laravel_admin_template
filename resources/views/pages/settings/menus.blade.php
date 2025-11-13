@@ -12,7 +12,7 @@
             <tr>
                 <th class="p-2 border">Title</th>
                 <th class="p-2 border">Icon</th>
-                <th class="p-2 border">Link</th>
+                <th class="p-2 border">Page</th>
                 <th class="p-2 border">Allowed Roles</th>
                 <th class="p-2 border">Parent</th>
                 <th class="p-2 border text-center">Order</th>
@@ -45,7 +45,11 @@
 
             <div>
                 <label class="block font-medium">Link</label>
-                <input id="menuLink" type="text" class="w-full border p-2 rounded text-black">
+                <div class="w-full h-full flex my-auto">
+                    <h1 class="p-2 text-center text-xl">
+                        /</h1><input id="menuLink" type="text" class="w-full border p-2 rounded text-black">
+                </div>
+
             </div>
 
             <div>
@@ -166,7 +170,6 @@
                     .checked);
             });
         }
-
         // --------------------- LOAD MENUS ---------------------
         async function loadMenus() {
             const res = await fetch(`${window.APP_URL}/api/nav_menus/list`, {
@@ -178,63 +181,117 @@
             menusData = await res.json();
             tableBody.innerHTML = "";
 
+            // Build a lookup for menu titles
             const menuMap = {};
             menusData.forEach(menu => menuMap[menu.id] = menu.title);
 
-            menusData.forEach(menu => {
-                const tr = document.createElement("tr");
-                tr.classList.add("cursor-pointer", "hover:bg-gray-100");
-
-                const parentName = menu.parent_menu === 0 ?
-                    "Main Menu" :
-                    (menuMap[menu.parent_menu] || "Unknown");
-
-                // Find siblings and current index
-                const siblings = menusData
-                    .filter(m => m.parent_menu === menu.parent_menu)
+            // Helper function to recursively render menus
+            function renderMenuRows(parentId = 0, level = 0) {
+                const children = menusData
+                    .filter(m => m.parent_menu === parentId)
                     .sort((a, b) => a.menu_order - b.menu_order);
-                const index = siblings.findIndex(m => m.id === menu.id);
 
-                // Hide buttons on edge
-                const moveUpHidden = index === 0 ? "hidden" : "";
-                const moveDownHidden = index === siblings.length - 1 ? "hidden" : "";
+                children.forEach(menu => {
+                    const tr = document.createElement("tr");
+                    tr.classList.add("cursor-pointer", "hover:bg-gray-100");
 
-                tr.innerHTML = `
-        <td class="border p-2">${menu.title}</td>
-        <td class="border p-2">${menu.icon || ""}</td>
-        <td class="border p-2">${menu.link || ""}</td>
-        <td class="border p-2">${menu.allowed_roles || ""}</td>
-        <td class="border p-2">${parentName}</td>
-        <td class="border menubuttons p-2 text-center">
-            <button class="move-up bg-blue-600 hover:bg-blue-800 text-white px-2 py-1 rounded-md ${moveUpHidden}" data-id="${menu.id}"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 15l7-7 7 7" />
-</svg>
-</button>
-            <button class="move-down bg-blue-600 hover:bg-blue-800 text-white px-2 py-1 rounded-md ${moveDownHidden}" data-id="${menu.id}"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M19 9l-7 7-7-7" />
-</svg>
-</button>
-        </td>
-        <td class="border menubuttons p-2 text-center">
-            <button class="delete-button bg-red-600 hover:bg-red-800 py-1 px-2 rounded text-white" data-id="${menu.id}"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-  <path d="M3 6h18v2H3V6zm2 3h14l-1.5 12.5a1 1 0 0 1-1 .5H8a1 1 0 0 1-1-.5L5 9zm5 2v8h2v-8H10zm4 0v8h2v-8h-2zM9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1h5v2H4V4h5z"/>
-</svg>
-</button>
-        </td>
-    `;
-                tableBody.appendChild(tr);
-            });
+                    const parentName = menu.parent_menu === 0 ?
+                        "Main Menu" :
+                        (menuMap[menu.parent_menu] || "Unknown");
 
-            // Populate parent menu dropdown
+                    // Find siblings and current index (for up/down)
+                    const siblings = menusData
+                        .filter(m => m.parent_menu === menu.parent_menu)
+                        .sort((a, b) => a.menu_order - b.menu_order);
+                    const index = siblings.findIndex(m => m.id === menu.id);
+
+                    const moveUpHidden = index === 0 ? "hidden" : "";
+                    const moveDownHidden = index === siblings.length - 1 ? "hidden" : "";
+                    const roles = JSON.parse(menu.allowed_roles).join(', ');
+                    const targetpage = menu.link.replace(/^\//, '');
+
+                    // Indentation for child menus
+                    const indent = "&nbsp;".repeat(level * 6) + (level > 0 ? "↳ " : "");
+
+                    tr.innerHTML = `
+                <td class="border p-2">${indent}${menu.title}</td>
+                <td class="border p-2">${menu.icon || ""}</td>
+                <td class="border p-2">${targetpage || ""}</td>
+                <td class="border p-2">${roles || ""}</td>
+                <td class="border p-2">${parentName}</td>
+                <td class="border menubuttons p-2 text-center">
+                    <button class="move-up bg-blue-600 hover:bg-blue-800 text-white px-2 py-1 rounded-md ${moveUpHidden}" data-id="${menu.id}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 15l7-7 7 7" />
+                        </svg>
+                    </button>
+                    <button class="move-down bg-blue-600 hover:bg-blue-800 text-white px-2 py-1 rounded-md ${moveDownHidden}" data-id="${menu.id}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                </td>
+                <td class="border menubuttons p-2 text-center">
+                    <button class="delete-button bg-red-600 hover:bg-red-800 py-1 px-2 rounded text-white" data-id="${menu.id}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M3 6h18v2H3V6zm2 3h14l-1.5 12.5a1 1 0 0 1-1 .5H8a1 1 0 0 1-1-.5L5 9zm5 2v8h2v-8H10zm4 0v8h2v-8h-2zM9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1h5v2H4V4h5z"/>
+                        </svg>
+                    </button>
+                </td>
+            `;
+
+                    // Existing click logic (unchanged)
+                    tr.addEventListener("click", (e) => {
+                        if (e.target.closest("td.menubuttons")) {
+                            return;
+                        }
+                        // Your main logic here (only runs if not clicking menubuttons)
+                        console.log("Row clicked, not menubuttons");
+
+                        modalTitle.textContent = "Modify Menu";
+                        saveBtn.textContent = "Modify";
+
+                        // Populate all fields
+                        fields.id.value = menu.id;
+                        fields.title.value = menu.title || "";
+                        fields.icon.value = menu.icon || "";
+                        fields.link.value = menu.link || "";
+                        fields.parent.value = menu.parent_menu || 0;
+
+                        // Populate roles checkboxes
+                        const allowedRoles = JSON.parse(menu.allowed_roles || "[]");
+                        document.querySelectorAll('.roleCheckbox').forEach(cb => {
+                            cb.checked = allowedRoles.includes(cb.value);
+                        });
+
+                        modal.classList.remove("hidden");
+                        modal.classList.add("flex");
+                    });
+
+                    // Append to table
+                    tableBody.appendChild(tr);
+
+                    // Recursively render child menus
+                    renderMenuRows(menu.id, level + 1);
+                });
+            }
+
+            // Render top-level menus first
+            renderMenuRows(0);
+
+            // Populate parent dropdown
             const parentSelect = fields.parent;
             parentSelect.innerHTML = `<option value="0">Main Menu</option>`;
-            menusData.filter(m => m.parent_menu === 0).forEach(menu => {
-                const opt = document.createElement("option");
-                opt.value = menu.id;
-                opt.textContent = menu.title;
-                parentSelect.appendChild(opt);
-            });
+            menusData
+                .filter(m => m.parent_menu === 0)
+                .forEach(menu => {
+                    const opt = document.createElement("option");
+                    opt.value = menu.id;
+                    opt.textContent = menu.title;
+                    parentSelect.appendChild(opt);
+                });
         }
+
 
         // --------------------- PARENT CHANGE ---------------------
         fields.parent.addEventListener("change", () => {
@@ -357,6 +414,9 @@
         }
 
         async function deleteMenu(id) {
+
+            const confirmed = await customConfirm("Delete this menu?");
+            if (!confirmed) return; // if user clicks Cancel, exit
             await fetch(`${window.APP_URL}/api/nav_menus/${id}`, {
                 method: "DELETE",
                 headers: {

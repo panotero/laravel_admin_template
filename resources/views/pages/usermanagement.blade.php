@@ -265,16 +265,28 @@
             }
 
             // Deactivate
-            if (e.target.matches(".deactivateBtn") && confirm("Deactivate this user?")) {
-                await fetch(`/api/deactivate_users/${id}`, {
+            if (e.target.matches(".deactivateBtn")) {
+
+                // Use customConfirm instead of default confirm
+                const confirmed = await customConfirm("Deactivate this user?");
+                if (!confirmed) return; // if user clicks Cancel, exit
+
+                // User clicked OK → proceed with API call
+                await fetch(`/api/users/deactivate/${id}`, {
                     method: "PATCH"
                 });
+
+                // Reload users table
                 loadUsers();
             }
 
             // Reactivate
-            if (e.target.matches(".reactivateBtn") && confirm("Reactivate this user?")) {
-                await fetch(`/api/reactivate_users/${id}`, {
+            if (e.target.matches(".reactivateBtn")) {
+
+                // Use customConfirm instead of default confirm
+                const confirmed = await customConfirm("Reactivate this user?");
+                if (!confirmed) return; // if user clicks Cancel, exit
+                await fetch(`/api/users/reactivate/${id}`, {
                     method: "PATCH"
                 });
                 loadUsers();

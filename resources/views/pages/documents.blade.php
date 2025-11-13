@@ -93,45 +93,44 @@
 
             <!-- Table -->
             <div class="overflow-x-auto bg-white rounded-xl shadow">
-<<<<<<< HEAD
-                <table class="w-full text-sm text-left border-collapse">
-=======
-                <table id="allDocumentTable" class="w-full text-sm text-left border-collapse">
->>>>>>> main
-                    <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
-                        <tr>
-                            <th class="px-4 py-3">Control #</th>
-                            <th class="px-4 py-3">Label</th>
-                            <th class="px-4 py-3">Subject</th>
-                            <th class="px-4 py-3">Origin Office</th>
-                            <th class="px-4 py-3">Destination Office</th>
-                            <th class="px-4 py-3">Due Date</th>
-                            <th class="px-4 py-3">Duration</th>
-                            <th class="px-4 py-3">Date Uploaded</th>
-                            <th class="px-4 py-3">Confidentiality</th>
-                            <th class="px-4 py-3">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class="border-t hover:bg-gray-50">
-                            <td class="px-4 py-2">DOC-00456</td>
-                            <td class="px-4 py-2">
-                                <select class="border rounded px-2 py-1 text-xs">
-                                    <option>General</option>
-                                    <option>Confidential</option>
-                                </select>
-                            </td>
-                            <td class="px-4 py-2">Budget Proposal</td>
-                            <td class="px-4 py-2">Finance</td>
-                            <td class="px-4 py-2">Director’s Office</td>
-                            <td class="px-4 py-2">2025-11-10</td>
-                            <td class="px-4 py-2"></td>
-                            <td class="px-4 py-2">2025-11-05</td>
-                            <td class="px-4 py-2">Confidential</td>
-                            <td class="px-4 py-2">In Review</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <<<<<<< HEAD <table class="w-full text-sm text-left border-collapse">
+                    =======
+                    <table id="allDocumentTable" class="w-full text-sm text-left border-collapse">
+                        >>>>>>> main
+                        <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
+                            <tr>
+                                <th class="px-4 py-3">Control #</th>
+                                <th class="px-4 py-3">Label</th>
+                                <th class="px-4 py-3">Subject</th>
+                                <th class="px-4 py-3">Origin Office</th>
+                                <th class="px-4 py-3">Destination Office</th>
+                                <th class="px-4 py-3">Due Date</th>
+                                <th class="px-4 py-3">Duration</th>
+                                <th class="px-4 py-3">Date Uploaded</th>
+                                <th class="px-4 py-3">Confidentiality</th>
+                                <th class="px-4 py-3">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-t hover:bg-gray-50">
+                                <td class="px-4 py-2">DOC-00456</td>
+                                <td class="px-4 py-2">
+                                    <select class="border rounded px-2 py-1 text-xs">
+                                        <option>General</option>
+                                        <option>Confidential</option>
+                                    </select>
+                                </td>
+                                <td class="px-4 py-2">Budget Proposal</td>
+                                <td class="px-4 py-2">Finance</td>
+                                <td class="px-4 py-2">Director’s Office</td>
+                                <td class="px-4 py-2">2025-11-10</td>
+                                <td class="px-4 py-2"></td>
+                                <td class="px-4 py-2">2025-11-05</td>
+                                <td class="px-4 py-2">Confidential</td>
+                                <td class="px-4 py-2">In Review</td>
+                            </tr>
+                        </tbody>
+                    </table>
             </div>
         </div>
     </div>
@@ -187,24 +186,24 @@
                 <div class="space-y-4">
                     <div>
                         <label class="text-sm text-gray-600">Origin Office</label>
-<<<<<<< HEAD
-                        <select id="originOffice" class="w-full border-gray-300 rounded-lg px-3 py-2">
-=======
-                        <select id="originOffice" class="w-full border-gray-300 rounded-lg px-3 py-2 officeSelect">
->>>>>>> main
-                            <option>Select...</option>
-                        </select>
+                        <<<<<<< HEAD <select id="originOffice" class="w-full border-gray-300 rounded-lg px-3 py-2">
+                            =======
+                            <select id="originOffice"
+                                class="w-full border-gray-300 rounded-lg px-3 py-2 officeSelect">
+                                >>>>>>> main
+                                <option>Select...</option>
+                            </select>
                     </div>
                     <div>
                         <label class="text-sm text-gray-600">Destination Office</label>
-<<<<<<< HEAD
-                        <select id="destinationOffice" class="w-full border-gray-300 rounded-lg px-3 py-2">
-=======
-                        <select id="destinationOffice"
-                            class="w-full border-gray-300 rounded-lg px-3 py-2 officeSelect">
->>>>>>> main
-                            <option>Select...</option>
-                        </select>
+                        <<<<<<< HEAD <select id="destinationOffice"
+                            class="w-full border-gray-300 rounded-lg px-3 py-2">
+                            =======
+                            <select id="destinationOffice"
+                                class="w-full border-gray-300 rounded-lg px-3 py-2 officeSelect">
+                                >>>>>>> main
+                                <option>Select...</option>
+                            </select>
                     </div>
                     <div>
                         <label class="text-sm text-gray-600">Document Type</label>
@@ -233,8 +232,6 @@
             </div>
         </div>
     </div>
-<<<<<<< HEAD
-=======
 
     <!-- Document Details Modal -->
     <div id="approvalDocumentModal"
@@ -601,173 +598,179 @@
             </div>
         </div>
     </div>
->>>>>>> main
 </div>
 
 <script>
     (function() {
-<<<<<<< HEAD
-        initModal({
-            modalId: "modalNewDocument",
-=======
-        const openModalButton = document.getElementById("btnNewDocument");
-        console.log(openModalButton);
-        openModalButton.addEventListener("click", () => {
-
+            <<
+            <<
+            << < HEAD
             initModal({
                 modalId: "modalNewDocument",
-            });
->>>>>>> main
-        });
+                ===
+                ===
+                =
+                const openModalButton = document.getElementById("btnNewDocument");
+                console.log(openModalButton);
+                openModalButton.addEventListener("click", () => {
 
-        initPDFDropzone({
-            dropzoneId: "dropzone",
-            fileInputId: "fileInput",
-            fileInfoId: "fileInfo",
-            clearBtnId: "clearSelectionBtn",
-        });
+                    initModal({
+                        modalId: "modalNewDocument",
+                    }); >>>
+                    >>>
+                    > main
+                });
 
-<<<<<<< HEAD
-    })();
+                initPDFDropzone({
+                    dropzoneId: "dropzone",
+                    fileInputId: "fileInput",
+                    fileInfoId: "fileInfo",
+                    clearBtnId: "clearSelectionBtn",
+                });
+
+                <<
+                <<
+                << < HEAD
+            })();
 </script>
 
 <script></script>
 =======
-        // Reference to table body
-        const tableBody = document.querySelector("#allDocumentTable tbody"); // Sample data array
-        const approvalData = [{
-                controlNumber: "DOC-00123",
-                label: "General",
-                subject: "Quarterly Report",
-                originOffice: "HR Office",
-                destinationOffice: "Admin Office",
-                dueDate: "2025-11-15",
-                duration: "8 days",
-                dateUploaded: "2025-11-07",
-                confidentiality: "Normal",
-                status: "Pending"
-            },
-            {
-                controlNumber: "DOC-00124",
-                label: "Confidential",
-                subject: "Monthly Report",
-                originOffice: "Finance Office",
-                destinationOffice: "Admin Office",
-                dueDate: "2025-11-20",
-                duration: "5 days",
-                dateUploaded: "2025-11-07",
-                confidentiality: "High",
-                status: "Pending"
-            }
-            // Add more objects as needed
-        ];
+// Reference to table body
+const tableBody = document.querySelector("#allDocumentTable tbody"); // Sample data array
+const approvalData = [{
+controlNumber: "DOC-00123",
+label: "General",
+subject: "Quarterly Report",
+originOffice: "HR Office",
+destinationOffice: "Admin Office",
+dueDate: "2025-11-15",
+duration: "8 days",
+dateUploaded: "2025-11-07",
+confidentiality: "Normal",
+status: "Pending"
+},
+{
+controlNumber: "DOC-00124",
+label: "Confidential",
+subject: "Monthly Report",
+originOffice: "Finance Office",
+destinationOffice: "Admin Office",
+dueDate: "2025-11-20",
+duration: "5 days",
+dateUploaded: "2025-11-07",
+confidentiality: "High",
+status: "Pending"
+}
+// Add more objects as needed
+];
 
-        // Populate table
-        tableBody.innerHTML = ""; // clear existing rows
-        approvalData.forEach(item => {
-            const tr = document.createElement("tr");
-            tr.classList.add("border-t", "hover:bg-gray-50", "cursor-pointer");
+// Populate table
+tableBody.innerHTML = ""; // clear existing rows
+approvalData.forEach(item => {
+const tr = document.createElement("tr");
+tr.classList.add("border-t", "hover:bg-gray-50", "cursor-pointer");
 
-            tr.innerHTML = `
-        <td class="px-4 py-2">${item.controlNumber}</td>
-        <td class="px-4 py-2 ">
-            <select class="border rounded px-2 py-1 text-xs labeldropdown">
-                <option ${item.label === "General" ? "selected" : ""}>General</option>
-                <option ${item.label === "Confidential" ? "selected" : ""}>Confidential</option>
-            </select>
-        </td>
-        <td class="px-4 py-2">${item.subject}</td>
-        <td class="px-4 py-2">${item.originOffice}</td>
-        <td class="px-4 py-2">${item.destinationOffice}</td>
-        <td class="px-4 py-2">${item.dueDate}</td>
-        <td class="px-4 py-2">${item.duration}</td>
-        <td class="px-4 py-2">${item.dateUploaded}</td>
-        <td class="px-4 py-2">${item.confidentiality}</td>
-        <td class="px-4 py-2">${item.status}</td>
-    `;
-            tr.classList.add("modal-open");
-            // Optional: attach row click to open modal
-            tr.addEventListener("click", (e) => {
-                console.log(e.target.classList);
+tr.innerHTML = `
+<td class="px-4 py-2">${item.controlNumber}</td>
+<td class="px-4 py-2 ">
+    <select class="border rounded px-2 py-1 text-xs labeldropdown">
+        <option ${item.label === "General" ? "selected" : "" }>General</option>
+        <option ${item.label === "Confidential" ? "selected" : "" }>Confidential</option>
+    </select>
+</td>
+<td class="px-4 py-2">${item.subject}</td>
+<td class="px-4 py-2">${item.originOffice}</td>
+<td class="px-4 py-2">${item.destinationOffice}</td>
+<td class="px-4 py-2">${item.dueDate}</td>
+<td class="px-4 py-2">${item.duration}</td>
+<td class="px-4 py-2">${item.dateUploaded}</td>
+<td class="px-4 py-2">${item.confidentiality}</td>
+<td class="px-4 py-2">${item.status}</td>
+`;
+tr.classList.add("modal-open");
+// Optional: attach row click to open modal
+tr.addEventListener("click", (e) => {
+console.log(e.target.classList);
 
-                if (e.target.classList.contains("labeldropdown")) return;
-                initModal({
-                    modalId: "approvalDocumentModal"
-                });
-            });
+if (e.target.classList.contains("labeldropdown")) return;
+initModal({
+modalId: "approvalDocumentModal"
+});
+});
 
-            tableBody.appendChild(tr);
-        });
+tableBody.appendChild(tr);
+});
 
-        const fileInfoButton = document.querySelector('.fileInfoButton');
-        fileInfoButton.addEventListener("click", () => {
+const fileInfoButton = document.querySelector('.fileInfoButton');
+fileInfoButton.addEventListener("click", () => {
 
-            initModal({
-                modalId: "pdfPreviewModal"
-            });
-        });
-        const routeBtn = document.querySelector('.routeBtn');
-        routeBtn.addEventListener("click", () => {
+initModal({
+modalId: "pdfPreviewModal"
+});
+});
+const routeBtn = document.querySelector('.routeBtn');
+routeBtn.addEventListener("click", () => {
 
-            initModal({
-                modalId: "routingModal"
-            });
-        });
+initModal({
+modalId: "routingModal"
+});
+});
 
-        const officeSelect = document.getElementById("routeOfficeSelect");
-        const officedropdown = document.querySelectorAll(".officeSelect");
-        const userSelect = document.getElementById("userSelect");
-        const statusSelect = document.getElementById("statusSelect");
-        const internalSection = document.getElementById("internalSection");
-        const externalSection = document.getElementById("externalSection");
-        const pdfUploadSection = document.getElementById("pdfUploadSection");
+const officeSelect = document.getElementById("routeOfficeSelect");
+const officedropdown = document.querySelectorAll(".officeSelect");
+const userSelect = document.getElementById("userSelect");
+const statusSelect = document.getElementById("statusSelect");
+const internalSection = document.getElementById("internalSection");
+const externalSection = document.getElementById("externalSection");
+const pdfUploadSection = document.getElementById("pdfUploadSection");
 
-        const currentOffice = "PO-OED"; // Replace this with the logged-in user's office from backend/session
-        officedropdown.forEach(officeoption => {
-            // Fetch offices
-            fetch("/api/offices")
-                .then(res => res.json())
-                .then(offices => {
-                    officeoption.innerHTML = `<option value="">Select Office</option>` +
-                        offices.map(o => `<option value="${o.office_name}">${o.office_name}</option>`)
-                        .join("");
-                });
-        })
+const currentOffice = "PO-OED"; // Replace this with the logged-in user's office from backend/session
+officedropdown.forEach(officeoption => {
+// Fetch offices
+fetch("/api/offices")
+.then(res => res.json())
+.then(offices => {
+officeoption.innerHTML = `<option value="">Select Office</option>` +
+offices.map(o => `<option value="${o.office_name}">${o.office_name}</option>`)
+.join("");
+});
+})
 
-        // Handle office change
-        officeSelect.addEventListener("change", e => {
-            const selected = e.target.value;
-            if (!selected) {
-                internalSection.classList.add("hidden");
-                externalSection.classList.add("hidden");
-                return;
-            }
+// Handle office change
+officeSelect.addEventListener("change", e => {
+const selected = e.target.value;
+if (!selected) {
+internalSection.classList.add("hidden");
+externalSection.classList.add("hidden");
+return;
+}
 
-            if (selected === currentOffice) {
-                internalSection.classList.remove("hidden");
-                externalSection.classList.add("hidden");
+if (selected === currentOffice) {
+internalSection.classList.remove("hidden");
+externalSection.classList.add("hidden");
 
-                // Fetch users of the same office
-                fetch("/api/users")
-                    .then(res => res.json())
-                    .then(users => {
-                        const filtered = users.filter(u => u.office && u.office.office_name ===
-                            currentOffice);
-                        userSelect.innerHTML = `<option value="">Select User</option>` +
-                            filtered.map(u => `<option value="${u.id}">${u.name}</option>`).join("");
-                    });
-            } else {
-                internalSection.classList.add("hidden");
-                externalSection.classList.remove("hidden");
-            }
-        });
+// Fetch users of the same office
+fetch("/api/users")
+.then(res => res.json())
+.then(users => {
+const filtered = users.filter(u => u.office && u.office.office_name ===
+currentOffice);
+userSelect.innerHTML = `<option value="">Select User</option>` +
+filtered.map(u => `<option value="${u.id}">${u.name}</option>`).join("");
+});
+} else {
+internalSection.classList.add("hidden");
+externalSection.classList.remove("hidden");
+}
+});
 
-        // Show/hide PDF upload when "Approved" is selected
-        statusSelect.addEventListener("change", e => {
-            pdfUploadSection.classList.toggle("hidden", e.target.value !== "approved");
-        });
+// Show/hide PDF upload when "Approved" is selected
+statusSelect.addEventListener("change", e => {
+pdfUploadSection.classList.toggle("hidden", e.target.value !== "approved");
+});
 
 
-    })();
+})();
 </script>
 >>>>>>> main

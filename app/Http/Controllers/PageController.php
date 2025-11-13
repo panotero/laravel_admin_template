@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\MailerSetting;
 use App\Models\User;
 use App\Models\SettingRole;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class PageController extends Controller
 {
@@ -51,5 +53,41 @@ class PageController extends Controller
     public function page_featuredHome()
     {
         return view('pages.featuredHome');
+    }
+
+    public function page_settings()
+    {
+        return view('pages.settings.settings');
+    }
+    public function page_documents()
+    {
+        return view('pages.documents');
+    }
+
+    public function page_approvals()
+    {
+
+        return view('pages.approvals');
+    }
+
+    public function page_reports_documents()
+    {
+
+        return view('pages.reports.documents');
+    }
+
+    public function page_reports_users()
+    {
+        return view('pages.reports.users');
+    }
+
+    public function profile()
+    {
+        return "page profile";
+    }
+
+    public function settings()
+    {
+        return "page settings";
     }
 }

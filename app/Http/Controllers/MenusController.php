@@ -6,33 +6,59 @@ use Illuminate\Http\Request;
 use App\Models\NavMenu;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class MenusController extends Controller
 {
-    //
-    // ✅ Get all menus
+
     public function index()
     {
         $user = Auth::user();
 
-        Log::info('Authenticated user:', [
-            'id' => $user->id,
-            'email' => $user->email,
-            'role' => $user->role, // should show "superadmin"
-        ]);
+        // Log::info('Authenticated user:', [
+        //     'id' => $user->id,
+        //     'email' => $user->email,
+        //     'role' => $user->role, // should show "superadmin"
+        // ]);
 
-        // Filter menus by allowed_roles and reset array keys
-        $menus = NavMenu::all()->filter(function ($menu) use ($user) {
+        // Fetch menus ordered by parent and order
+        $menus = NavMenu::orderBy('parent_menu', 'asc')
+            ->orderBy('menu_order', 'asc')
+            ->get();
+
+        // Filter by allowed_roles
+        $filtered = $menus->filter(function ($menu) use ($user) {
             $allowedRoles = json_decode($menu->allowed_roles, true) ?? [];
             return in_array($user->role, $allowedRoles);
-        })->values(); // 🔑 important: reset keys
+        })->values();
 
-        return response()->json($menus);
+        // Build nested parent-child structure
+        $grouped = $filtered->where('parent_menu', 0)->map(function ($parent) use ($filtered) {
+            $children = $filtered->where('parent_menu', $parent->id)->values();
+            return [
+                'id' => $parent->id,
+                'title' => $parent->title,
+                'icon' => $parent->icon,
+                'link' => $parent->link,
+                'menu_order' => $parent->menu_order,
+                'allowed_roles' => $parent->allowed_roles,
+                'children' => $children
+            ];
+        })->values();
+
+        // Log::info('Filtered and grouped menus:', [
+        //     'total' => $grouped->count(),
+        //     'menus' => $grouped
+        // ]);
+
+        return response()->json($grouped);
     }
 
     public function menulist()
     {
-        return response()->json(NavMenu::all());
+        return response()->json(NavMenu::orderBy('parent_menu', 'asc')
+            ->orderBy('menu_order', 'asc')
+            ->get());
     }
 
     public function store(Request $request)
@@ -48,9 +74,26 @@ class MenusController extends Controller
                 'link' => 'nullable|string',
                 'allowed_roles' => 'nullable',
                 'parent_menu' => 'nullable|integer',
+                'menu_order' => 'nullable|integer',
             ]);
 
-            $menu = NavMenu::create($data);
+            $parentId = $data['parent_menu'] ?? 0;
+
+            // ✅ Find current max order under same parent
+            $maxOrder = \App\Models\NavMenu::where('parent_menu', $parentId)->max('menu_order');
+            $maxOrder = $maxOrder ? intval($maxOrder) : 0;
+
+            // ✅ Use provided menu_order if valid, otherwise set next available order
+            if (empty($data['menu_order']) || $data['menu_order'] <= 0) {
+                $data['menu_order'] = $maxOrder + 1;
+            } else {
+                // If manually inserted order, shift others down
+                \App\Models\NavMenu::where('parent_menu', $parentId)
+                    ->where('menu_order', '>=', $data['menu_order'])
+                    ->increment('menu_order');
+            }
+
+            $menu = \App\Models\NavMenu::create($data);
 
             Log::info('STORE success', ['menu' => $menu]);
 
@@ -72,6 +115,7 @@ class MenusController extends Controller
             ], 500);
         }
     }
+
 
     public function update(Request $request, $id)
     {
@@ -140,6 +184,75 @@ class MenusController extends Controller
                 'success' => false,
                 'message' => 'Failed to delete menu',
                 'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function swapMenuOrder(Request $request)
+    {
+        $id1 = $request->input('id1');
+        $id2 = $request->input('id2');
+
+        Log::info('🔄 Swap request received', [
+            'id1' => $id1,
+            'id2' => $id2
+        ]);
+
+        if (!$id1 || !$id2) {
+            Log::warning('⚠️ Invalid IDs for swap', ['id1' => $id1, 'id2' => $id2]);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Invalid menu IDs provided.'
+            ], 400);
+        }
+
+        $menu1 = DB::table('nav_menus')->where('id', $id1)->first();
+        $menu2 = DB::table('nav_menus')->where('id', $id2)->first();
+
+        if (!$menu1 || !$menu2) {
+            Log::warning('⚠️ Menu not found for swap', [
+                'menu1_found' => (bool) $menu1,
+                'menu2_found' => (bool) $menu2
+            ]);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'One or both menu items not found.'
+            ], 404);
+        }
+
+        Log::info('📋 Current menu order before swap', [
+            'menu1' => ['id' => $menu1->id, 'title' => $menu1->title, 'menu_order' => $menu1->menu_order],
+            'menu2' => ['id' => $menu2->id, 'title' => $menu2->title, 'menu_order' => $menu2->menu_order]
+        ]);
+
+        try {
+            DB::transaction(function () use ($menu1, $menu2) {
+                DB::table('nav_menus')
+                    ->where('id', $menu1->id)
+                    ->update(['menu_order' => $menu2->menu_order]);
+
+                DB::table('nav_menus')
+                    ->where('id', $menu2->id)
+                    ->update(['menu_order' => $menu1->menu_order]);
+            });
+
+            Log::info('✅ Swap completed successfully', [
+                'swapped' => [
+                    'menu1' => ['id' => $menu1->id, 'new_order' => $menu2->menu_order],
+                    'menu2' => ['id' => $menu2->id, 'new_order' => $menu1->menu_order],
+                ]
+            ]);
+
+            return response()->json(['status' => 'success']);
+        } catch (\Exception $e) {
+            Log::error('❌ Swap failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An error occurred while swapping menu order.'
             ], 500);
         }
     }

@@ -9,3 +9,8 @@ Alpine.start();
 import "./dashboard";
 import "./navmenu";
 import "./mailer";
+import "./modalController";
+import "./dragdropzone";
+import "./mobileCardRenderer";
+import "./toast";
+import "./customAlert";

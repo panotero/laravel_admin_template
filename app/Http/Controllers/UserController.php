@@ -15,11 +15,7 @@ class UserController extends Controller
     // UserController.php
     public function index()
     {
-        // if (auth()->user()->role !== 'superadmin') {
-        //     abort(403);
-        // }
-        $users = User::all();
-        return view('users.index', compact('users'));
+        return response()->json(User::with('office')->get());
     }
 
     public function create()
@@ -28,88 +24,156 @@ class UserController extends Controller
         return view('users.create');
     }
 
-    public function store(Request $request)
+    public function show($id)
     {
         try {
-            // 🔒 Auth check first
-            // if (!auth()->check() || auth()->user()->role !== 'developer') {
-            //     Log::warning('Unauthorized user tried to create a new user.', [
-            //         'user_id' => auth()->id(),
-            //         'user_email' => auth()->user()->email ?? 'guest'
-            //     ]);
+            $user = User::with('office', 'userConfig')->findOrFail($id);
 
-            //     return response()->json([
-            //         'success' => false,
-            //         'message' => 'Unauthorized action.',
-            //     ], 403);
-            // }
-
-            // ✅ Validation rules
-            $validated = $request->validate([
-                'name'     => 'required|string|max:255|regex:/^[a-zA-Z\s\.\-]+$/',
-                'email'    => 'required|email|unique:users,email',
-                'password' => 'required|min:6',
-                'role_id'  => 'required|integer|exists:setting_role,id',
-                'role'     => 'nullable|string|max:50',
+            return response()->json($user, 200);
+        } catch (\Exception $e) {
+            Log::error('Failed to fetch user', [
+                'id' => $id,
+                'error' => $e->getMessage()
             ]);
 
-            // ✅ Use DB transaction for integrity
-            $user = DB::transaction(function () use ($validated) {
-                // Fetch role name if not passed (fallback)
-                $role = $validated['role'] ?? DB::table('setting_role')->where('id', $validated['role_id'])->value('role_name');
+            return response()->json(['error' => 'User not found.'], 404);
+        }
+    }
 
-                return User::create([
-                    'name'     => trim($validated['name']),
-                    'email'    => strtolower($validated['email']),
-                    'password' => Hash::make($validated['password']),
-                    'role_id'  => (int) $validated['role_id'],
-                    'role'     => Str::lower($role ?? 'user'),
-                ]);
+    /**
+     * Deactivate a user by ID
+     */
+    public function deactivate($id)
+    {
+        try {
+            $user = User::findOrFail($id);
+
+            // Update status to deactivated
+            $user->status = 'deactivated';
+            $user->save();
+
+            Log::info('User deactivated successfully', ['id' => $id]);
+
+            return response()->json(['message' => 'User deactivated successfully.'], 200);
+        } catch (\Exception $e) {
+            Log::error('Failed to deactivate user', [
+                'id' => $id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json(['error' => 'Failed to deactivate user.'], 500);
+        }
+    }
+
+    public function reactivate($id)
+    {
+
+        try {
+            $user = User::findOrFail($id);
+
+            // Update status to deactivated
+            $user->status = 'active';
+            $user->save();
+
+            Log::info('User deactivated successfully', ['id' => $id]);
+
+            return response()->json(['message' => 'User deactivated successfully.'], 200);
+        } catch (\Exception $e) {
+            Log::error('Failed to deactivate user', [
+                'id' => $id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json(['error' => 'Failed to deactivate user.'], 500);
+        }
+    }
+
+    public function save_info($id = false, Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'nullable|string|max:255',
+            'email' => 'nullable|email|unique:users,email,' . $id,
+            'password' => 'nullable|string|min:6',
+            'role' => 'nullable|string',
+            'office_id' => 'nullable|integer',
+            'role_id' => 'nullable|integer',
+        ]);
+
+        Log::info('save user info triggered', [
+            'inputs' => $request->all(),
+            'id' => $id,
+        ]);
+
+        try {
+            // Remove null values so they won't overwrite existing columns
+            $data = array_filter($validated, function ($value) {
+                return !is_null($value) && $value !== '';
             });
 
-            // 🧾 Log success
-            Log::info('User created successfully.', [
-                'created_by' => auth()->user()->email ?? 'unknown',
-                'user_id' => $user->id,
-                'email' => $user->email,
-                'role' => $user->role,
-            ]);
+            // If password is provided, hash it
+            if (isset($data['password'])) {
+                $data['password'] = Hash::make($data['password']);
+            }
+
+            if ($id) {
+                // Update existing record
+                $user = User::findOrFail($id);
+                $user->update($data);
+            }
 
             return response()->json([
                 'success' => true,
-                'message' => 'User created successfully!',
-                'data'    => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'role' => $user->role,
-                    'created_at' => $user->created_at,
-                ],
-            ], 201);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::warning('Validation failed while creating user.', [
-                'errors' => $e->errors(),
-                'input' => $request->all(),
-                'user' => auth()->user()->email ?? 'unknown'
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed.',
-                'errors'  => $e->errors(),
-            ], 422);
-        } catch (\Throwable $e) {
-            Log::error('Unexpected error while creating user.', [
+                'message' => 'User updated successfully',
+                'data' => $user,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Failed to save user', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'input' => $request->all(),
-                'user' => auth()->user()->email ?? 'unknown'
+                'data' => $validated,
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Internal server error.',
-                'error'   => config('app.debug') ? $e->getMessage() : 'Something went wrong.',
+                'message' => 'Failed to save user information',
+            ], 500);
+        }
+    }
+
+    public function store(Request $request)
+    {
+        // Validate request
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6',
+            'role' => 'nullable|string',
+            'office_id' => 'nullable|integer',
+            'role_id' => 'nullable|integer',
+        ]);
+
+        try {
+            // Create the user
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+                'role' => $validated['role'] ?? null,
+                'office_id' => $validated['office_id'] ?? null,
+                'role_id' => $validated['role_id'] ?? null,
+                'status' => 'active', // default active
+            ]);
+
+            Log::info('User created successfully', ['user_id' => $user->id]);
+
+            return response()->json($user, 201);
+        } catch (\Exception $e) {
+            Log::error('Failed to create user', [
+                'error' => $e->getMessage(),
+                'data' => $validated,
+            ]);
+
+            return response()->json([
+                'error' => 'Failed to create user.'
             ], 500);
         }
     }

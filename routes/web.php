@@ -7,6 +7,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\MailerController;
+use App\Http\Middleware\CheckUserStatus;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,19 +21,24 @@ use App\Http\Controllers\MailerController;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return auth()->check() ? redirect()->route('dashboard') : redirect()->route('login');
 });
 
 // Protected routes
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'check.status'])->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
 
     Route::get('/debug_auth', function () {
+        $user = auth()->user();
+        if ($user) {
+            $user->load('office'); // Eager load the office relationship
+        }
+
         return [
             'isLoggedIn' => auth()->check(),
-            'user' => auth()->user(),
+            'user' => $user,
         ];
     });
 
@@ -44,6 +50,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/page_users', [PageController::class, 'page_Users']);
     Route::get('/page_forms', [PageController::class, 'page_Forms']);
     Route::get('/page_featuredHome', [PageController::class, 'page_featuredHome']);
+    Route::get('/page_settings', [PageController::class, 'page_settings']);
+    Route::get('/page_documents', [PageController::class, 'page_documents']);
+    Route::get('/page_approvals', [PageController::class, 'page_approvals']);
+    Route::get('/page_reports_documents', [PageController::class, 'page_reports_documents']);
+    Route::get('/page_reports_users', [PageController::class, 'page_reports_users']);
+    Route::get('/profile', [PageController::class, 'profile'])->name('profile');
+    Route::get('/settings', [PageController::class, 'settings'])->name('settings');
 
 
     //mailing service
@@ -53,10 +66,5 @@ Route::middleware(['auth'])->group(function () {
 
 
     Route::resource('users', UserController::class)->middleware('can:isSuperAdmin');
-    Route::get('/profile', function () {
-        return view('profile.edit', [
-            'user' => Auth::user(), // ✅ use Auth facade
-        ]);
-    })->name('profile.edit');
 });
 require __DIR__ . '/auth.php';

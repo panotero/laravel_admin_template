@@ -5,50 +5,95 @@ document.addEventListener("DOMContentLoaded", function () {
   if (!sidebar) return;
 
   // === PAGE LOADER FUNCTION ===
-  function loadPage(menu) {
+  async function loadPage(menu) {
     if (!menu) return;
 
     // Save the last visited menu
     localStorage.setItem("lastMenu", JSON.stringify(menu));
 
+    const menulist = document.querySelectorAll(".menu");
+    const activemenu = document.querySelectorAll(".menu.active");
+    const activepage = Array.from(menulist).find(
+      (btn) => btn.textContent.trim() === menu.title
+    );
+
+    activemenu.forEach((activebttn) => {
+      activebttn.classList.remove(
+        "bg-blue-400",
+        "hover:dark:bg-blue-600",
+        "text-white",
+        "active",
+        "hover:bg-blue-600"
+      );
+      activebttn.classList.add("text-black", "hover:bg-gray-200");
+    });
+
+    if (activepage) {
+      activepage.classList.add(
+        "bg-blue-400",
+        "hover:dark:bg-blue-600",
+        "text-white",
+        "active",
+        "hover:bg-blue-600"
+      );
+      activepage.classList.remove("hover:bg-gray-200", "text-black");
+    }
+
     // Update page title
     const titleEl = document.getElementById("page-title");
     if (titleEl) titleEl.textContent = menu.title;
 
-    // Load page content
-    fetch(AppURL + menu.link, {
-      headers: { Accept: "application/json" },
-    })
-      .then((res) => res.text())
-      .then((data) => {
-        const contentEl = document.getElementById("content");
+    const contentEl = document.getElementById("content");
 
-        // Inject the HTML
-        // contentEl.innerHTML = `<div class="p-4 bg-white dark:bg-gray-800 rounded shadow">${data}</div>`;
-        contentEl.innerHTML = `<div class="dark p-4 bg-white dark:bg-gray-800 rounded shadow">${data}</div>`;
+    // Show card-style loading skeleton
+    contentEl.innerHTML = `
+    <div class="mx-auto w-full rounded-md p-4 animate-pulse mt-4">
+      <div class="w-full flex space-x-4">
+        <div class="h-10 w-10 rounded-full bg-gray-200"></div>
+        <div class="flex-1 space-y-6 py-1">
+          <div class="h-2 rounded bg-gray-200"></div>
+          <div class="space-y-3">
+            <div class="grid grid-cols-3 gap-4">
+              <div class="col-span-2 h-2 rounded bg-gray-200"></div>
+              <div class="col-span-1 h-2 rounded bg-gray-200"></div>
+            </div>
+            <div class="h-2 rounded bg-gray-200"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
 
-        // ✅ Find and execute any inline/external scripts inside the loaded HTML
-        const scripts = contentEl.querySelectorAll("script");
-        scripts.forEach((oldScript) => {
-          const newScript = document.createElement("script");
-
-          if (oldScript.src) {
-            // If external script (with src="")
-            newScript.src = oldScript.src;
-          } else {
-            // Inline script content
-            newScript.textContent = oldScript.textContent;
-          }
-
-          document.body.appendChild(newScript);
-          oldScript.remove();
-        });
-      })
-      .catch(() => {
-        document.getElementById(
-          "content"
-        ).innerHTML = `<div class="p-4 bg-red-200 text-red-800 rounded">Failed to load ${menu.title}</div>`;
+    try {
+      const res = await fetch(AppURL + menu.link, {
+        headers: { Accept: "application/json" },
       });
+
+      if (!res.ok) {
+        throw new Error(`Failed to load page: ${res.status} ${res.statusText}`);
+      }
+
+      const data = await res.text();
+      contentEl.innerHTML = `<div class="dark p-4 dark:bg-gray-800 rounded shadow">${data}</div>`;
+
+      // Execute any inline/external scripts
+      const scripts = contentEl.querySelectorAll("script");
+      scripts.forEach((oldScript) => {
+        const newScript = document.createElement("script");
+        if (oldScript.src) {
+          newScript.src = oldScript.src;
+        } else {
+          newScript.textContent = oldScript.textContent;
+        }
+        document.body.appendChild(newScript);
+        document.body.removeChild(newScript);
+      });
+    } catch (err) {
+      contentEl.innerHTML = `<div class="bg-red-600 text-white rounded p-4">
+      <strong>Error:</strong> ${err.message}
+    </div>`;
+      console.error(err);
+    }
   }
 
   window.loadPage = loadPage; // expose globally for other JS
@@ -76,7 +121,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className =
-      "w-full text-left px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-between gap-2";
+      "w-full text-left px-3 py-2 rounded hover:bg-gray-200 dark:text-white dark:hover:bg-gray-700 flex items-center justify-between gap-2 menu";
 
     const left = document.createElement("span");
     left.className = "flex items-center gap-2";
@@ -96,7 +141,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (menu.children && menu.children.length) {
       const sub = document.createElement("div");
       sub.className =
-        "space-y-1 bg-gray-500 dark:bg-gray-700 dark:text-gray-300";
+        "space-y-1 bg-gray-100 dark:bg-gray-800 dark:text-gray-300";
       sub.style.maxHeight = "0px";
       sub.style.overflow = "hidden";
       sub.style.transition = "max-height 250ms ease";
@@ -105,13 +150,13 @@ document.addEventListener("DOMContentLoaded", function () {
         const childBtn = document.createElement("button");
         childBtn.type = "button";
         childBtn.className =
-          "w-full text-left px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center gap-2";
+          "w-full text-left px-3 py-2 rounded hover:bg-gray-200 dark:text-white dark:hover:bg-gray-700 flex items-center gap-2 menu child-menu";
         childBtn.innerHTML = `<i class="${child.icon || ""}"></i> ${
           child.title || ""
         }`;
         childBtn.addEventListener("click", (e) => {
           e.stopPropagation();
-          loadPage(child); // ✅ loads child + saves as lastMenu
+          loadPage(child); // loads child + saves as lastMenu
           if (window.innerWidth < 1024) toggleSidebar();
         });
         sub.appendChild(childBtn);
@@ -151,9 +196,6 @@ document.addEventListener("DOMContentLoaded", function () {
       }
       return res.json(); // parse JSON response
     })
-    .then((data) => {
-      console.log("API Response:", data); // log the response
-    })
     .catch((err) => {
       console.error("Fetch error:", err);
     });
@@ -182,8 +224,9 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       });
 
-      // 🔥 Restore last visited page
+      // Restore last visited page
       let lastMenu = localStorage.getItem("lastMenu");
+      //   console.log(lastMenu);
       if (lastMenu) {
         try {
           lastMenu = JSON.parse(lastMenu);
@@ -200,12 +243,13 @@ document.addEventListener("DOMContentLoaded", function () {
     })
     .catch((err) => console.error("Failed to load nav menus", err));
 
-  //function for mobile nav menu
+  // Elements
   const sidebarWrapper = document.getElementById("sidebar-wrapper");
   const sidebarToggle = document.getElementById("sidebar-toggle");
   const sidebarOverlay = document.getElementById("sidebar-overlay");
-  const mainContent = document.getElementById("main-content");
+  const sidebarMenu = document.getElementById("sidebar-menu");
 
+  // Toggle sidebar open/close
   function toggleSidebar() {
     const isHidden = sidebarWrapper.classList.contains("-translate-x-full");
 
@@ -222,4 +266,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
   sidebarToggle.addEventListener("click", toggleSidebar);
   sidebarOverlay.addEventListener("click", toggleSidebar);
+
+  // Hide sidebar when a menu link is clicked (mobile only)
+  sidebarMenu.addEventListener("click", (e) => {
+    const link = e.target.closest("a");
+    if (!link) return; // only proceed if a link is clicked
+
+    if (window.innerWidth < 1024) {
+      // mobile breakpoint
+      sidebarWrapper.classList.add("-translate-x-full");
+      sidebarOverlay.classList.add("hidden");
+    }
+  });
+
+  // Optional: reset sidebar visibility on window resize
+  window.addEventListener("resize", () => {
+    if (window.innerWidth >= 1024) {
+      sidebarWrapper.classList.remove("-translate-x-full");
+      sidebarOverlay.classList.add("hidden");
+    } else {
+      sidebarWrapper.classList.add("-translate-x-full");
+    }
+  });
 });

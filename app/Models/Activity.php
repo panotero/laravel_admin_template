@@ -1,0 +1,28 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Activity extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'action',
+        'document_id',
+        'document_control_number',
+        'user_id',
+    ];
+
+    public function document()
+    {
+        return $this->belongsTo(Document::class, 'document_id', 'document_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+}

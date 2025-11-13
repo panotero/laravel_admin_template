@@ -2,31 +2,33 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+
 use App\Http\Controllers\Api\MenuController;
 use App\Http\Controllers\MailerController;
-use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\MenusController;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ListingController;
+use App\Http\Controllers\OfficeController;
+use App\Http\Controllers\UserConfigController;
+use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\ActivityController;
 
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
+| Organized by feature/module. Middleware groups are used where needed.
+| Each resource is grouped using Route::prefix for clarity.
+|--------------------------------------------------------------------------
 */
 
-//middle ware deployed
+// ----------------------------------------------------------
+// 🧍 AUTHENTICATED ROUTES
+// ----------------------------------------------------------
 Route::middleware(['web', 'auth'])->group(function () {
-
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
+    Route::get('/user', fn(Request $request) => $request->user());
     Route::get('/debug_auth', function () {
         return [
             'isLoggedIn' => auth()->check(),
@@ -37,40 +39,102 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/load_menu', [MenusController::class, 'index']);
 });
 
-Route::post('/users/store', [UserController::class, 'store']);
-Route::get('/users', [UserController::class, 'index']);
-Route::delete('/users/{id}', [UserController::class, 'destroy']);
+
+// ----------------------------------------------------------
+// OFFICES
+// ----------------------------------------------------------
+Route::prefix('offices')->group(function () {
+    Route::get('/', [OfficeController::class, 'index']);
+    Route::post('/', [OfficeController::class, 'store']);
+    Route::delete('/{id}', [OfficeController::class, 'destroy']);
+});
 
 
+// ----------------------------------------------------------
+// USER CONFIGS
+// ----------------------------------------------------------
+Route::prefix('userconfigs')->group(function () {
+    Route::get('/', [UserConfigController::class, 'index']);
+    Route::post('/', [UserConfigController::class, 'store']);
+    Route::delete('/{id}', [UserConfigController::class, 'destroy']);
+});
+
+
+// ----------------------------------------------------------
+// USERS
+// ----------------------------------------------------------
+Route::prefix('users')->group(function () {
+    Route::get('/', [UserController::class, 'index']);
+    Route::get('/{id}', [UserController::class, 'show']);
+    Route::post('/', [UserController::class, 'store']);
+    Route::patch('/save/{id}', [UserController::class, 'save_info']);
+    Route::patch('/deactivate/{id}', [UserController::class, 'deactivate']);
+    Route::patch('/reactivate/{id}', [UserController::class, 'reactivate']);
+});
+
+
+// ----------------------------------------------------------
+// DOCUMENTS
+// ----------------------------------------------------------
+Route::prefix('documents')->group(function () {
+    Route::get('/', [DocumentController::class, 'index']);                  // Fetch all documents
+    Route::get('/{idOrControlNumber}', [DocumentController::class, 'show']); // Fetch by ID or control number
+    Route::post('/', [DocumentController::class, 'store']);                 // Create
+    Route::patch('/{id}', [DocumentController::class, 'update']);           // Update
+    Route::delete('/{id}', [DocumentController::class, 'destroy']);         // Delete
+});
+
+
+// ----------------------------------------------------------
+// ACTIVITIES
+// ----------------------------------------------------------
+Route::prefix('activities')->group(function () {
+    Route::get('/', [ActivityController::class, 'index']);
+    Route::get('/{id}', [ActivityController::class, 'show']);
+    Route::post('/', [ActivityController::class, 'store']);
+    Route::delete('/{id}', [ActivityController::class, 'destroy']);
+});
+
+
+// ----------------------------------------------------------
+// MAILER
+// ----------------------------------------------------------
 Route::post('/send-mail', [MailerController::class, 'send']);
 
 
-//no middleware for testing
-Route::get('/roles', function () {
-    return \DB::table('setting_role')->get();
+// ----------------------------------------------------------
+// MENUS
+// ----------------------------------------------------------
+Route::prefix('nav_menus')->group(function () {
+    Route::get('/list', [MenusController::class, 'menulist']);
+    Route::post('/', [MenusController::class, 'store']);
+    Route::put('/{id}', [MenusController::class, 'update']);
+    Route::delete('/{id}', [MenusController::class, 'destroy']);
+    Route::post('/swap', [MenusController::class, 'swapMenuOrder']);
 });
 
-Route::get('/nav_menus_list', [MenusController::class, 'menulist']);
-Route::post('/nav_menus', [MenusController::class, 'store']);
-Route::put('/nav_menus/{id}', [MenusController::class, 'update']);
-Route::delete('/nav_menus/{id}', [MenusController::class, 'destroy']);
+
+// ----------------------------------------------------------
+//  LISTINGS
+// ----------------------------------------------------------
+Route::prefix('listings')->group(function () {
+    Route::get('/', [ListingController::class, 'index']);
+    Route::get('/{id}', [ListingController::class, 'show']);
+    Route::post('/', [ListingController::class, 'store'])->name('listings.store');
+    Route::put('/{id}', [ListingController::class, 'update']);
+    Route::delete('/{id}', [ListingController::class, 'destroy'])->name('listings.destroy');
+});
+
+
+// ----------------------------------------------------------
+//  TEST / DEBUG
+// ----------------------------------------------------------
+Route::get('/roles', fn() => DB::table('setting_role')->get());
 
 Route::post('/test-api', function (Request $request) {
-    \Log::info('Test API triggered', $request->all());
-
+    Log::info('Test API triggered', $request->all());
     return response()->json([
         'success' => true,
         'message' => 'API successfully triggered!',
     ]);
 });
-
-
-// Store listing (used by modal form)
-Route::post('/listings', [ListingController::class, 'store'])->name('listings.store');
-Route::get('/listings', [ListingController::class, 'index']); // fetch all
-Route::get('/listings/{id}', [ListingController::class, 'show']); // fetch one
-Route::put('/listings/{id}', [ListingController::class, 'update']);
-
-// Optional API routes
-Route::get('/listings/{listing}', [ListingController::class, 'show'])->name('listings.show');
-Route::delete('/listings/{listing}', [ListingController::class, 'destroy'])->name('listings.destroy');

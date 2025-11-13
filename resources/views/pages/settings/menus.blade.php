@@ -1,4 +1,4 @@
-<div class="p-6">
+<div class="lg:m-5 p-5 rounded-lg bg-white">
     <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-semibold">Navigation Menus</h2>
         <button id="addMenuBtn" onclick="add_menu()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
@@ -12,9 +12,11 @@
             <tr>
                 <th class="p-2 border">Title</th>
                 <th class="p-2 border">Icon</th>
-                <th class="p-2 border">Link</th>
+                <th class="p-2 border">Page</th>
                 <th class="p-2 border">Allowed Roles</th>
                 <th class="p-2 border">Parent</th>
+                <th class="p-2 border text-center">Order</th>
+                <th class="p-2 border text-center">Action</th>
             </tr>
         </thead>
         <tbody id="navMenuTbody">
@@ -43,7 +45,11 @@
 
             <div>
                 <label class="block font-medium">Link</label>
-                <input id="menuLink" type="text" class="w-full border p-2 rounded text-black">
+                <div class="w-full h-full flex my-auto">
+                    <h1 class="p-2 text-center text-xl">
+                        /</h1><input id="menuLink" type="text" class="w-full border p-2 rounded text-black">
+                </div>
+
             </div>
 
             <div>
@@ -69,7 +75,6 @@
 </div>
 <script>
     (function() {
-        console.log('menus initialized');
         const modal = document.getElementById("menuModal");
         const cancelBtn = document.getElementById("cancelModalBtn");
         const form = document.getElementById("menuForm");
@@ -86,59 +91,244 @@
         };
 
         const tableBody = document.getElementById("navMenuTbody");
-        let menusData = []; // store all menus for parent-child relationship
+        let menusData = [];
 
-        // Load initial data
-        loadMenus();
-        loadRoles();
-
-        // Cancel modal
+        // --------------------- MODAL FUNCTIONS ---------------------
         cancelBtn.addEventListener("click", () => {
-            modal.classList.add("hidden");
-            modal.classList.remove("flex");
+            closeModal();
         });
 
-        // Parent select change: if a parent is selected, copy its roles and disable checkboxes
+        function openModal(mode = "Add", menu = null) {
+            modalTitle.textContent = mode === "Add" ? "Add New Menu" : "Modify Menu";
+            saveBtn.textContent = mode === "Add" ? "Save" : "Modify";
+
+            if (menu) {
+                fields.id.value = menu.id;
+                fields.title.value = menu.title || "";
+                fields.icon.value = menu.icon || "";
+                fields.link.value = menu.link || "";
+                fields.parent.value = menu.parent_menu || 0;
+
+                const allowedRoles = JSON.parse(menu.allowed_roles || "[]");
+                document.querySelectorAll(".roleCheckbox").forEach(cb => {
+                    cb.checked = allowedRoles.includes(cb.value);
+                    cb.disabled = menu.parent_menu !== 0;
+                });
+            } else {
+                fields.id.value = "";
+                fields.title.value = "";
+                fields.icon.value = "";
+                fields.link.value = "";
+                fields.parent.value = 0;
+                document.querySelectorAll(".roleCheckbox").forEach(cb => {
+                    cb.checked = false;
+                    cb.disabled = false;
+                });
+            }
+
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        }
+
+        function closeModal() {
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        }
+
+        // --------------------- LOAD ROLES ---------------------
+        async function loadRoles() {
+            const res = await fetch(`${window.APP_URL}/api/userconfigs`, {
+                headers: {
+                    Accept: "application/json"
+                }
+            });
+            const roles = await res.json();
+            const container = fields.rolesContainer;
+            container.innerHTML = "";
+
+            const checkAllWrapper = document.createElement("label");
+            checkAllWrapper.classList.add("flex", "items-center", "gap-2", "mb-2");
+            checkAllWrapper.innerHTML = `
+            <input type="checkbox" id="checkAllRoles" class="cursor-pointer">
+            <span class="font-medium text-gray-700">Check All</span>
+        `;
+            container.appendChild(checkAllWrapper);
+
+            roles.forEach(role => {
+                const wrapper = document.createElement("label");
+                wrapper.classList.add("flex", "items-center", "gap-2");
+                wrapper.innerHTML = `
+                <input type="checkbox" value="${role.designation}" class="roleCheckbox cursor-pointer">
+                <span>${role.designation}</span>
+            `;
+                container.appendChild(wrapper);
+            });
+
+            const checkAllBox = container.querySelector("#checkAllRoles");
+            checkAllBox.addEventListener("change", () => {
+                container.querySelectorAll(".roleCheckbox").forEach(cb => cb.checked = checkAllBox
+                    .checked);
+            });
+        }
+        // --------------------- LOAD MENUS ---------------------
+        async function loadMenus() {
+            const res = await fetch(`${window.APP_URL}/api/nav_menus/list`, {
+                credentials: 'include',
+                headers: {
+                    Accept: "application/json"
+                }
+            });
+            menusData = await res.json();
+            tableBody.innerHTML = "";
+
+            // Build a lookup for menu titles
+            const menuMap = {};
+            menusData.forEach(menu => menuMap[menu.id] = menu.title);
+
+            // Helper function to recursively render menus
+            function renderMenuRows(parentId = 0, level = 0) {
+                const children = menusData
+                    .filter(m => m.parent_menu === parentId)
+                    .sort((a, b) => a.menu_order - b.menu_order);
+
+                children.forEach(menu => {
+                    const tr = document.createElement("tr");
+                    tr.classList.add("cursor-pointer", "hover:bg-gray-100");
+
+                    const parentName = menu.parent_menu === 0 ?
+                        "Main Menu" :
+                        (menuMap[menu.parent_menu] || "Unknown");
+
+                    // Find siblings and current index (for up/down)
+                    const siblings = menusData
+                        .filter(m => m.parent_menu === menu.parent_menu)
+                        .sort((a, b) => a.menu_order - b.menu_order);
+                    const index = siblings.findIndex(m => m.id === menu.id);
+
+                    const moveUpHidden = index === 0 ? "hidden" : "";
+                    const moveDownHidden = index === siblings.length - 1 ? "hidden" : "";
+                    const roles = JSON.parse(menu.allowed_roles).join(', ');
+                    const targetpage = menu.link.replace(/^\//, '');
+
+                    // Indentation for child menus
+                    const indent = "&nbsp;".repeat(level * 6) + (level > 0 ? "↳ " : "");
+
+                    tr.innerHTML = `
+                <td class="border p-2">${indent}${menu.title}</td>
+                <td class="border p-2">${menu.icon || ""}</td>
+                <td class="border p-2">${targetpage || ""}</td>
+                <td class="border p-2">${roles || ""}</td>
+                <td class="border p-2">${parentName}</td>
+                <td class="border menubuttons p-2 text-center">
+                    <button class="move-up bg-blue-600 hover:bg-blue-800 text-white px-2 py-1 rounded-md ${moveUpHidden}" data-id="${menu.id}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 15l7-7 7 7" />
+                        </svg>
+                    </button>
+                    <button class="move-down bg-blue-600 hover:bg-blue-800 text-white px-2 py-1 rounded-md ${moveDownHidden}" data-id="${menu.id}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                </td>
+                <td class="border menubuttons p-2 text-center">
+                    <button class="delete-button bg-red-600 hover:bg-red-800 py-1 px-2 rounded text-white" data-id="${menu.id}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M3 6h18v2H3V6zm2 3h14l-1.5 12.5a1 1 0 0 1-1 .5H8a1 1 0 0 1-1-.5L5 9zm5 2v8h2v-8H10zm4 0v8h2v-8h-2zM9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1h5v2H4V4h5z"/>
+                        </svg>
+                    </button>
+                </td>
+            `;
+
+                    // Existing click logic (unchanged)
+                    tr.addEventListener("click", (e) => {
+                        if (e.target.closest("td.menubuttons")) {
+                            return;
+                        }
+                        // Your main logic here (only runs if not clicking menubuttons)
+                        console.log("Row clicked, not menubuttons");
+
+                        modalTitle.textContent = "Modify Menu";
+                        saveBtn.textContent = "Modify";
+
+                        // Populate all fields
+                        fields.id.value = menu.id;
+                        fields.title.value = menu.title || "";
+                        fields.icon.value = menu.icon || "";
+                        fields.link.value = menu.link || "";
+                        fields.parent.value = menu.parent_menu || 0;
+
+                        // Populate roles checkboxes
+                        const allowedRoles = JSON.parse(menu.allowed_roles || "[]");
+                        document.querySelectorAll('.roleCheckbox').forEach(cb => {
+                            cb.checked = allowedRoles.includes(cb.value);
+                        });
+
+                        modal.classList.remove("hidden");
+                        modal.classList.add("flex");
+                    });
+
+                    // Append to table
+                    tableBody.appendChild(tr);
+
+                    // Recursively render child menus
+                    renderMenuRows(menu.id, level + 1);
+                });
+            }
+
+            // Render top-level menus first
+            renderMenuRows(0);
+
+            // Populate parent dropdown
+            const parentSelect = fields.parent;
+            parentSelect.innerHTML = `<option value="0">Main Menu</option>`;
+            menusData
+                .filter(m => m.parent_menu === 0)
+                .forEach(menu => {
+                    const opt = document.createElement("option");
+                    opt.value = menu.id;
+                    opt.textContent = menu.title;
+                    parentSelect.appendChild(opt);
+                });
+        }
+
+
+        // --------------------- PARENT CHANGE ---------------------
         fields.parent.addEventListener("change", () => {
             const parentId = parseInt(fields.parent.value);
             if (parentId === 0) {
-                // Main menu: enable roles
-                document.querySelectorAll('.roleCheckbox').forEach(cb => cb.disabled = false);
-                document.querySelectorAll('.roleCheckbox').forEach(cb => cb.checked = false);
+                document.querySelectorAll(".roleCheckbox").forEach(cb => {
+                    cb.disabled = false;
+                    cb.checked = false;
+                });
             } else {
-                // Child menu: get parent's allowed_roles
                 const parentMenu = menusData.find(m => m.id === parentId);
-                if (parentMenu) {
-                    const parentRoles = JSON.parse(parentMenu.allowed_roles || "[]");
-                    document.querySelectorAll('.roleCheckbox').forEach(cb => {
-                        cb.checked = parentRoles.includes(cb.value);
-                        cb.disabled = true; // cannot modify child roles
-                    });
-                }
+                const parentRoles = parentMenu ? JSON.parse(parentMenu.allowed_roles || "[]") : [];
+                document.querySelectorAll(".roleCheckbox").forEach(cb => {
+                    cb.checked = parentRoles.includes(cb.value);
+                    cb.disabled = true;
+                });
             }
         });
 
-        // Submit form
+        // --------------------- FORM SUBMIT ---------------------
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
 
-            let checkedRoles = Array.from(
-                document.querySelectorAll('.roleCheckbox:checked')
-            ).map(cb => cb.value);
-
+            let checkedRoles = Array.from(document.querySelectorAll(".roleCheckbox:checked")).map(cb =>
+                cb.value);
             const parentId = parseInt(fields.parent.value);
 
-            // If it has a parent, follow parent's roles
             if (parentId !== 0) {
                 const parentMenu = menusData.find(m => m.id === parentId);
-                checkedRoles = JSON.parse(parentMenu.allowed_roles || "[]");
+                checkedRoles = parentMenu ? JSON.parse(parentMenu.allowed_roles || "[]") : [];
             }
 
             const payload = {
                 title: fields.title.value,
                 icon: fields.icon.value,
                 link: fields.link.value,
-                allowed_roles: `[${checkedRoles.map(r => `"${r}"`).join(',')}]`,
+                allowed_roles: JSON.stringify(checkedRoles),
                 parent_menu: fields.parent.value,
             };
 
@@ -154,160 +344,96 @@
                 method,
                 headers: {
                     "Content-Type": "application/json",
-                    Accept: "application/json",
+                    Accept: "application/json"
                 },
-                body: JSON.stringify(payload),
+                body: JSON.stringify(payload)
             });
 
-            // ✅ If updating parent, also update child menus
             if (fields.id.value) {
-                const currentMenuId = parseInt(fields.id.value);
                 const updatedMenu = await res.json();
-
-                // If parent menu was updated, update all children roles
-                menusData.forEach(async (m) => {
-                    if (m.parent_menu === currentMenuId) {
+                menusData.forEach(async m => {
+                    if (m.parent_menu === parseInt(fields.id.value)) {
                         await fetch(`${window.APP_URL}/api/nav_menus/${m.id}`, {
                             method: "PUT",
                             headers: {
                                 "Content-Type": "application/json",
-                                Accept: "application/json",
+                                Accept: "application/json"
                             },
                             body: JSON.stringify({
                                 ...m,
                                 allowed_roles: updatedMenu.data
                                     .allowed_roles
-                            }),
+                            })
                         });
                     }
                 });
             }
 
-            modal.classList.add("hidden");
-            loadMenus();
-            loadRoles();
+            closeModal();
+            await loadMenus();
+            await loadRoles();
         });
 
-        // Load menus table
-        async function loadMenus() {
-            const res = await fetch(`${window.APP_URL}/api/nav_menus_list`, {
-                credentials: 'include',
+        // --------------------- TABLE BUTTON ACTIONS ---------------------
+        tableBody.addEventListener("click", async (e) => {
+            const btn = e.target.closest("button");
+            if (!btn) return;
+
+            const id = parseInt(btn.dataset.id);
+            if (btn.classList.contains("move-up")) await swapMenu(id, "up");
+            else if (btn.classList.contains("move-down")) await swapMenu(id, "down");
+            else if (btn.classList.contains("delete-button")) await deleteMenu(id);
+        });
+
+        async function swapMenu(id, direction) {
+            const current = menusData.find(m => m.id === id);
+            const siblings = menusData.filter(m => m.parent_menu === current.parent_menu).sort((a, b) => a
+                .menu_order - b.menu_order);
+            const index = siblings.findIndex(m => m.id === id);
+
+            let swapWith = null;
+            if (direction === "up" && index > 0) swapWith = siblings[index - 1];
+            if (direction === "down" && index < siblings.length - 1) swapWith = siblings[index + 1];
+
+            if (!swapWith) return;
+
+            await fetch(`${window.APP_URL}/api/nav_menus/swap`, {
+                method: "POST",
                 headers: {
+                    "Content-Type": "application/json",
                     Accept: "application/json"
                 },
-            });
-            menusData = await res.json(); // store globally
-            tableBody.innerHTML = "";
-
-            const menuMap = {};
-            menusData.forEach(menu => menuMap[menu.id] = menu.title);
-
-            menusData.forEach((menu) => {
-                const tr = document.createElement("tr");
-                tr.classList.add("cursor-pointer", "hover:bg-gray-100");
-
-                const parentName = menu.parent_menu === 0 ? "Main Menu" : (menuMap[menu.parent_menu] ||
-                    "Unknown");
-
-                tr.innerHTML = `
-                <td class="border p-2">${menu.title}</td>
-                <td class="border p-2">${menu.icon || ""}</td>
-                <td class="border p-2">${menu.link || ""}</td>
-                <td class="border p-2">${menu.allowed_roles || ""}</td>
-                <td class="border p-2">${parentName}</td>
-            `;
-
-                tr.addEventListener("click", () => {
-                    modalTitle.textContent = "Modify Menu";
-                    saveBtn.textContent = "Modify";
-
-                    // Populate all fields
-                    fields.id.value = menu.id;
-                    fields.title.value = menu.title || "";
-                    fields.icon.value = menu.icon || "";
-                    fields.link.value = menu.link || "";
-                    fields.parent.value = menu.parent_menu || 0;
-
-                    // Populate roles checkboxes
-                    const allowedRoles = JSON.parse(menu.allowed_roles || "[]");
-                    document.querySelectorAll('.roleCheckbox').forEach(cb => {
-                        cb.checked = allowedRoles.includes(cb.value);
-                        // Disable if menu has parent
-                        // cb.disabled = menu.parent_menu !== 0;
-                    });
-
-                    modal.classList.remove("hidden");
-                    modal.classList.add("flex");
-                });
-
-                tableBody.appendChild(tr);
+                body: JSON.stringify({
+                    id1: current.id,
+                    id2: swapWith.id
+                }),
+                credentials: "include"
             });
 
-            // Load parent menus dropdown
-            async function loadParentMenus() {
-                console.log(menusData);
-                const parentSelect = fields.parent;
-                parentSelect.innerHTML = `<option value="0">Main Menu</option>`;
-                menusData.forEach(menu => {
-                    if (menu.parent_menu === 0) {
-                        const opt = document.createElement("option");
-                        opt.value = menu.id;
-                        opt.textContent = menu.title;
-                        parentSelect.appendChild(opt);
-                    }
-                });
-            }
-
-            loadParentMenus();
+            loadMenus();
         }
 
-        // Load roles as checkboxes
-        async function loadRoles() {
-            const res = await fetch(`${window.APP_URL}/api/roles`, {
+        async function deleteMenu(id) {
+
+            const confirmed = await customConfirm("Delete this menu?");
+            if (!confirmed) return; // if user clicks Cancel, exit
+            await fetch(`${window.APP_URL}/api/nav_menus/${id}`, {
+                method: "DELETE",
                 headers: {
+                    "Content-Type": "application/json",
                     Accept: "application/json"
-                }
+                },
+                credentials: "include"
             });
-            const roles = await res.json();
-            const container = fields.rolesContainer;
-            container.innerHTML = "";
-
-            roles.forEach(role => {
-                const wrapper = document.createElement("label");
-                wrapper.classList.add("flex", "items-center", "gap-2");
-                wrapper.innerHTML = `
-                <input type="checkbox" value="${role.role_name}" class="roleCheckbox">
-                <span>${role.role_name}</span>
-            `;
-                container.appendChild(wrapper);
-            });
+            loadMenus();
         }
 
+        // --------------------- ADD MENU BUTTON ---------------------
+        const addBtn = document.getElementById("addMenuBtn");
+        addBtn.addEventListener("click", () => openModal("Add"));
 
-        // Add new menu button
-        function add_menu() {
-            const addBtn = document.getElementById("addMenuBtn");
-            addBtn.addEventListener("click", () => {
-                modalTitle.textContent = "Add New Menu";
-                saveBtn.textContent = "Save";
-                fields.id.value = "";
-                fields.title.value = "";
-                fields.icon.value = "";
-                fields.link.value = "";
-                fields.parent.value = 0;
-
-                // Reset roles checkboxes
-                document.querySelectorAll('.roleCheckbox').forEach(cb => {
-                    cb.checked = false;
-                    cb.disabled = false;
-                });
-
-                modal.classList.remove("hidden");
-                modal.classList.add("flex");
-            });
-        }
-
-        add_menu(); // initialize add menu button
-
+        // --------------------- INITIAL LOAD ---------------------
+        loadRoles();
+        loadMenus();
     })();
 </script>

@@ -10,8 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 class MenusController extends Controller
 {
-    //
-    // ✅ Get all menus
+
     public function index()
     {
         $user = Auth::user();

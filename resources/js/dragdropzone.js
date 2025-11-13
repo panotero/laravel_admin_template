@@ -74,6 +74,7 @@ function initPDFDropzone({ dropzoneId, fileInputId, fileInfoId, clearBtnId }) {
     clearBtn.classList.remove("hidden");
   }
 }
+<<<<<<< HEAD
 
 //function for modal operations
 function initModal({ modalId }) {
@@ -92,6 +93,20 @@ function initModal({ modalId }) {
     modal.classList.remove("hidden");
     document.body.classList.add("overflow-hidden"); // prevent background scroll
   });
+=======
+function initModal({ modalId }) {
+  const modal = document.getElementById(modalId);
+  const closeBtn = modal.querySelector(".modal-close"); // search inside modal
+
+  if (!modal || !closeBtn) {
+    console.warn("Missing modal elements. Check your IDs.");
+    return;
+  }
+
+  // Open modal immediately (no new click event)
+  modal.classList.remove("hidden");
+  document.body.classList.add("overflow-hidden");
+>>>>>>> main
 
   // Close modal (button)
   closeBtn.addEventListener("click", () => {
@@ -107,6 +122,9 @@ function initModal({ modalId }) {
     }
   });
 }
+<<<<<<< HEAD
 //this section initializes function globally
+=======
+>>>>>>> main
 window.initModal = initModal;
 window.initPDFDropzone = initPDFDropzone;

@@ -31,9 +31,14 @@ Route::middleware(['auth', 'check.status'])->group(function () {
     })->name('dashboard');
 
     Route::get('/debug_auth', function () {
+        $user = auth()->user();
+        if ($user) {
+            $user->load('office'); // Eager load the office relationship
+        }
+
         return [
             'isLoggedIn' => auth()->check(),
-            'user' => auth()->user(),
+            'user' => $user,
         ];
     });
 

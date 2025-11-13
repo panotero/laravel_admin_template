@@ -29,7 +29,10 @@ use App\Http\Controllers\ActivityController;
 // ----------------------------------------------------------
 Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/user', fn(Request $request) => $request->user());
+<<<<<<< HEAD
 
+=======
+>>>>>>> main
     Route::get('/debug_auth', function () {
         return [
             'isLoggedIn' => auth()->check(),

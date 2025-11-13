@@ -36,7 +36,62 @@
                     </tr>
                 </thead>
                 <tbody>
+<<<<<<< HEAD
                     <tr class="border-t hover:bg-gray-50 cursor-pointer">
+=======
+                    <tr class="border-t hover:bg-gray-50 cursor-pointer modal-open">
+                        <td class="px-4 py-2">DOC-00123</td>
+                        <td class="px-4 py-2">
+                            <select class="border rounded px-2 py-1 text-xs">
+                                <option>General</option>
+                                <option>Confidential</option>
+                            </select>
+                        </td>
+                        <td class="px-4 py-2">Quarterly Report</td>
+                        <td class="px-4 py-2">HR Office</td>
+                        <td class="px-4 py-2">Admin Office</td>
+                        <td class="px-4 py-2">2025-11-15</td>
+                        <td class="px-4 py-2">8 days</td>
+                        <td class="px-4 py-2">2025-11-07</td>
+                        <td class="px-4 py-2">Normal</td>
+                        <td class="px-4 py-2">Pending</td>
+                    </tr>
+                    <tr class="border-t hover:bg-gray-50 cursor-pointer  modal-open">
+                        <td class="px-4 py-2">DOC-00123</td>
+                        <td class="px-4 py-2">
+                            <select class="border rounded px-2 py-1 text-xs">
+                                <option>General</option>
+                                <option>Confidential</option>
+                            </select>
+                        </td>
+                        <td class="px-4 py-2">Quarterly Report</td>
+                        <td class="px-4 py-2">HR Office</td>
+                        <td class="px-4 py-2">Admin Office</td>
+                        <td class="px-4 py-2">2025-11-15</td>
+                        <td class="px-4 py-2">8 days</td>
+                        <td class="px-4 py-2">2025-11-07</td>
+                        <td class="px-4 py-2">Normal</td>
+                        <td class="px-4 py-2">Pending</td>
+                    </tr>
+                    <tr class="border-t hover:bg-gray-50 cursor-pointer modal-open">
+                        <td class="px-4 py-2">DOC-00123</td>
+                        <td class="px-4 py-2">
+                            <select class="border rounded px-2 py-1 text-xs">
+                                <option>General</option>
+                                <option>Confidential</option>
+                            </select>
+                        </td>
+                        <td class="px-4 py-2">Quarterly Report</td>
+                        <td class="px-4 py-2">HR Office</td>
+                        <td class="px-4 py-2">Admin Office</td>
+                        <td class="px-4 py-2">2025-11-15</td>
+                        <td class="px-4 py-2">8 days</td>
+                        <td class="px-4 py-2">2025-11-07</td>
+                        <td class="px-4 py-2">Normal</td>
+                        <td class="px-4 py-2">Pending</td>
+                    </tr>
+                    <tr class="border-t hover:bg-gray-50 cursor-pointer modal-open">
+>>>>>>> main
                         <td class="px-4 py-2">DOC-00123</td>
                         <td class="px-4 py-2">
                             <select class="border rounded px-2 py-1 text-xs">
@@ -57,6 +112,7 @@
             </table>
         </div>
     </div>
+<<<<<<< HEAD
     <!-- Document Details Modal -->
     <div id="documentModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 px-4">
         <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto">
@@ -185,12 +241,16 @@
             </div>
         </div>
     </div>
+=======
+
+>>>>>>> main
 
 </div>
 
 <script>
     (function() {
 
+<<<<<<< HEAD
         const table = document.getElementById("approvaltable");
         table.addEventListener("click", (e) => {
             const row = e.target.closest("tr");
@@ -274,5 +334,36 @@
                 subtree: true
             });
         }
+=======
+        // Sample data array
+        const approvalData = [{
+                controlNumber: "DOC-00123",
+                label: "General",
+                subject: "Quarterly Report",
+                originOffice: "HR Office",
+                destinationOffice: "Admin Office",
+                dueDate: "2025-11-15",
+                duration: "8 days",
+                dateUploaded: "2025-11-07",
+                confidentiality: "Normal",
+                status: "Pending"
+            },
+            {
+                controlNumber: "DOC-00124",
+                label: "Confidential",
+                subject: "Monthly Report",
+                originOffice: "Finance Office",
+                destinationOffice: "Admin Office",
+                dueDate: "2025-11-20",
+                duration: "5 days",
+                dateUploaded: "2025-11-07",
+                confidentiality: "High",
+                status: "Pending"
+            }
+            // Add more objects as needed
+        ];
+
+
+>>>>>>> main
     })();
 </script>

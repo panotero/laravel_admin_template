@@ -36,7 +36,7 @@ class ActivityController extends Controller
         $validator = Validator::make($request->all(), [
             'action' => 'required|string|max:100',
             'document_id' => 'nullable|integer',
-            'document_control_number' => 'nullable|integer',
+            'document_control_number' => 'required|string|max:100',
             'user_id' => 'nullable|integer',
         ]);
 

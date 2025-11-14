@@ -14,3 +14,6 @@ import "./dragdropzone";
 import "./mobileCardRenderer";
 import "./toast";
 import "./customAlert";
+import "./filler";
+import "./activityLogger";
+import "./documentHandler";

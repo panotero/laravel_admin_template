@@ -56,6 +56,30 @@
             </table>
         </div>
     </div>
+    <!-- Document Type Table -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-5">
+        <div class="w-full flex justify-between p-5">
+
+            <h2 class="text-xl font-semibold mb-4">Document Type List</h2>
+            <button data-modal-name = "documentModal"
+                class="px-5 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-2xl shadow-sm modal">
+                ➕ Add Document Type
+            </button>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm border-collapse" id="documentTable">
+                <thead>
+                    <tr class="bg-gray-100 dark:bg-gray-700 text-left">
+                        <th class="p-3">ID</th>
+                        <th class="p-3">Document Type</th>
+                        <th class="p-3">Created At</th>
+                        <th class="p-3">Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <!-- Office Modal -->
@@ -97,21 +121,56 @@
         </form>
     </div>
 </div>
+<!-- Document Type Modal -->
+<div id="documentModal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50 modal-overlay">
+
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg w-96 p-6">
+        <h3 class="text-lg font-semibold mb-4">Add New Document Type</h3>
+
+        <form id="documentTypeForm">
+
+            <!-- Document Type -->
+            <input type="text" name="document_type" placeholder="Document Type"
+                class="w-full mb-3 rounded-lg border-gray-300 dark:border-gray-700
+                          dark:bg-gray-900 p-2"
+                required>
+
+            <!-- Description -->
+            <textarea name="description" placeholder="Description (optional)"
+                class="w-full mb-3 rounded-lg border-gray-300 dark:border-gray-700
+                             dark:bg-gray-900 p-2 h-24"></textarea>
+
+            <div class="flex justify-end gap-3">
+                <button type="button" class="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 closemodalbutton">
+                    Cancel
+                </button>
+
+                <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white">
+                    Save
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
     (function() {
         const base = '/api';
 
         // Fetch and render both tables
         async function loadData() {
-            const [offices, users] = await Promise.all([
+            const [offices, users, documentTypes] = await Promise.all([
                 fetch(`${base}/offices`).then(res => res.json()),
-                fetch(`${base}/userconfigs`).then(res => res.json())
+                fetch(`${base}/userconfigs`).then(res => res.json()),
+                fetch(`${base}/documenttypes`).then(res => res.json())
             ]);
 
             const officeTable = document.querySelector('#officeTable tbody');
             const userTable = document.querySelector('#userTable tbody');
+            const documentTable = document.querySelector('#documentTable tbody');
             officeTable.innerHTML = '';
             userTable.innerHTML = '';
+            documentTable.innerHTML = '';
 
             offices.forEach(o => {
                 officeTable.insertAdjacentHTML('beforeend', `
@@ -122,6 +181,23 @@
         <td class="p-3">${o.created_at}</td>
         <td class="p-3"><a href="#" class="px-5 py-2 my-2  text-white bg-red-500 rounded-md deletebtn" data-mode="office" data-id="${o.office_id}">Delete</a></td>
       </tr>`);
+            });
+            documentTypes.forEach(d => {
+                documentTable.insertAdjacentHTML('beforeend', `
+        <tr class="border-t hover:bg-gray-50 dark:hover:bg-gray-700">
+            <td class="p-3">${d.id}</td>
+            <td class="p-3">${d.document_type}</td>
+            <td class="p-3">${d.created_at}</td>
+            <td class="p-3">
+                <button
+                    class="px-5 py-2 text-white bg-red-500 rounded-md deletebtn"
+                    data-mode="documenttype"
+                    data-id="${d.id}">
+                    Delete
+                </button>
+            </td>
+        </tr>
+    `);
             });
 
             users.forEach(u => {
@@ -145,6 +221,8 @@
                         deleteOffice(id);
                     } else if (mode === "user") {
                         deleteUser(id);
+                    } else if (mode === "documenttype") {
+                        deleteDocType(id);
                     } else {
                         console.warn("Unknown delete mode:", mode);
                     }
@@ -174,6 +252,16 @@
             closeModal('userModal');
             loadData();
         };
+        document.getElementById('documentTypeForm').onsubmit = async e => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            await fetch(`${base}/documenttypes`, {
+                method: 'POST',
+                body: formData
+            });
+            closeModal('documentModal');
+            loadData();
+        };
         // Delete functions
         async function deleteOffice(id) {
             await fetch(`${base}/offices/${id}`, {
@@ -184,6 +272,12 @@
 
         async function deleteUser(id) {
             await fetch(`${base}/userconfigs/${id}`, {
+                method: 'DELETE'
+            });
+            loadData();
+        }
+        async function deleteDocType(id) {
+            await fetch(`${base}/documenttypes/${id}`, {
                 method: 'DELETE'
             });
             loadData();

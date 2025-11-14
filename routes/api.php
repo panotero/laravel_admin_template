@@ -14,6 +14,7 @@ use App\Http\Controllers\OfficeController;
 use App\Http\Controllers\UserConfigController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ActivityController;
+use App\Http\Controllers\DocumentTypeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,15 +31,33 @@ use App\Http\Controllers\ActivityController;
 Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/user', fn(Request $request) => $request->user());
     Route::get('/debug_auth', function () {
+        $user = auth()->user();
+        if ($user) {
+            $user->load('office'); // Eager load the office relationship
+        }
+
         return [
             'isLoggedIn' => auth()->check(),
-            'user' => auth()->user(),
+            'user' => $user,
+        ];
+    });
+    Route::get('/user_info', function () {
+
+        $user = auth()->user();
+        if ($user) {
+            $user->load('office', 'userConfig'); // Eager load the office relationship
+        }
+
+        return [
+            'isLoggedIn' => auth()->check(),
+            'user' => $user,
         ];
     });
 
     Route::get('/load_menu', [MenusController::class, 'index']);
 });
-
+Route::post('/activities', [ActivityController::class, 'store'])
+    ->name('api.activities.store');
 
 // ----------------------------------------------------------
 // OFFICES
@@ -57,6 +76,17 @@ Route::prefix('userconfigs')->group(function () {
     Route::get('/', [UserConfigController::class, 'index']);
     Route::post('/', [UserConfigController::class, 'store']);
     Route::delete('/{id}', [UserConfigController::class, 'destroy']);
+});
+
+// ----------------------------------------------------------
+// DOCUMENT TYPES
+// ----------------------------------------------------------
+Route::prefix('documenttypes')->group(function () {
+    Route::get('/', [DocumentTypeController::class, 'index']);
+    Route::post('/', [DocumentTypeController::class, 'store']);
+    Route::get('/{id}', [DocumentTypeController::class, 'show']);
+    Route::patch('/{id}', [DocumentTypeController::class, 'update']);
+    Route::delete('/{id}', [DocumentTypeController::class, 'destroy']);
 });
 
 
@@ -78,7 +108,7 @@ Route::prefix('users')->group(function () {
 // ----------------------------------------------------------
 Route::prefix('documents')->group(function () {
     Route::get('/', [DocumentController::class, 'index']);                  // Fetch all documents
-    Route::get('/{idOrControlNumber}', [DocumentController::class, 'show']); // Fetch by ID or control number
+    Route::get('/{ControlNumber}', [DocumentController::class, 'show']); // Fetch by ID or control number
     Route::post('/', [DocumentController::class, 'store']);                 // Create
     Route::patch('/{id}', [DocumentController::class, 'update']);           // Update
     Route::delete('/{id}', [DocumentController::class, 'destroy']);         // Delete

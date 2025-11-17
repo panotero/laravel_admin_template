@@ -17,3 +17,5 @@ import "./customAlert";
 import "./filler";
 import "./activityLogger";
 import "./documentHandler";
+import "./pdftoimageConverter";
+// import "./pdf.worker.min.mjs";

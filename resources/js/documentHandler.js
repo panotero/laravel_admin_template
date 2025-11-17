@@ -5,6 +5,7 @@ async function populateDocumentModal(documentId) {
   try {
     const res = await fetch(`/api/documents/${documentId}`);
     const data = await res.json();
+    console.log(data);
 
     // Check if document exists
     if (!data || Object.keys(data).length === 0) {
@@ -40,6 +41,7 @@ async function populateDocumentModal(documentId) {
     // ------------------------
     const fileList = document.getElementById("fileVersionsList");
     fileList.innerHTML = "";
+
     if (data.files && data.files.length) {
       data.files.forEach((file, index) => {
         const li = document.createElement("li");
@@ -55,26 +57,44 @@ async function populateDocumentModal(documentId) {
           "fileInfoButton",
           "modal-open"
         );
+
         li.dataset.version = `v${index + 1}.0`;
         li.dataset.fileId = file.file_id;
 
         li.innerHTML = `
-                    <div>
-                        <p class="text-gray-900 dark:text-gray-100 font-medium">Version ${
-                          index + 1
-                        }.0</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Uploaded: ${
-                          file.uploaded_at.split(" ")[0]
-                        } by ${file.uploading_office}</p>
-                    </div>
-                    <button class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
-                        Download
-                    </button>
-                `;
+            <div>
+                <p class="text-gray-900 dark:text-gray-100 font-medium">
+                    ${file.file_name}.0
+                </p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                    Uploaded: ${file.uploaded_at.split(" ")[0]} by ${
+          file.uploading_office
+        }
+                </p>
+            </div>
+
+            <a href="${file.file_path}"
+               download
+               class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+               onclick="event.stopPropagation();">
+               Download
+            </a>
+        `;
+
+        // Make the whole LI open modal
+        li.addEventListener("click", () => {
+          //   file.file_path;
+          loadSampleSlides();
+          initModal({ modalId: "pdfPreviewModal" });
+        });
+
         fileList.appendChild(li);
       });
     } else {
-      fileList.innerHTML = `<li class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">No files available</li>`;
+      fileList.innerHTML = `
+        <li class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
+            No files available
+        </li>`;
     }
 
     // ------------------------

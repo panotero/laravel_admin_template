@@ -254,123 +254,6 @@
                         <div
                             class="border border-gray-200 dark:border-gray-700 rounded-lg max-h-48 lg:h-48 overflow-y-auto">
                             <ul id="fileVersionsList" class="divide-y divide-gray-200 dark:divide-gray-700">
-                                <!-- Example version item -->
-                                <li class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer fileInfoButton modal-open"
-                                    data-version="v1.0" data-file-id = "123">
-                                    <div>
-                                        <p class="text-gray-900 dark:text-gray-100 font-medium">Version 1.0</p>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400">Uploaded: 2025-11-10 by
-                                            Minton Diaz</p>
-                                    </div>
-                                    <button
-                                        class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
-                                        Download
-                                    </button>
-                                </li>
-                                <li class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer fileInfoButton modal-open"
-                                    data-version="v1.1" data-file-id = "123">
-                                    <div>
-                                        <p class="text-gray-900 dark:text-gray-100 font-medium">Version 1.1</p>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400">Uploaded: 2025-11-12 by
-                                            John
-                                            Smith</p>
-                                    </div>
-                                    <button
-                                        class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
-                                        Download
-                                    </button>
-                                </li>
-                                <li class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer fileInfoButton modal-open"
-                                    data-version="v1.1" data-file-id = "123">
-                                    <div>
-                                        <p class="text-gray-900 dark:text-gray-100 font-medium">Version 1.1</p>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400">Uploaded: 2025-11-12 by
-                                            John
-                                            Smith</p>
-                                    </div>
-                                    <button
-                                        class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
-                                        Download
-                                    </button>
-                                </li>
-                                <li class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer fileInfoButton modal-open"
-                                    data-version="v1.1" data-file-id = "123">
-                                    <div>
-                                        <p class="text-gray-900 dark:text-gray-100 font-medium">Version 1.1</p>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400">Uploaded: 2025-11-12 by
-                                            John
-                                            Smith</p>
-                                    </div>
-                                    <button
-                                        class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 ">
-                                        Download
-                                    </button>
-                                </li>
-                                <li class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer fileInfoButton modal-open"
-                                    data-version="v1.1" data-file-id = "123">
-                                    <div>
-                                        <p class="text-gray-900 dark:text-gray-100 font-medium">Version 1.1</p>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400">Uploaded: 2025-11-12 by
-                                            John
-                                            Smith</p>
-                                    </div>
-                                    <button
-                                        class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
-                                        Download
-                                    </button>
-                                </li>
-                                <li class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer fileInfoButton modal-open"
-                                    data-version="v1.1" data-file-id = "123">
-                                    <div>
-                                        <p class="text-gray-900 dark:text-gray-100 font-medium">Version 1.1</p>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400">Uploaded: 2025-11-12 by
-                                            John
-                                            Smith</p>
-                                    </div>
-                                    <button
-                                        class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
-                                        Download
-                                    </button>
-                                </li>
-                                <li class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer fileInfoButton modal-open"
-                                    data-version="v1.1" data-file-id = "123">
-                                    <div>
-                                        <p class="text-gray-900 dark:text-gray-100 font-medium">Version 1.1</p>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400">Uploaded: 2025-11-12 by
-                                            John
-                                            Smith</p>
-                                    </div>
-                                    <button
-                                        class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
-                                        Download
-                                    </button>
-                                </li>
-                                <li class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer fileInfoButton modal-open"
-                                    data-version="v1.1" data-file-id = "123">
-                                    <div>
-                                        <p class="text-gray-900 dark:text-gray-100 font-medium">Version 1.1</p>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400">Uploaded: 2025-11-12 by
-                                            John
-                                            Smith</p>
-                                    </div>
-                                    <button
-                                        class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
-                                        Download
-                                    </button>
-                                </li>
-                                <li class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer fileInfoButton modal-open"
-                                    data-version="v1.1" data-file-id = "123">
-                                    <div>
-                                        <p class="text-gray-900 dark:text-gray-100 font-medium">Version 1.1</p>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400">Uploaded: 2025-11-12 by
-                                            John
-                                            Smith</p>
-                                    </div>
-                                    <button
-                                        class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
-                                        Download
-                                    </button>
-                                </li>
                             </ul>
                         </div>
                     </div>
@@ -379,70 +262,6 @@
                     <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
                         <h3 class="text-lg font-medium text-gray-800 dark:text-gray-100 mb-3">Activity History</h3>
                         <div id="activityLog" class="space-y-2 max-h-48 lg:h-48 overflow-y-auto">
-                            <div class="text-sm text-gray-700 dark:text-gray-300">
-                                <p><span class="font-semibold">John Smith</span> viewed the document <span
-                                        class="text-gray-500 text-xs">2 hours ago</span></p>
-                            </div>
-                            <div class="text-sm text-gray-700 dark:text-gray-300">
-                                <p><span class="font-semibold">Minton Diaz</span> routed the document to HR <span
-                                        class="text-gray-500 text-xs">yesterday</span></p>
-                            </div>
-                            <div class="text-sm text-gray-700 dark:text-gray-300">
-                                <p><span class="font-semibold">Minton Diaz</span> routed the document to HR <span
-                                        class="text-gray-500 text-xs">yesterday</span></p>
-                            </div>
-                            <div class="text-sm text-gray-700 dark:text-gray-300">
-                                <p><span class="font-semibold">Minton Diaz</span> routed the document to HR <span
-                                        class="text-gray-500 text-xs">yesterday</span></p>
-                            </div>
-                            <div class="text-sm text-gray-700 dark:text-gray-300">
-                                <p><span class="font-semibold">Minton Diaz</span> routed the document to HR <span
-                                        class="text-gray-500 text-xs">yesterday</span></p>
-                            </div>
-                            <div class="text-sm text-gray-700 dark:text-gray-300">
-                                <p><span class="font-semibold">Minton Diaz</span> routed the document to HR <span
-                                        class="text-gray-500 text-xs">yesterday</span></p>
-                            </div>
-                            <div class="text-sm text-gray-700 dark:text-gray-300">
-                                <p><span class="font-semibold">Minton Diaz</span> routed the document to HR <span
-                                        class="text-gray-500 text-xs">yesterday</span></p>
-                            </div>
-                            <div class="text-sm text-gray-700 dark:text-gray-300">
-                                <p><span class="font-semibold">Minton Diaz</span> routed the document to HR <span
-                                        class="text-gray-500 text-xs">yesterday</span></p>
-                            </div>
-                            <div class="text-sm text-gray-700 dark:text-gray-300">
-                                <p><span class="font-semibold">Minton Diaz</span> routed the document to HR <span
-                                        class="text-gray-500 text-xs">yesterday</span></p>
-                            </div>
-                            <div class="text-sm text-gray-700 dark:text-gray-300">
-                                <p><span class="font-semibold">Minton Diaz</span> routed the document to HR <span
-                                        class="text-gray-500 text-xs">yesterday</span></p>
-                            </div>
-                            <div class="text-sm text-gray-700 dark:text-gray-300">
-                                <p><span class="font-semibold">Minton Diaz</span> routed the document to HR <span
-                                        class="text-gray-500 text-xs">yesterday</span></p>
-                            </div>
-                            <div class="text-sm text-gray-700 dark:text-gray-300">
-                                <p><span class="font-semibold">Minton Diaz</span> routed the document to HR <span
-                                        class="text-gray-500 text-xs">yesterday</span></p>
-                            </div>
-                            <div class="text-sm text-gray-700 dark:text-gray-300">
-                                <p><span class="font-semibold">Minton Diaz</span> routed the document to HR <span
-                                        class="text-gray-500 text-xs">yesterday</span></p>
-                            </div>
-                            <div class="text-sm text-gray-700 dark:text-gray-300">
-                                <p><span class="font-semibold">Minton Diaz</span> routed the document to HR <span
-                                        class="text-gray-500 text-xs">yesterday</span></p>
-                            </div>
-                            <div class="text-sm text-gray-700 dark:text-gray-300">
-                                <p><span class="font-semibold">Minton Diaz</span> routed the document to HR <span
-                                        class="text-gray-500 text-xs">yesterday</span></p>
-                            </div>
-                            <div class="text-sm text-gray-700 dark:text-gray-300">
-                                <p><span class="font-semibold">Minton Diaz</span> routed the document to HR <span
-                                        class="text-gray-500 text-xs">yesterday</span></p>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -474,11 +293,11 @@
                     Cancel
                 </button>
             </div>
-            <div class="flex-1 overflow-hidden">
-                <iframe id="pdfViewer" src="" class="w-full h-full rounded-b-2xl "></iframe>
-            </div>
+
+
         </div>
     </div>
+
 
     <!-- Routing Modal -->
     <div id="routingModal" class="fixed inset-0 hidden z-50 flex items-center justify-center bg-black/50 px-4">
@@ -695,7 +514,7 @@
         // Event Listeners
         // ----------------------------
         function initEventListeners() {
-
+            initFlowbite();
             initPDFDropzone({
                 dropzoneId: "dropzone",
                 fileInputId: "fileInput",

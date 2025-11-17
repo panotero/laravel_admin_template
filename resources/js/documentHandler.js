@@ -84,7 +84,15 @@ async function populateDocumentModal(documentId) {
         // Make the whole LI open modal
         li.addEventListener("click", () => {
           //   file.file_path;
-          loadSampleSlides();
+          // Example usage
+          const mySlides = [
+            "Slide 1",
+            "Slide 2",
+            "Slide 3",
+            "Slide 4",
+            "Slide 5",
+          ];
+          loadSlidesFromArray(mySlides);
           initModal({ modalId: "pdfPreviewModal" });
         });
 

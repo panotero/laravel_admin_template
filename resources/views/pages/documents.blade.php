@@ -294,6 +294,26 @@
                 </button>
             </div>
 
+            <div class="relative w-full max-w-3xl mx-auto">
+                <div class="glide glide-parent">
+                    <div class="glide__track" data-glide-el="track">
+                        <ul class="glide__slides" id="pdfSlide">
+                            <!-- Slides will be injected here -->
+                        </ul>
+                    </div>
+
+                    <!-- Navigation buttons -->
+                    <button
+                        class="parent-prev absolute top-1/2 left-2 transform -translate-y-1/2 bg-black/50 text-white p-3 rounded-full hover:bg-black/70">
+                        ◀
+                    </button>
+                    <button
+                        class="parent-next absolute top-1/2 right-2 transform -translate-y-1/2 bg-black/50 text-white p-3 rounded-full hover:bg-black/70">
+                        ▶
+                    </button>
+                </div>
+            </div>
+
 
         </div>
     </div>
@@ -514,7 +534,6 @@
         // Event Listeners
         // ----------------------------
         function initEventListeners() {
-            initFlowbite();
             initPDFDropzone({
                 dropzoneId: "dropzone",
                 fileInputId: "fileInput",

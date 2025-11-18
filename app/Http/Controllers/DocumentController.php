@@ -82,7 +82,9 @@ class DocumentController extends Controller
 
         $documentControlNumber = $prefix . $sequence;
 
-
+        $involved_office = [];
+        $involved_office[] = $request->office_origin;
+        $involved_office[] = $request->destination_office;
         // -------------------------------
         // CREATE DOCUMENT RECORD
         // -------------------------------
@@ -93,6 +95,7 @@ class DocumentController extends Controller
             'particular'              => $request->particular,
             'office_origin'           => $request->office_origin,
             'destination_office'      => $request->destination_office,
+            'involved_office'         => $involved_office,
             'user_id'                 => $request->user_id,
             'document_form'           => $request->document_form,
             'document_type'           => $request->document_type,
@@ -159,6 +162,7 @@ class DocumentController extends Controller
         return response()->json([
             'message' => 'Document created successfully',
             'data'    => $document,
+            'docControlNumber' => $documentControlNumber,
         ], 201);
     }
 

@@ -54,71 +54,39 @@
                                 </path>
                             </svg>
                             <!-- Optional red dot for unread notifications -->
-                            <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
+                            <span id="notifcount"
+                                class="absolute top-0 right-0 block h-5 w-5 text-white rounded-full text-sm bg-red-500"></span>
                         </button>
-
-                        <!-- Dropdown Content -->
+                        <!-- Notification Dropdown -->
                         <div x-show="open" x-transition:enter="transition ease-out duration-200"
                             x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
                             x-transition:leave="transition ease-in duration-75"
                             x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
-                            class="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto rounded-md shadow-lg bg-white dark:bg-gray-700 z-50"
+                            class="absolute right-0 mt-2 w-96 max-h-[32rem] overflow-y-auto rounded-xl shadow-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 z-50"
                             style="display: none;">
-                            <div class="py-2">
-                                <p
-                                    class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 border-b border-gray-200 dark:border-gray-600">
-                                    Notifications
-                                </p>
 
-                                <!-- Notification Items -->
-                                <a href="#"
-                                    class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded">
-                                    New message from John
-                                </a>
-                                <a href="#"
-                                    class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded">
-                                    Server maintenance scheduled
-                                </a>
-                                <a href="#"
-                                    class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded">
-                                    Password changed successfully
-                                </a>
-                                <a href="#"
-                                    class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded">
-                                    Password changed successfully
-                                </a>
-                                <a href="#"
-                                    class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded">
-                                    Password changed successfully
-                                </a>
-                                <a href="#"
-                                    class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded">
-                                    Password changed successfully
-                                </a>
-                                <a href="#"
-                                    class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded">
-                                    Password changed successfully
-                                </a>
-                                <a href="#"
-                                    class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded">
-                                    Password changed successfully
-                                </a>
-                                <a href="#"
-                                    class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded">
-                                    Password changed successfully
-                                </a>
-                                <a href="#"
-                                    class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded">
-                                    Password changed successfully
-                                </a>
+                            <!-- Header -->
+                            <div
+                                class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Notifications</h3>
+                                <button class="text-sm text-blue-600 dark:text-blue-400 hover:underline">Mark all as
+                                    read</button>
+                            </div>
 
-                                <!-- Optional "See all" -->
-                                <a href="#"
-                                    class="block px-4 py-2 text-sm text-blue-600 dark:text-blue-400 hover:underline text-center">
+                            <!-- Notification List -->
+                            <div id="notificationsContainer" class="divide-y divide-gray-200 dark:divide-gray-700">
+
+
+                            </div>
+
+                            <!-- Footer: See All -->
+                            <div class="text-center py-3 border-t border-gray-200 dark:border-gray-700">
+                                <a href="#" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">
                                     See all notifications
                                 </a>
                             </div>
                         </div>
+
                     </div>
 
 
@@ -148,6 +116,15 @@
             </main>
         </div>
     </div>
+    <script>
+        (() => {
+            document.addEventListener("DOMContentLoaded", () => {
+                loadNotifications();
+
+            });
+
+        })();
+    </script>
 
 
 </x-app-layout>

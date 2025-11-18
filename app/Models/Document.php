@@ -12,7 +12,7 @@ class Document extends Model
     protected $table = 'documents'; // optional if table name matches model
 
     // Make sure the primary key is 'id' and auto-incrementing
-    protected $primaryKey = 'id';
+    protected $primaryKey = 'document_id';
     public $incrementing = true;
     protected $keyType = 'int';
 
@@ -28,6 +28,7 @@ class Document extends Model
         'document_form',
         'document_type',
         'date_of_document',
+        'involved_office',
         'due_date',
         'signatory',
         'remarks',

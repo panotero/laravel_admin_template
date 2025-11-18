@@ -34,7 +34,7 @@ try {
       `
       )
       .join("");
-    console.log(imageSlides);
+    // console.log(imageSlides);
     let num = listing.price;
     price = num;
     const slideHTML = `

@@ -6,6 +6,7 @@ window.Alpine = Alpine;
 
 Alpine.start();
 
+import "./notificationController";
 import "./dashboard";
 import "./navmenu";
 import "./mailer";
@@ -18,4 +19,4 @@ import "./filler";
 import "./activityLogger";
 import "./documentHandler";
 import "./pdftoimageConverter";
-// import "./pdf.worker.min.mjs";
+import "./pdf.worker.min.mjs";

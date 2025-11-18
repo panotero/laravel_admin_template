@@ -14,9 +14,11 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <!-- PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@glidejs/glide/dist/css/glide.core.min.css">
 
     <script>
         window.APP_URL = "{{ config('app.url') }}";
@@ -66,9 +68,9 @@
     <div id="globalMessageContainer" class="fixed bottom-4 right-4 z-50 flex flex-col items-end pointer-events-none">
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.8.7/flowbite.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/@glidejs/glide"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@glidejs/glide/dist/glide.min.js"></script>
 </body>
 
 </html>

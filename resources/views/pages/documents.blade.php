@@ -2,7 +2,7 @@
 
 
     <!-- Content -->
-    <div class="container mx-auto p-6 space-y-10">
+    <div class="container mx-auto py-5">
         <!-- Table 1: Assigned to You -->
         <div><button id="btnNewDocument"
                 class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition modal-open">
@@ -33,6 +33,7 @@
                     <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
                         <tr>
                             <th class="px-4 py-3">Control #</th>
+                            <th class="px-4 py-3">Document Code</th>
                             <th class="px-4 py-3">Label</th>
                             <th class="px-4 py-3">Subject</th>
                             <th class="px-4 py-3">Origin Office</th>
@@ -80,6 +81,7 @@
                     <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
                         <tr>
                             <th class="px-4 py-3">Control #</th>
+                            <th class="px-4 py-3">Document Code</th>
                             <th class="px-4 py-3">Label</th>
                             <th class="px-4 py-3">Subject</th>
                             <th class="px-4 py-3">Origin Office</th>
@@ -115,7 +117,7 @@
                     Drag & drop a PDF file here or
                     <span class="text-blue-600 underline">click to browse</span>
                 </p>
-                <input type="file" accept="application/pdf" class="hidden" id="fileInput" required />
+                <input type="file" accept="application/pdf" class="" id="fileInput" required />
             </div>
 
             <!-- Display selected file info -->
@@ -294,27 +296,56 @@
                 </button>
             </div>
 
-            <div class="relative w-full max-w-3xl mx-auto">
-                <div class="glide glide-parent">
-                    <div class="glide__track" data-glide-el="track">
-                        <ul class="glide__slides" id="pdfSlide">
-                            <!-- Slides will be injected here -->
-                        </ul>
-                    </div>
 
-                    <!-- Navigation buttons -->
-                    <button
-                        class="parent-prev absolute top-1/2 left-2 transform -translate-y-1/2 bg-black/50 text-white p-3 rounded-full hover:bg-black/70">
-                        ◀
+
+            <!-- Glide (inside Flowbite modal) -->
+            <div id="galleryGlide" class="glide w-full max-w-md mx-auto relative">
+
+                <!-- Loading Overlay -->
+                <div id="galleryLoading"
+                    class="absolute inset-0 flex items-center justify-center bg-white/70 hidden z-50">
+                    <div
+                        class="animate-spin text-black dark:text-gray-200 h-10 w-10 border-4 border-gray-400 border-t-transparent rounded-full">
+                    </div>
+                </div>
+
+                <div class="glide__track" data-glide-el="track">
+                    <ul class="glide__slides" id="glideSlides">
+                        <!-- JS will populate slides here -->
+                    </ul>
+                    <div class="flex justify-end space-x-2 mb-2">
+                        <button id="zoomIn" class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200">+</button>
+                        <button id="zoomOut" class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200">-</button>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="flex justify-between mt-4">
+                    <button data-glide-dir="<" class="slide-previous px-4 py-2 bg-gray-100 rounded hover:bg-gray-200">
+                        Prev
                     </button>
-                    <button
-                        class="parent-next absolute top-1/2 right-2 transform -translate-y-1/2 bg-black/50 text-white p-3 rounded-full hover:bg-black/70">
-                        ▶
+
+                    <button data-glide-dir=">" class="slide-next px-4 py-2 bg-gray-100 rounded hover:bg-gray-200">
+                        Next
                     </button>
                 </div>
+
             </div>
 
 
+
+        </div>
+    </div>
+
+    <!-- Control Number Modal -->
+    <div id="controlNumberModal" class="hidden fixed inset-0 flex items-center justify-center z-50 bg-black/50">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 w-80 max-w-full relative">
+            <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Document Created</h2>
+            <p id="controlNumberText" class="text-gray-700 dark:text-gray-300 mb-4 text-center text-sm"></p>
+            <button
+                class="modal-close px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors duration-200 w-full">
+                Close
+            </button>
         </div>
     </div>
 
@@ -403,9 +434,9 @@
         </div>
     </div>
 </div>
-
 <script>
-    (function() { // ----------------------------
+    (function() {
+        // ----------------------------
         // Helper Functions
         // ----------------------------
 
@@ -431,30 +462,35 @@
             tr.dataset.status = item.status;
 
             tr.innerHTML = `
-        <td class="px-4 py-2">${item.document_code}</td>
-        <td class="px-4 py-2">
-            <select class="border rounded px-2 py-1 text-xs labeldropdown">
-                <option ${item.document_type === "General" ? "selected" : ""}>General</option>
-                <option ${item.document_type === "Confidential" ? "selected" : ""}>Confidential</option>
-            </select>
-        </td>
-        <td class="px-4 py-2">${item.particular}</td>
-        <td class="px-4 py-2">${item.office_origin}</td>
-        <td class="px-4 py-2">${item.destination_office}</td>
-        <td class="px-4 py-2">${item.date_forwarded || "-"}</td>
-        <td class="px-4 py-2">${calculateDuration(item.date_of_document, item.date_forwarded)}</td>
-        <td class="px-4 py-2">${item.created_at ? item.created_at.split('T')[0] : "-"}</td>
-        <td class="px-4 py-2">${item.confidentiality || "-"}</td>
-        <td class="px-4 py-2">${item.status || "-"}</td>
-    `;
+            <td class="px-4 py-2">${item.document_code}</td>
+            <td class="px-4 py-2">${item.documentControlNumber}</td>
+            <td class="px-4 py-2">
+                <select class="border rounded px-2 py-1 text-xs labeldropdown">
+                    <option ${item.document_type === "General" ? "selected" : ""}>General</option>
+                    <option ${item.document_type === "Confidential" ? "selected" : ""}>Confidential</option>
+                </select>
+            </td>
+            <td class="px-4 py-2">${item.particular}</td>
+            <td class="px-4 py-2">${item.office_origin}</td>
+            <td class="px-4 py-2">${item.destination_office}</td>
+            <td class="px-4 py-2">${item.date_forwarded || "-"}</td>
+            <td class="px-4 py-2">${calculateDuration(item.date_of_document, item.date_forwarded)}</td>
+            <td class="px-4 py-2">${item.created_at ? item.created_at.split('T')[0] : "-"}</td>
+            <td class="px-4 py-2">${item.confidentiality || "-"}</td>
+            <td class="px-4 py-2">${item.status || "-"}</td>
+        `;
 
             tr.classList.add("modal-open");
+
             tr.addEventListener("click", (e) => {
                 if (e.target.classList.contains("labeldropdown")) return;
+
                 initModal({
                     modalId: "DocumentModal"
                 });
                 populateDocumentModal(tr.dataset.documentId);
+
+                console.log("row clicked");
                 logActivity('view', tr.dataset.documentId, tr.dataset.documentControlNumber);
             });
 
@@ -491,18 +527,12 @@
                     [];
                     const activities = Array.isArray(doc.activities) ? doc.activities : [];
 
-                    // ----------------------------
                     // Determine All Documents visibility
-                    // ----------------------------
                     const canSeeAllDocs = !userOfficeName || userOfficeName === "ODDG-PP" ||
                         involvedOffices.includes(userOfficeName);
-                    if (canSeeAllDocs) {
-                        appendDocumentRow(allDocsTableBody, doc);
-                    }
+                    if (canSeeAllDocs) appendDocumentRow(allDocsTableBody, doc);
 
-                    // ----------------------------
                     // Determine Assigned To You visibility
-                    // ----------------------------
                     const routeActivities = activities.filter(a => a.action?.toLowerCase().includes(
                         "route"));
                     const lastRouteActivity = routeActivities.length ? routeActivities[routeActivities
@@ -510,21 +540,16 @@
                     let showAssigned = false;
 
                     if (!lastRouteActivity) {
-                        // No route activity: visible to users with "routing" approval type in destination office
                         if (userApprovalType === "routing" && (!userOfficeName || doc
                                 .destination_office === userOfficeName)) {
                             showAssigned = true;
                         }
                     } else if (lastRouteActivity.routed_to === userId) {
-                        // If last route activity is assigned to current user
                         showAssigned = true;
                     }
 
-                    if (showAssigned) {
-                        appendDocumentRow(assignedTableBody, doc);
-                    }
+                    if (showAssigned) appendDocumentRow(assignedTableBody, doc);
                 });
-
             } catch (error) {
                 console.error("Error fetching documents:", error);
             }
@@ -540,20 +565,18 @@
                 fileInfoId: "fileInfo",
                 clearBtnId: "clearSelectionBtn",
             });
+
             fillOfficeDropdown();
+
+            const submitBtn = document.querySelector("#modalNewDocument button.bg-blue-600");
+            const fileInput = document.getElementById("fileInput");
             // Open New Document Modal
             document.getElementById("btnNewDocument")?.addEventListener("click", () => {
                 initModal({
                     modalId: "modalNewDocument"
                 });
             });
-
-            const submitBtn = document.querySelector("#modalNewDocument button.bg-blue-600");
-            const fileInput = document.getElementById("fileInput");
-
-            submitBtn.addEventListener("click", async (e) => {
-
-                // Let browser check required fields
+            submitBtn?.addEventListener("click", async () => {
                 const form = document.querySelector("#modalNewDocument");
                 const invalid = form.querySelector(":invalid");
 
@@ -562,50 +585,27 @@
                     return;
                 }
 
-                // PDF required manually (HTML5 cannot validate hidden file inputs)
                 if (!fileInput.files[0]) {
                     alert("Please upload a PDF file.");
                     return;
                 }
 
-                // --------------------------------------------
-                // GET FIELD VALUES
-                // --------------------------------------------
-                const document_code = document.getElementById("document_code").value.trim();
-                const subject = document.getElementById("subject").value.trim();
-                const signatory = document.getElementById("signatory").value.trim();
-                const remarks = document.getElementById("remarks").value.trim();
-
-                const originOffice = document.getElementById("originOffice").value;
-                const destinationOffice = document.getElementById("destinationOffice").value;
-                const documentType = document.getElementById("documentType").value;
-                const dueDate = document.getElementById("due_date").value;
-                const documentDate = document.getElementById("document_date").value;
-
-                const pdfFile = fileInput.files[0];
-
-                // --------------------------------------------
-                // FORM DATA BUILD
-                // --------------------------------------------
                 const formData = new FormData();
-                formData.append("document_code", document_code);
+                formData.append("document_code", document.getElementById("document_code").value.trim());
                 formData.append("date_received", new Date().toISOString().split("T")[0]);
-                formData.append("particular", subject);
-                formData.append("office_origin", originOffice);
+                formData.append("particular", document.getElementById("subject").value.trim());
+                formData.append("office_origin", document.getElementById("originOffice").value);
                 formData.append("user_id", window.authUser.id);
                 formData.append("document_form", "PDF");
-                formData.append("document_type", documentType);
-                formData.append("due_date", dueDate);
-                formData.append("document_date", documentDate);
-                formData.append("signatory", signatory);
+                formData.append("document_type", document.getElementById("documentType").value);
+                formData.append("due_date", document.getElementById("due_date").value);
+                formData.append("document_date", document.getElementById("document_date").value);
+                formData.append("signatory", document.getElementById("signatory").value.trim());
+                formData.append("destination_office", document.getElementById("destinationOffice")
+                    .value);
+                formData.append("remarks", document.getElementById("remarks").value.trim());
+                formData.append("file", fileInput.files[0]);
 
-                formData.append("destination_office", destinationOffice);
-                formData.append("remarks", remarks);
-                formData.append("file", pdfFile);
-
-                // --------------------------------------------
-                // SUBMIT REQUEST
-                // --------------------------------------------
                 try {
                     submitBtn.disabled = true;
                     submitBtn.textContent = "Submitting...";
@@ -622,10 +622,46 @@
                         return;
                     }
 
-                    alert("Document created successfully!");
+                    // Hide New Document modal
                     document.getElementById("modalNewDocument").classList.add("hidden");
 
-                    if (typeof getDocs === "function") getDocs();
+                    const modal = document.getElementById("modalNewDocument");
+
+                    if (modal) {
+                        modal.querySelectorAll("input, select, textarea").forEach((el) => {
+                            switch (el.type) {
+                                case "checkbox":
+                                case "radio":
+                                    el.checked = false;
+                                    break;
+                                case "file":
+                                    el.value = "";
+                                    break;
+                                default:
+                                    el.value = "";
+                            }
+                        });
+
+                        // Optionally reset any custom display elements like file info
+                        const fileInfo = modal.querySelector("#fileInfo");
+                        const clearBtn = modal.querySelector("#clearSelectionBtn");
+                        if (fileInfo) fileInfo.textContent = "";
+                        if (clearBtn) clearBtn.classList.add("hidden");
+                    }
+
+                    // Populate and show Control Number modal
+                    if (result.docControlNumber) {
+                        const controlModal = document.getElementById("controlNumberModal");
+                        const controlText = document.getElementById("controlNumberText");
+                        controlText.textContent = Array.isArray(result.docControlNumber) ?
+                            result.docControlNumber.join(", ") :
+                            result.docControlNumber;
+
+                        // Trigger your modal-open class to open it
+                        controlModal.classList.add("modal-open");
+                    }
+
+                    getDocs();
 
                 } catch (err) {
                     console.error(err);
@@ -637,20 +673,19 @@
             });
 
 
-
             // PDF Preview Modal
-            document.querySelectorAll('.fileInfoButton').forEach(btn => {
+            document.querySelectorAll('.fileInfoButton').forEach(btn =>
                 btn.addEventListener("click", () => initModal({
                     modalId: "pdfPreviewModal"
-                }));
-            });
+                }))
+            );
 
             // Routing Modal
-            document.querySelectorAll('.routeBtn').forEach(btn => {
+            document.querySelectorAll('.routeBtn').forEach(btn =>
                 btn.addEventListener("click", () => initModal({
                     modalId: "routingModal"
-                }));
-            });
+                }))
+            );
 
             // Office change logic
             const officeSelect = document.getElementById("routeOfficeSelect");
@@ -663,16 +698,11 @@
 
             officeSelect?.addEventListener("change", e => {
                 const selected = e.target.value;
-                if (!selected) {
-                    internalSection?.classList.add("hidden");
-                    externalSection?.classList.add("hidden");
-                    return;
-                }
+
+                internalSection?.classList.toggle("hidden", selected !== currentOffice);
+                externalSection?.classList.toggle("hidden", selected === currentOffice || !selected);
 
                 if (selected === currentOffice) {
-                    internalSection?.classList.remove("hidden");
-                    externalSection?.classList.add("hidden");
-
                     fetch("/api/users")
                         .then(res => res.json())
                         .then(users => {
@@ -681,13 +711,9 @@
                                 filtered.map(u => `<option value="${u.id}">${u.name}</option>`).join(
                                     "");
                         });
-                } else {
-                    internalSection?.classList.add("hidden");
-                    externalSection?.classList.remove("hidden");
                 }
             });
 
-            // Show PDF upload only when approved
             statusSelect?.addEventListener("change", e => {
                 pdfUploadSection?.classList.toggle("hidden", e.target.value !== "approved");
             });

@@ -1,5 +1,5 @@
 <div class="min-h-screen">
-    <div class="w-full mx-auto dark:text-gray-200 text-gray-900">
+    <div class="w-full  container mx-auto py-5 dark:text-gray-200 text-gray-900">
 
 
         {{-- Top row: 3 stat cards --}}

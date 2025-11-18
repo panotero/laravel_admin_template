@@ -15,6 +15,7 @@ use App\Http\Controllers\UserConfigController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\DocumentTypeController;
+use App\Http\Controllers\NotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,6 +56,38 @@ Route::middleware(['web', 'auth'])->group(function () {
     });
 
     Route::get('/load_menu', [MenusController::class, 'index']);
+    Route::prefix('notifications')->group(function () {
+        Route::get('/', [NotificationController::class, 'getNotifications']);
+    });
+
+    Route::get('notifications/stream', function () {
+        return response()->stream(function () {
+            while (true) {
+                $user = auth()->user();
+
+                $notifications = \App\Models\Notification::where(function ($query) use ($user) {
+                    $query->where('routed_to', $user->id)
+                        ->orWhere(function ($sub) use ($user) {
+                            $sub->whereNull('routed_to')
+                                ->where('destination_office', $user->office->office_name);
+                        });
+                })
+                    ->with('document')
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+
+                echo "data: " . json_encode($notifications) . "\n\n";
+                ob_flush();
+                flush();
+
+                sleep(3);
+            }
+        }, 200, [
+            'Content-Type' => 'text/event-stream',
+            'Cache-Control' => 'no-cache',
+            'X-Accel-Buffering' => 'no'
+        ]);
+    });
 });
 Route::post('/activities', [ActivityController::class, 'store'])
     ->name('api.activities.store');
@@ -113,6 +146,9 @@ Route::prefix('documents')->group(function () {
     Route::patch('/{id}', [DocumentController::class, 'update']);           // Update
     Route::delete('/{id}', [DocumentController::class, 'destroy']);         // Delete
 });
+
+
+
 
 
 // ----------------------------------------------------------

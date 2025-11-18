@@ -157,7 +157,7 @@
                 Array.from(row.querySelectorAll("td")).map((cell) => cell.textContent.trim())
             );
 
-            console.log(" Table data:", tableData);
+            // console.log(" Table data:", tableData);
         }
 
         // ==========================

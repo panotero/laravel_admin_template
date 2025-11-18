@@ -50,7 +50,7 @@ async function fetchAuthUser() {
     if (data.isLoggedIn) {
       // Store globally
       window.authUser = data.user;
-      console.log("Authenticated user:", window.authUser);
+      //   console.log("Authenticated user:", window.authUser);
     } else {
       window.authUser = null;
       console.log("User is not logged in");

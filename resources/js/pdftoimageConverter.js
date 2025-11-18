@@ -1,53 +1,100 @@
-function loadSlidesFromArray(slideTexts = []) {
-  const slidesContainer = document.getElementById("pdfSlide");
-  if (!slidesContainer) return; // exit if content area not loaded yet
+// Import PDF.js
+import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf";
 
-  // Clear previous slides
-  slidesContainer.innerHTML = "";
+// Worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = "/js/pdf.worker.min.js";
 
-  // Build slides
-  slideTexts.forEach((text) => {
-    const slideHTML = `
-      <li class="glide__slide flex items-center justify-center h-64 bg-gray-100 rounded-xl shadow-md">
-        <h1 class="text-3xl font-bold text-black">${text}</h1>
-      </li>
-    `;
-    slidesContainer.insertAdjacentHTML("beforeend", slideHTML);
+/* ---------------------------------------------
+ * BUILD HTML <li> SLIDE FROM IMAGE SRC
+ * --------------------------------------------- */
+function buildSlideHTML(imgSrc) {
+  return `
+    <li class="glide__slide flex items-center justify-center bg-gray-100">
+      <img src="${imgSrc}" class="max-h-[80vh] w-auto object-contain rounded-xl">
+    </li>
+  `;
+}
+
+/* ---------------------------------------------
+ * LOAD SLIDES (accepts array of HTML strings)
+ * --------------------------------------------- */
+function loadSlidesFromArray(slides = []) {
+  const slideContainer = document.getElementById("glideSlides");
+  const loadingOverlay = document.getElementById("galleryLoading");
+
+  slideContainer.innerHTML = "";
+  loadingOverlay.classList.remove("hidden");
+
+  slides.forEach((slideHTML) => {
+    slideContainer.insertAdjacentHTML("beforeend", slideHTML);
   });
 
-  // Destroy previous instance if exists
-  if (window.pdfGlide) {
-    window.pdfGlide.destroy();
-    window.pdfGlide = null;
-  }
+  initGlide();
 
-  // Initialize Glide
-  window.pdfGlide = new Glide(".glide-parent", {
-    type: "carousel",
-    perView: 1,
+  // hide loader
+  loadingOverlay.classList.add("hidden");
+}
+
+/* ---------------------------------------------
+ * GLIDE INITIALIZER (safe for SPA)
+ * --------------------------------------------- */
+let glideInstance = null;
+
+function initGlide() {
+  if (glideInstance) glideInstance.destroy();
+
+  glideInstance = new Glide("#galleryGlide", {
+    type: "slider",
     focusAt: "center",
-    gap: 20,
-    autoplay: 2000,
+    perView: 1,
+    gap: 10,
     hoverpause: true,
   });
 
-  window.pdfGlide.mount();
+  glideInstance.mount();
 
-  // Remove previous listeners by cloning buttons
-  const prevBtn = document.querySelector(".parent-prev");
-  const nextBtn = document.querySelector(".parent-next");
+  document
+    .querySelector(".slide-previous")
+    .addEventListener("click", () => glideInstance.go("<"));
 
-  if (prevBtn && nextBtn) {
-    prevBtn.replaceWith(prevBtn.cloneNode(true));
-    nextBtn.replaceWith(nextBtn.cloneNode(true));
-
-    // Re-select buttons
-    const newPrevBtn = document.querySelector(".parent-prev");
-    const newNextBtn = document.querySelector(".parent-next");
-
-    newPrevBtn.addEventListener("click", () => window.pdfGlide.go("<"));
-    newNextBtn.addEventListener("click", () => window.pdfGlide.go(">"));
-  }
+  document
+    .querySelector(".slide-next")
+    .addEventListener("click", () => glideInstance.go(">"));
 }
 
+/* ---------------------------------------------
+ * EXTRACT IMAGES FROM PDF AND RETURN SLIDE HTML
+ * --------------------------------------------- */
+async function extractPdfImages(pdfUrl, scale = 1.5) {
+  const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
+
+  const slideElements = [];
+
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const viewport = page.getViewport({ scale });
+
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+
+    await page.render({
+      canvasContext: context,
+      viewport,
+    }).promise;
+
+    // Convert PDF page to data URL image
+    const imgSrc = canvas.toDataURL("image/png");
+
+    // Convert to <li> slide html
+    slideElements.push(buildSlideHTML(imgSrc));
+  }
+
+  return slideElements;
+}
+
+/* Expose to global for SPA */
+window.extractPdfImages = extractPdfImages;
 window.loadSlidesFromArray = loadSlidesFromArray;

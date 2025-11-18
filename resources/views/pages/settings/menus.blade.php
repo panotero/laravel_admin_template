@@ -246,7 +246,7 @@
                             return;
                         }
                         // Your main logic here (only runs if not clicking menubuttons)
-                        console.log("Row clicked, not menubuttons");
+                        // console.log("Row clicked, not menubuttons");
 
                         modalTitle.textContent = "Modify Menu";
                         saveBtn.textContent = "Modify";

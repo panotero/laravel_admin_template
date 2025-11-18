@@ -35,6 +35,7 @@ class Notification extends Model
         return $this->belongsTo(Document::class, 'document_id');
     }
 
+
     // Relationship to User (who should receive the notification)
     public function user()
     {

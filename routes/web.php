@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\MailerController;
 use App\Http\Middleware\CheckUserStatus;
+use App\Http\Controllers\NotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -66,5 +67,9 @@ Route::middleware(['auth', 'check.status'])->group(function () {
 
 
     Route::resource('users', UserController::class)->middleware('can:isSuperAdmin');
+
+    Route::prefix('notifications')->group(function () {
+        Route::get('/', [NotificationController::class, 'getNotifications']);
+    });
 });
 require __DIR__ . '/auth.php';

@@ -45,7 +45,7 @@
                     <!-- Notification Dropdown -->
                     <div class="relative" x-data="{ open: false }" @click.outside="open = false">
                         <!-- Trigger Button -->
-                        <button @click="open = !open"
+                        <button @click="open = !open" id="notificationIcon"
                             class="relative p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
                             <svg class="h-6 w-6 text-gray-800 dark:text-gray-200" fill="none" stroke="currentColor"
                                 stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -91,15 +91,19 @@
 
 
                     <!-- Profile Dropdown -->
-                    <x-dropdown align="right" width="48">
+                    <x-dropdown align="right" width="w-auto">
                         <x-slot name="trigger">
                             <button class="text-gray-800 dark:text-gray-200">
                                 <div class="flex flex-col items-center justify-center">
-                                    <img src="{{ Auth::user()->profile_photo_url ?? asset('default-avatar.png') }}"
-                                        alt="Avatar" class="h-5 w-5 rounded-full object-cover mb-2">
-                                    <p class="text-sm text-gray-700 dark:text-gray-300 text-center max-md:hidden">
-                                        {{ Auth::user()->name }}
-                                    </p>
+                                    @if (Auth::user()->profile_photo_url)
+                                        <img src="{{ Auth::user()->profile_photo_url }}" alt="Avatar"
+                                            class="h-10 w-10 rounded-full object-cover">
+                                    @else
+                                        <div
+                                            class="h-10 w-10 rounded-full bg-gray-400 text-white flex items-center justify-center font-semibold">
+                                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                                        </div>
+                                    @endif
                                 </div>
                             </button>
                         </x-slot>
@@ -117,13 +121,10 @@
         </div>
     </div>
     <script>
-        (() => {
-            document.addEventListener("DOMContentLoaded", () => {
-                loadNotifications();
+        document.addEventListener("DOMContentLoaded", () => {
+            loadNotifications();
 
-            });
-
-        })();
+        });
     </script>
 
 

@@ -11,6 +11,7 @@ use App\Models\Notification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class DocumentController extends Controller
 {
@@ -124,16 +125,14 @@ class DocumentController extends Controller
             if (!is_dir($publicPath)) {
                 mkdir($publicPath, 0777, true);
             }
-
+            // dd($document->document_id);
             // Save file
             $file->move($publicPath, $fileName);
-
             // Path stored in DB
             $filePath = "assets/documents/$officeFolder/pdf/$fileName";
-
             // Insert into files table
             DB::table('files')->insert([
-                'document_id'      => $document->id,
+                'document_id'      => $document->document_id,
                 'file_name'      => $cleanOriginal,
                 'file_path'        => $filePath,
                 'file_password'    => null,
@@ -148,7 +147,7 @@ class DocumentController extends Controller
         // NOTIFICATION ENTRY
         // -------------------------------
         DB::table('notifications')->insert([
-            'document_id'        => $document->id,
+            'document_id'        => $document->document_id,
             'office_origin'      => $request->office_origin,
             'destination_office' => $request->destination_office,
             'routed_to'          => $request->routed_to,

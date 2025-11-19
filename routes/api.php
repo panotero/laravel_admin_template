@@ -16,6 +16,7 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\DocumentTypeController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\RoutingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -88,7 +89,9 @@ Route::middleware(['web', 'auth'])->group(function () {
             'X-Accel-Buffering' => 'no'
         ]);
     });
+    Route::post('/notifications/mark-read', [NotificationController::class, 'markRead']);
 });
+Route::post('/documents/route', [RoutingController::class, 'routeDocument']);
 Route::post('/activities', [ActivityController::class, 'store'])
     ->name('api.activities.store');
 

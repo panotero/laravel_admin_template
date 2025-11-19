@@ -20,3 +20,4 @@ import "./activityLogger";
 import "./documentHandler";
 import "./pdftoimageConverter";
 import "./pdf.worker.min.mjs";
+import "./routeControl";

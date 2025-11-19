@@ -1,7 +1,7 @@
 @props([
     'align' => 'right',
     'width' => '48',
-    'contentClasses' => 'py-1 bg-white dark:bg-gray-700',
+    'contentClasses' => 'w-auto py-1 bg-white dark:bg-gray-700',
     'showProfile' => true,
     'showSettings' => true,
     'showLogout' => true,
@@ -44,10 +44,25 @@
         <div class="rounded-md ring-1 ring-black ring-opacity-5 {{ $contentClasses }}">
 
             <!-- User Avatar + Email -->
-            <div class="flex flex-col items-center p-4 border-b border-gray-200 dark:border-gray-600">
-                <img src="{{ Auth::user()->profile_photo_url ?? asset('default-avatar.png') }}" alt="Avatar"
-                    class="h-12 w-12 rounded-full object-cover mb-2">
-                <p class="text-sm text-gray-700 dark:text-gray-300">{{ Auth::user()->email }}</p>
+            <div class="flex items-start justify-center  p-4">
+                <div class="">
+
+                    @if (Auth::user()->profile_photo_url)
+                        <img src="{{ Auth::user()->profile_photo_url }}" alt="Avatar"
+                            class="h-16 w-16 rounded-full object-cover">
+                    @else
+                        <div
+                            class="h-16 w-16 rounded-full bg-gray-400 text-white flex items-center justify-center font-semibold">
+                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                        </div>
+                    @endif
+                </div>
+                <div class=" px-3">
+
+                    <p class="text-sm text-gray-700 dark:text-gray-300">{{ Auth::user()->email }}</p>
+                    <p class="text-sm text-gray-700 dark:text-gray-300">{{ Auth::user()->name }}</p>
+                    <p class="text-sm text-gray-700 dark:text-gray-300">{{ Auth::user()->office->office_name }}</p>
+                </div>
             </div>
 
             {{-- Profile --}}

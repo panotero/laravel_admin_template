@@ -9,11 +9,15 @@ class Activity extends Model
 {
     use HasFactory;
 
+
     protected $fillable = [
         'action',
         'document_id',
+        'final_approval',
         'document_control_number',
         'user_id',
+        'routed_to',
+        'final_remarks',
     ];
 
     public function document()

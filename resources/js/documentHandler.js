@@ -21,6 +21,7 @@ async function populateDocumentModal(documentId) {
     // ------------------------
     // Populate Header
     // ------------------------
+    document.getElementById("docId").value = data.document_id;
     setText("docControlNumber", data.document_control_number);
     setText("docStatus", data.status);
 
@@ -29,8 +30,15 @@ async function populateDocumentModal(documentId) {
     // ------------------------
     setText("docTitle", data.particular);
     setText("docDept", data.office_origin);
-    setText("docAuthor", data.signatory);
-    setText("docDate", data.date_of_document);
+    setText("docAuthor", data.signatory || "N/A");
+    setText("docDate", data.date_of_document || data.date_received || "N/A");
+    setText("docCode", data.document_code || "N/A");
+    setText("docForm", data.document_form || "N/A");
+    setText("docType", data.document_type || "N/A");
+    setText("docDueDate", data.due_date || "N/A");
+    setText("docDestination", data.destination_office || "N/A");
+    setText("docConfidentiality", data.confidentiality || "Normal");
+    setText("docRemarks", data.remarks || "-");
 
     // ------------------------
     // Populate Files / Versions

@@ -117,7 +117,7 @@
                     Drag & drop a PDF file here or
                     <span class="text-blue-600 underline">click to browse</span>
                 </p>
-                <input type="file" accept="application/pdf" class="" id="fileInput" required />
+                <input type="file" accept="application/pdf" class="hidden" id="fileInput" required />
             </div>
 
             <!-- Display selected file info -->
@@ -221,22 +221,50 @@
                 <!-- Left Section: Metadata -->
                 <div class="w-full lg:w-1/2 p-6 space-y-4">
                     <h3 class="text-lg font-medium text-gray-800 dark:text-gray-100">Document Metadata</h3>
-                    <div class="space-y-2 text-sm">
+                    <div class="space-y-2 text-md">
                         <div class="flex justify-between">
                             <span class="text-gray-600 dark:text-gray-400">Title:</span>
                             <span id="docTitle" class="text-gray-900 dark:text-gray-100">Project Proposal</span>
                         </div>
                         <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Document Code:</span>
+                            <span id="docCode" class="text-gray-900 dark:text-gray-100"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Form:</span>
+                            <span id="docForm" class="text-gray-900 dark:text-gray-100"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Type:</span>
+                            <span id="docType" class="text-gray-900 dark:text-gray-100"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Due Date:</span>
+                            <span id="docDueDate" class="text-gray-900 dark:text-gray-100"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Destination Office:</span>
+                            <span id="docDestination" class="text-gray-900 dark:text-gray-100"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Confidentiality:</span>
+                            <span id="docConfidentiality" class="text-gray-900 dark:text-gray-100"></span>
+                        </div>
+                        <div class="flex justify-between">
                             <span class="text-gray-600 dark:text-gray-400">Department:</span>
-                            <span id="docDept" class="text-gray-900 dark:text-gray-100">Engineering</span>
+                            <span id="docDept" class="text-gray-900 dark:text-gray-100"></span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600 dark:text-gray-400">Created By:</span>
-                            <span id="docAuthor" class="text-gray-900 dark:text-gray-100">Minton Diaz</span>
+                            <span id="docAuthor" class="text-gray-900 dark:text-gray-100"></span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600 dark:text-gray-400">Created At:</span>
-                            <span id="docDate" class="text-gray-900 dark:text-gray-100">2025-11-13</span>
+                            <span id="docDate" class="text-gray-900 dark:text-gray-100"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Remarks:</span>
+                            <span id="docRemarks" class="text-gray-900 dark:text-gray-100"></span>
                         </div>
                     </div>
                 </div>
@@ -349,11 +377,13 @@
         </div>
     </div>
 
-
     <!-- Routing Modal -->
     <div id="routingModal" class="fixed inset-0 hidden z-50 flex items-center justify-center bg-black/50 px-4">
         <div
             class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto p-6 space-y-6">
+
+            <!-- Hidden Document ID -->
+            <input type="hidden" id="docId" value="">
 
             <!-- Header -->
             <div class="border-b border-gray-200 dark:border-gray-700 pb-3">
@@ -373,9 +403,17 @@
             <!-- Internal Routing Section -->
             <div id="internalSection" class="hidden space-y-2">
                 <label class="text-gray-700 dark:text-gray-300 font-medium text-sm">Select User</label>
-                <select id="userSelect"
+                <select required id="userSelect"
                     class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
                     <option value="">Loading users...</option>
+                </select>
+
+                <label class="text-gray-700 dark:text-gray-300 font-medium text-sm">Select Approval Type</label>
+                <select required id="approvalSelect"
+                    class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">Select Approval Type</option>
+                    <option value="pre-approval">Pre-approval</option>
+                    <option value="final-approval">Final-approval</option>
                 </select>
             </div>
 
@@ -433,6 +471,7 @@
             </div>
         </div>
     </div>
+
 </div>
 <script>
     (function() {
@@ -565,6 +604,7 @@
                 fileInfoId: "fileInfo",
                 clearBtnId: "clearSelectionBtn",
             });
+            initroute();
 
             fillOfficeDropdown();
 
@@ -690,6 +730,7 @@
             // Office change logic
             const officeSelect = document.getElementById("routeOfficeSelect");
             const userSelect = document.getElementById("userSelect");
+            const approvalSelect = document.getElementById("approvalSelect");
             const statusSelect = document.getElementById("statusSelect");
             const internalSection = document.getElementById("internalSection");
             const externalSection = document.getElementById("externalSection");
@@ -710,6 +751,8 @@
                             userSelect.innerHTML = `<option value="">Select User</option>` +
                                 filtered.map(u => `<option value="${u.id}">${u.name}</option>`).join(
                                     "");
+                            approvalSelect.innerHTML =
+                                `<option value="">Select Approval Type</option><option value="pre-approval">Pre-approval</option><option value="final-approval">final-approval</option>`;
                         });
                 }
             });

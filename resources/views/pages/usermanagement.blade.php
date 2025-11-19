@@ -33,7 +33,7 @@
 
         <!-- Form -->
         <form id="userForm" class="space-y-4">
-            <input type="text" id="userId" />
+            <input type="hidden" id="userId" />
 
             <div>
                 <label class="block text-sm text-gray-600 mb-1">Name</label>
@@ -132,7 +132,7 @@
                         <td class="px-6 py-3">${u.name}</td>
                         <td class="px-6 py-3">${u.email}</td>
                         <td class="px-6 py-3">${u.role ?? "-"}</td>
-                        <td class="px-6 py-3">${u.office_name ?? "-"}</td>
+                        <td class="px-6 py-3">${u.office.office_name ?? "-"}</td>
                         <td class="px-6 py-3 text-center">
                             <button class="text-blue-500 hover:underline editBtn" data-id="${u.id}">Edit</button> |
                             <button class="text-white px-5 py-2 rounded ${actionClass}" data-id="${u.id}">${actionLabel}</button>

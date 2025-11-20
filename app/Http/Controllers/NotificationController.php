@@ -28,7 +28,6 @@ class NotificationController extends Controller
         // dd($user);
         return response()->json($notifications);
     }
-
     public function stream()
     {
         $user = auth()->user();
@@ -38,16 +37,11 @@ class NotificationController extends Controller
 
         return response()->stream(function () use ($user) {
             while (true) {
-                $notifications = Notification::where(function ($query) use ($user) {
-                    $query->where('routed_to', $user->id)
-                        ->orWhere(function ($sub) use ($user) {
-                            $sub->whereNull('routed_to')
-                                ->where('destination_office', $user->office->office_name);
-                        });
-                })
-                    ->with('document')
+                // Only get notifications for the logged-in user
+                $notifications = Notification::where('user_id', $user->id)
+                    ->with('document') // include related document if needed
                     ->orderBy('created_at', 'desc')
-                    ->get();
+                    ->get(['id', 'document_id', 'message', 'is_read', 'created_at']); // select only necessary columns
 
                 echo "data: " . json_encode($notifications) . "\n\n";
                 ob_flush();

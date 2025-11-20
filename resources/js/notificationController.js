@@ -1,4 +1,5 @@
 let allNotificationIds = []; // store all IDs
+let lastUnreadCount = 0;
 const NotifContainer = document.getElementById("notifcount");
 const notifIcon = document.getElementById("notificationIcon"); // icon you click
 
@@ -14,7 +15,7 @@ function initNotificationStream() {
     } else {
       NotifContainer.classList.remove("hidden");
     }
-    console.log(unreadCount);
+    // console.log(unreadCount);
 
     // Update the counter display
     NotifContainer.textContent = unreadCount > 0 ? unreadCount : "";
@@ -29,6 +30,24 @@ function initNotificationStream() {
       created_at: item.created_at,
       is_read: item.is_read,
     }));
+    // 🔥 Only call getDocs() if unread count changed
+    if (unreadCount !== lastUnreadCount) {
+      console.log(
+        "Notification count changed:",
+        lastUnreadCount,
+        "→",
+        unreadCount
+      );
+
+      if (typeof window.getDocs === "function") {
+        window.getDocs();
+      } else {
+        console.warn("getDocs() not available yet.");
+      }
+
+      // Update tracker
+      lastUnreadCount = unreadCount;
+    }
 
     // Populate your UI list if needed
     populateNotifications(notificationsArray);

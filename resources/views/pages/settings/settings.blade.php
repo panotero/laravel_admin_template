@@ -83,7 +83,8 @@
 </div>
 
 <!-- Office Modal -->
-<div id="officeModal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50 modal-overlay">
+<div id="officeModal"
+    class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50 modal-overlay modal">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg w-96 p-6">
         <h3 class="text-lg font-semibold mb-4">Add New Office</h3>
         <form id="officeForm">
@@ -101,7 +102,7 @@
 </div>
 
 <!-- User Config Modal -->
-<div id="userModal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50 modal-overlay">
+<div id="userModal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50 modal-overlay modal">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg w-96 p-6">
         <h3 class="text-lg font-semibold mb-4">Add New User Config</h3>
         <form id="userForm">
@@ -122,7 +123,8 @@
     </div>
 </div>
 <!-- Document Type Modal -->
-<div id="documentModal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50 modal-overlay">
+<div id="documentModal"
+    class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50 modal-overlay modal">
 
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg w-96 p-6">
         <h3 class="text-lg font-semibold mb-4">Add New Document Type</h3>

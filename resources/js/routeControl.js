@@ -31,6 +31,12 @@ function initroute() {
 
         const data = await res.json();
         console.log(data);
+        window.getDocs();
+
+        const routingmodal = document.getElementById("routingModal");
+        routingmodal.classList.add("hidden");
+        const documentmodal = document.getElementById("DocumentModal");
+        documentmodal.classList.add("hidden");
 
         // optionally refresh activity log or close modal
       } catch (err) {

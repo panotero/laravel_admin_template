@@ -25,8 +25,8 @@
     </table>
 </div>
 
-<!-- ✅ Modal -->
-<div id="menuModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+<!-- Modal -->
+<div id="menuModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center modal">
     <div class="bg-white w-full max-w-md rounded shadow p-6 relative">
         <h3 id="modalTitle" class="text-lg font-semibold mb-4">Add New Menu</h3>
 

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\File;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -146,21 +147,36 @@ class DocumentController extends Controller
         // -------------------------------
         // NOTIFICATION ENTRY
         // -------------------------------
-        DB::table('notifications')->insert([
-            'document_id'        => $document->document_id,
-            'office_origin'      => $request->office_origin,
-            'destination_office' => $request->destination_office,
-            'routed_to'          => $request->routed_to,
-            'user_id'            => $request->user_id,
-            'message'            => "New document uploaded: {$document->document_code}",
-            'is_read'            => 0,
-            'created_at'         => now(),
-            'updated_at'         => now(),
-        ]);
+        //get all user id base on office name
+
+        $admin_users = User::with(['userConfig', 'office'])
+            ->whereHas('userConfig', function ($q) {
+                $q->where('approval_type', 'routing')
+                    ->where('status', 'active');
+            })
+            ->whereHas('office', function ($q) use ($request) {
+                $q->where('office_name', $request->destination_office);
+            })
+            ->get();
+        // dd($admin_users);
+        foreach ($admin_users as $user) {
+            DB::table('notifications')->insert([
+                'document_id'        => $document->document_id,
+                'office_origin'      => $request->office_origin,
+                'destination_office' => $request->destination_office,
+                'routed_to'          => $request->routed_to,
+                'user_id'            => $user->id,
+                'message'            => "New document uploaded: {$document->document_code}",
+                'is_read'            => 0,
+                'created_at'         => now(),
+                'updated_at'         => now(),
+            ]);
+        }
 
         return response()->json([
-            'message' => 'Document created successfully',
+            'message' => 'Document created successfully ' . $admin_users,
             'data'    => $document,
+            'userlist' => $admin_users,
             'docControlNumber' => $documentControlNumber,
         ], 201);
     }

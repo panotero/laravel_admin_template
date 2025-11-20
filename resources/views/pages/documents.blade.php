@@ -101,7 +101,7 @@
     </div>
 
     <!-- Modal: New Document -->
-    <div id="modalNewDocument" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 hidden">
+    <div id="modalNewDocument" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 hidden modal">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl p-6 overflow-y-auto max-h-[90vh]">
             <h2 class="text-lg font-semibold text-gray-700 mb-4">Upload New Document</h2>
 
@@ -357,16 +357,12 @@
                         Next
                     </button>
                 </div>
-
             </div>
-
-
-
         </div>
     </div>
 
     <!-- Control Number Modal -->
-    <div id="controlNumberModal" class="hidden fixed inset-0 flex items-center justify-center z-50 bg-black/50">
+    <div id="controlNumberModal" class="hidden fixed inset-0 flex items-center justify-center z-50 bg-black/50 modal">
         <div class="bg-white dark:bg-gray-800 rounded-xl p-6 w-80 max-w-full relative">
             <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Document Created</h2>
             <p id="controlNumberText" class="text-gray-700 dark:text-gray-300 mb-4 text-center text-sm"></p>
@@ -378,7 +374,7 @@
     </div>
 
     <!-- Routing Modal -->
-    <div id="routingModal" class="fixed inset-0 hidden z-50 flex items-center justify-center bg-black/50 px-4">
+    <div id="routingModal" class="fixed inset-0 hidden z-50 flex items-center justify-center bg-black/50 px-4 modal">
         <div
             class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto p-6 space-y-6">
 
@@ -431,7 +427,8 @@
 
                 <!-- Drag & Drop Upload Section (Visible only when Approved) -->
                 <div id="pdfUploadSection" class="hidden">
-                    <div id="dropzone"
+
+                    <div id="routedropzone"
                         class="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg flex flex-col items-center justify-center p-6 text-gray-500 dark:text-gray-400 cursor-pointer hover:border-blue-400 transition">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mb-2" fill="none"
                             viewBox="0 0 24 24" stroke="currentColor">
@@ -442,10 +439,10 @@
                             Drag & drop a PDF file here or
                             <span class="text-blue-600 dark:text-blue-400 underline">click to browse</span>
                         </p>
-                        <input type="file" accept="application/pdf" class="hidden" id="fileInput" />
+                        <input type="file" accept="application/pdf" class="hidden" id="routefileInput" />
                     </div>
-                    <div id="fileInfo" class="mt-2 text-sm text-gray-600 dark:text-gray-300"></div>
-                    <button id="clearSelectionBtn"
+                    <div id="routefileInfo" class="mt-2 text-sm text-gray-600 dark:text-gray-300"></div>
+                    <button id="clearrouteSelectionBtn"
                         class="mt-2 text-xs text-gray-500 hover:text-red-500 transition">Clear Selection</button>
                 </div>
             </div>
@@ -453,7 +450,7 @@
             <!-- Remarks -->
             <div class="space-y-2">
                 <label class="text-gray-700 dark:text-gray-300 font-medium text-sm">Remarks</label>
-                <textarea id="remarks"
+                <textarea id="routeremarks"
                     class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
                     rows="3" placeholder="Enter remarks..."></textarea>
             </div>
@@ -475,299 +472,6 @@
 </div>
 <script>
     (function() {
-        // ----------------------------
-        // Helper Functions
-        // ----------------------------
-
-        // Calculate duration between two dates
-        function calculateDuration(startDate, endDate) {
-            if (!startDate || !endDate) return "-";
-            const start = new Date(startDate);
-            const end = new Date(endDate);
-            if (isNaN(start) || isNaN(end)) return "-";
-            const diffTime = Math.abs(end - start);
-            return `${Math.ceil(diffTime / (1000 * 60 * 60 * 24))} days`;
-        }
-
-        // Append a single document row to a table
-        function appendDocumentRow(tableBody, item) {
-            if (!tableBody || !item) return;
-
-            const tr = document.createElement("tr");
-            tr.classList.add("border-t", "hover:bg-gray-50", "cursor-pointer");
-            tr.dataset.documentId = item.document_id;
-            tr.dataset.documentControlNumber = item.document_control_number;
-            tr.dataset.userId = item.user_id || '';
-            tr.dataset.status = item.status;
-
-            tr.innerHTML = `
-            <td class="px-4 py-2">${item.document_code}</td>
-            <td class="px-4 py-2">${item.documentControlNumber}</td>
-            <td class="px-4 py-2">
-                <select class="border rounded px-2 py-1 text-xs labeldropdown">
-                    <option ${item.document_type === "General" ? "selected" : ""}>General</option>
-                    <option ${item.document_type === "Confidential" ? "selected" : ""}>Confidential</option>
-                </select>
-            </td>
-            <td class="px-4 py-2">${item.particular}</td>
-            <td class="px-4 py-2">${item.office_origin}</td>
-            <td class="px-4 py-2">${item.destination_office}</td>
-            <td class="px-4 py-2">${item.date_forwarded || "-"}</td>
-            <td class="px-4 py-2">${calculateDuration(item.date_of_document, item.date_forwarded)}</td>
-            <td class="px-4 py-2">${item.created_at ? item.created_at.split('T')[0] : "-"}</td>
-            <td class="px-4 py-2">${item.confidentiality || "-"}</td>
-            <td class="px-4 py-2">${item.status || "-"}</td>
-        `;
-
-            tr.classList.add("modal-open");
-
-            tr.addEventListener("click", (e) => {
-                if (e.target.classList.contains("labeldropdown")) return;
-
-                initModal({
-                    modalId: "DocumentModal"
-                });
-                populateDocumentModal(tr.dataset.documentId);
-
-                console.log("row clicked");
-                logActivity('view', tr.dataset.documentId, tr.dataset.documentControlNumber);
-            });
-
-            tableBody.appendChild(tr);
-        }
-
-        // ----------------------------
-        // Fetch and Render Documents
-        // ----------------------------
-        async function getDocs() {
-            if (!window.authUser) {
-                console.error("Auth user not found.");
-                return;
-            }
-
-            const userId = window.authUser.id;
-            const userOfficeName = window.authUser.office?.office_name || null;
-            const userApprovalType = window.authUser.user_config?.approval_type || null;
-
-            try {
-                const res = await fetch("/api/documents");
-                const documents = await res.json();
-
-                const allDocsTableBody = document.querySelector("#allDocumentTable tbody");
-                const assignedTableBody = document.querySelector("#assignedToYouDocumentTable tbody");
-
-                if (!allDocsTableBody || !assignedTableBody) return;
-
-                allDocsTableBody.innerHTML = "";
-                assignedTableBody.innerHTML = "";
-
-                documents.forEach(doc => {
-                    const involvedOffices = Array.isArray(doc.involved_office) ? doc.involved_office :
-                    [];
-                    const activities = Array.isArray(doc.activities) ? doc.activities : [];
-
-                    // Determine All Documents visibility
-                    const canSeeAllDocs = !userOfficeName || userOfficeName === "ODDG-PP" ||
-                        involvedOffices.includes(userOfficeName);
-                    if (canSeeAllDocs) appendDocumentRow(allDocsTableBody, doc);
-
-                    // Determine Assigned To You visibility
-                    const routeActivities = activities.filter(a => a.action?.toLowerCase().includes(
-                        "route"));
-                    const lastRouteActivity = routeActivities.length ? routeActivities[routeActivities
-                        .length - 1] : null;
-                    let showAssigned = false;
-
-                    if (!lastRouteActivity) {
-                        if (userApprovalType === "routing" && (!userOfficeName || doc
-                                .destination_office === userOfficeName)) {
-                            showAssigned = true;
-                        }
-                    } else if (lastRouteActivity.routed_to === userId) {
-                        showAssigned = true;
-                    }
-
-                    if (showAssigned) appendDocumentRow(assignedTableBody, doc);
-                });
-            } catch (error) {
-                console.error("Error fetching documents:", error);
-            }
-        }
-
-        // ----------------------------
-        // Event Listeners
-        // ----------------------------
-        function initEventListeners() {
-            initPDFDropzone({
-                dropzoneId: "dropzone",
-                fileInputId: "fileInput",
-                fileInfoId: "fileInfo",
-                clearBtnId: "clearSelectionBtn",
-            });
-            initroute();
-
-            fillOfficeDropdown();
-
-            const submitBtn = document.querySelector("#modalNewDocument button.bg-blue-600");
-            const fileInput = document.getElementById("fileInput");
-            // Open New Document Modal
-            document.getElementById("btnNewDocument")?.addEventListener("click", () => {
-                initModal({
-                    modalId: "modalNewDocument"
-                });
-            });
-            submitBtn?.addEventListener("click", async () => {
-                const form = document.querySelector("#modalNewDocument");
-                const invalid = form.querySelector(":invalid");
-
-                if (invalid) {
-                    invalid.reportValidity();
-                    return;
-                }
-
-                if (!fileInput.files[0]) {
-                    alert("Please upload a PDF file.");
-                    return;
-                }
-
-                const formData = new FormData();
-                formData.append("document_code", document.getElementById("document_code").value.trim());
-                formData.append("date_received", new Date().toISOString().split("T")[0]);
-                formData.append("particular", document.getElementById("subject").value.trim());
-                formData.append("office_origin", document.getElementById("originOffice").value);
-                formData.append("user_id", window.authUser.id);
-                formData.append("document_form", "PDF");
-                formData.append("document_type", document.getElementById("documentType").value);
-                formData.append("due_date", document.getElementById("due_date").value);
-                formData.append("document_date", document.getElementById("document_date").value);
-                formData.append("signatory", document.getElementById("signatory").value.trim());
-                formData.append("destination_office", document.getElementById("destinationOffice")
-                    .value);
-                formData.append("remarks", document.getElementById("remarks").value.trim());
-                formData.append("file", fileInput.files[0]);
-
-                try {
-                    submitBtn.disabled = true;
-                    submitBtn.textContent = "Submitting...";
-
-                    const response = await fetch("/api/documents", {
-                        method: "POST",
-                        body: formData
-                    });
-
-                    const result = await response.json();
-
-                    if (!response.ok) {
-                        alert("Server validation failed:\n" + JSON.stringify(result, null, 2));
-                        return;
-                    }
-
-                    // Hide New Document modal
-                    document.getElementById("modalNewDocument").classList.add("hidden");
-
-                    const modal = document.getElementById("modalNewDocument");
-
-                    if (modal) {
-                        modal.querySelectorAll("input, select, textarea").forEach((el) => {
-                            switch (el.type) {
-                                case "checkbox":
-                                case "radio":
-                                    el.checked = false;
-                                    break;
-                                case "file":
-                                    el.value = "";
-                                    break;
-                                default:
-                                    el.value = "";
-                            }
-                        });
-
-                        // Optionally reset any custom display elements like file info
-                        const fileInfo = modal.querySelector("#fileInfo");
-                        const clearBtn = modal.querySelector("#clearSelectionBtn");
-                        if (fileInfo) fileInfo.textContent = "";
-                        if (clearBtn) clearBtn.classList.add("hidden");
-                    }
-
-                    // Populate and show Control Number modal
-                    if (result.docControlNumber) {
-                        const controlModal = document.getElementById("controlNumberModal");
-                        const controlText = document.getElementById("controlNumberText");
-                        controlText.textContent = Array.isArray(result.docControlNumber) ?
-                            result.docControlNumber.join(", ") :
-                            result.docControlNumber;
-
-                        // Trigger your modal-open class to open it
-                        controlModal.classList.add("modal-open");
-                    }
-
-                    getDocs();
-
-                } catch (err) {
-                    console.error(err);
-                    alert("Unexpected error.");
-                } finally {
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = "Submit";
-                }
-            });
-
-
-            // PDF Preview Modal
-            document.querySelectorAll('.fileInfoButton').forEach(btn =>
-                btn.addEventListener("click", () => initModal({
-                    modalId: "pdfPreviewModal"
-                }))
-            );
-
-            // Routing Modal
-            document.querySelectorAll('.routeBtn').forEach(btn =>
-                btn.addEventListener("click", () => initModal({
-                    modalId: "routingModal"
-                }))
-            );
-
-            // Office change logic
-            const officeSelect = document.getElementById("routeOfficeSelect");
-            const userSelect = document.getElementById("userSelect");
-            const approvalSelect = document.getElementById("approvalSelect");
-            const statusSelect = document.getElementById("statusSelect");
-            const internalSection = document.getElementById("internalSection");
-            const externalSection = document.getElementById("externalSection");
-            const pdfUploadSection = document.getElementById("pdfUploadSection");
-            const currentOffice = window.authUser.office?.office_name || null;
-
-            officeSelect?.addEventListener("change", e => {
-                const selected = e.target.value;
-
-                internalSection?.classList.toggle("hidden", selected !== currentOffice);
-                externalSection?.classList.toggle("hidden", selected === currentOffice || !selected);
-
-                if (selected === currentOffice) {
-                    fetch("/api/users")
-                        .then(res => res.json())
-                        .then(users => {
-                            const filtered = users.filter(u => u.office?.office_name === currentOffice);
-                            userSelect.innerHTML = `<option value="">Select User</option>` +
-                                filtered.map(u => `<option value="${u.id}">${u.name}</option>`).join(
-                                    "");
-                            approvalSelect.innerHTML =
-                                `<option value="">Select Approval Type</option><option value="pre-approval">Pre-approval</option><option value="final-approval">final-approval</option>`;
-                        });
-                }
-            });
-
-            statusSelect?.addEventListener("change", e => {
-                pdfUploadSection?.classList.toggle("hidden", e.target.value !== "approved");
-            });
-        }
-
-        // ----------------------------
-        // Initialization
-        // ----------------------------
-        getDocs();
-        initEventListeners();
-
-
+        initdocumentcontroller();
     })();
 </script>

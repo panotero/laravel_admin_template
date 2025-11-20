@@ -27,7 +27,7 @@
 </div>
 
 <!-- Modal -->
-<div id="userModal" class="fixed inset-0 bg-black/40 hidden flex items-center justify-center z-50">
+<div id="userModal" class="fixed inset-0 bg-black/40 hidden flex items-center justify-center z-50 modal">
     <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-xl relative transition-all">
         <h2 id="modalTitle" class="text-xl font-semibold mb-4">Add New User</h2>
 

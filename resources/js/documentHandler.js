@@ -207,6 +207,379 @@ function initZoomFunction() {
   });
 }
 
+function initdocumentcontroller() {
+  // ----------------------------
+  // Helper Functions
+  // ----------------------------
+
+  // Calculate duration between two dates
+  function calculateDuration(startDate, endDate) {
+    if (!startDate || !endDate) return "-";
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    if (isNaN(start) || isNaN(end)) return "-";
+    const diffTime = Math.abs(end - start);
+    return `${Math.ceil(diffTime / (1000 * 60 * 60 * 24))} days`;
+  }
+
+  // Append a single document row to a table
+  function appendDocumentRow(tableBody, item, source = null) {
+    if (!tableBody || !item) return;
+
+    const tr = document.createElement("tr");
+    tr.classList.add("border-t", "hover:bg-gray-50", "cursor-pointer");
+    tr.dataset.documentId = item.document_id;
+    tr.dataset.documentControlNumber = item.document_control_number;
+    tr.dataset.userId = item.user_id || "";
+    tr.dataset.status = item.status;
+
+    tr.innerHTML = `
+            <td class="px-4 py-2">${item.document_code}</td>
+            <td class="px-4 py-2">${item.documentControlNumber}</td>
+            <td class="px-4 py-2">
+                <select class="border rounded px-2 py-1 text-xs labeldropdown">
+                    <option ${
+                      item.document_type === "General" ? "selected" : ""
+                    }>General</option>
+                    <option ${
+                      item.document_type === "Confidential" ? "selected" : ""
+                    }>Confidential</option>
+                </select>
+            </td>
+            <td class="px-4 py-2">${item.particular}</td>
+            <td class="px-4 py-2">${item.office_origin}</td>
+            <td class="px-4 py-2">${item.destination_office}</td>
+            <td class="px-4 py-2">${item.date_forwarded || "-"}</td>
+            <td class="px-4 py-2">${calculateDuration(
+              item.date_of_document,
+              item.date_forwarded
+            )}</td>
+            <td class="px-4 py-2">${
+              item.created_at ? item.created_at.split("T")[0] : "-"
+            }</td>
+            <td class="px-4 py-2">${item.confidentiality || "-"}</td>
+            <td class="px-4 py-2">${item.status || "-"}</td>
+        `;
+
+    tr.classList.add("modal-open");
+    tr.dataset.source = source; // NEW: store where this row came from
+
+    tr.addEventListener("click", (e) => {
+      const routeBtn = document.getElementById("routeDocumentBtn");
+      if (e.target.classList.contains("labeldropdown")) return;
+
+      initModal({
+        modalId: "DocumentModal",
+      });
+      populateDocumentModal(tr.dataset.documentId);
+
+      if (source === "all") {
+        routeBtn.classList.add("hidden");
+      } else {
+        routeBtn.classList.remove("hidden");
+      }
+      console.log("row clicked");
+      logActivity(
+        "view",
+        tr.dataset.documentId,
+        tr.dataset.documentControlNumber
+      );
+    });
+
+    tableBody.appendChild(tr);
+  }
+
+  // ----------------------------
+  // Fetch and Render Documents
+  // ----------------------------
+  window.getDocs = async function getDocs() {
+    if (!window.authUser) {
+      console.error("Auth user not found.");
+      return;
+    }
+
+    const userId = window.authUser.id;
+    const userOfficeName = window.authUser.office?.office_name || null;
+    const userApprovalType = window.authUser.user_config?.approval_type || null;
+
+    try {
+      const res = await fetch("/api/documents");
+      const documents = await res.json();
+
+      const allDocsTableBody = document.querySelector(
+        "#allDocumentTable tbody"
+      );
+      const assignedTableBody = document.querySelector(
+        "#assignedToYouDocumentTable tbody"
+      );
+
+      if (!allDocsTableBody || !assignedTableBody) return;
+
+      allDocsTableBody.innerHTML = "";
+      assignedTableBody.innerHTML = "";
+
+      documents.forEach((doc) => {
+        const involvedOffices = Array.isArray(doc.involved_office)
+          ? doc.involved_office
+          : [];
+        const activities = Array.isArray(doc.activities) ? doc.activities : [];
+
+        // Determine All Documents visibility
+        const canSeeAllDocs =
+          !userOfficeName ||
+          userOfficeName === "ODDG-PP" ||
+          involvedOffices.includes(userOfficeName);
+        if (canSeeAllDocs) appendDocumentRow(allDocsTableBody, doc, "all");
+
+        // Determine Assigned To You visibility (NEW LOGIC)
+        let showAssigned = false;
+        const recipientId = doc.recipient_id;
+
+        // CASE 1 — Document has specific recipient
+        if (recipientId !== null) {
+          if (recipientId == userId) {
+            showAssigned = true;
+          }
+        }
+
+        // CASE 2 — No specific recipient
+        else {
+          const isRoutingUser = userApprovalType === "routing";
+          const sameOffice = userOfficeName === doc.destination_office;
+
+          if (isRoutingUser && sameOffice) {
+            showAssigned = true;
+          }
+        }
+
+        if (showAssigned) appendDocumentRow(assignedTableBody, doc, "assigned");
+      });
+    } catch (error) {
+      console.error("Error fetching documents:", error);
+    }
+  };
+
+  // ----------------------------
+  // Event Listeners
+  // ----------------------------
+  function initEventListeners() {
+    initPDFDropzone({
+      dropzoneId: "dropzone",
+      fileInputId: "fileInput",
+      fileInfoId: "fileInfo",
+      clearBtnId: "clearSelectionBtn",
+    });
+    initroute();
+
+    fillOfficeDropdown();
+
+    const submitBtn = document.querySelector(
+      "#modalNewDocument button.bg-blue-600"
+    );
+    const fileInput = document.getElementById("fileInput");
+    // Open New Document Modal
+    document.getElementById("btnNewDocument")?.addEventListener("click", () => {
+      initModal({
+        modalId: "modalNewDocument",
+      });
+    });
+    submitBtn?.addEventListener("click", async () => {
+      const form = document.querySelector("#modalNewDocument");
+      const invalid = form.querySelector(":invalid");
+
+      if (invalid) {
+        invalid.reportValidity();
+        return;
+      }
+
+      if (!fileInput.files[0]) {
+        alert("Please upload a PDF file.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append(
+        "document_code",
+        document.getElementById("document_code").value.trim()
+      );
+      formData.append("date_received", new Date().toISOString().split("T")[0]);
+      formData.append(
+        "particular",
+        document.getElementById("subject").value.trim()
+      );
+      formData.append(
+        "office_origin",
+        document.getElementById("originOffice").value
+      );
+      formData.append("user_id", window.authUser.id);
+      formData.append("document_form", "PDF");
+      formData.append(
+        "document_type",
+        document.getElementById("documentType").value
+      );
+      formData.append("due_date", document.getElementById("due_date").value);
+      formData.append(
+        "document_date",
+        document.getElementById("document_date").value
+      );
+      formData.append(
+        "signatory",
+        document.getElementById("signatory").value.trim()
+      );
+      formData.append(
+        "destination_office",
+        document.getElementById("destinationOffice").value
+      );
+      formData.append(
+        "remarks",
+        document.getElementById("remarks").value.trim()
+      );
+      formData.append("file", fileInput.files[0]);
+
+      try {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Submitting...";
+
+        const response = await fetch("/api/documents", {
+          method: "POST",
+          body: formData,
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          alert(
+            "Server validation failed:\n" + JSON.stringify(result, null, 2)
+          );
+          return;
+        }
+        console.log(result);
+
+        // Hide New Document modal
+        document.getElementById("modalNewDocument").classList.add("hidden");
+
+        const modal = document.getElementById("modalNewDocument");
+
+        if (modal) {
+          modal.querySelectorAll("input, select, textarea").forEach((el) => {
+            switch (el.type) {
+              case "checkbox":
+              case "radio":
+                el.checked = false;
+                break;
+              case "file":
+                el.value = "";
+                break;
+              default:
+                el.value = "";
+            }
+          });
+
+          // Optionally reset any custom display elements like file info
+          const fileInfo = modal.querySelector("#fileInfo");
+          const clearBtn = modal.querySelector("#clearSelectionBtn");
+          if (fileInfo) fileInfo.textContent = "";
+          if (clearBtn) clearBtn.classList.add("hidden");
+        }
+
+        // Populate and show Control Number modal
+        if (result.docControlNumber) {
+          const controlModal = document.getElementById("controlNumberModal");
+          const controlText = document.getElementById("controlNumberText");
+          controlText.textContent = Array.isArray(result.docControlNumber)
+            ? result.docControlNumber.join(", ")
+            : result.docControlNumber;
+
+          // Trigger your modal-open class to open it
+          controlModal.classList.add("modal-open");
+        }
+
+        getDocs();
+      } catch (err) {
+        console.error(err);
+        alert("Unexpected error.");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit";
+      }
+    });
+
+    // PDF Preview Modal
+    document.querySelectorAll(".fileInfoButton").forEach((btn) =>
+      btn.addEventListener("click", () =>
+        initModal({
+          modalId: "pdfPreviewModal",
+        })
+      )
+    );
+
+    // Routing Modal
+    document.querySelectorAll(".routeBtn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        initPDFDropzone({
+          dropzoneId: "routedropzone",
+          fileInputId: "routefileInput",
+          fileInfoId: "routefileInfo",
+          clearBtnId: "clearrouteSelectionBtn",
+        });
+        initModal({
+          modalId: "routingModal",
+        });
+      });
+    });
+
+    // Office change logic
+    const officeSelect = document.getElementById("routeOfficeSelect");
+    const userSelect = document.getElementById("userSelect");
+    const approvalSelect = document.getElementById("approvalSelect");
+    const statusSelect = document.getElementById("statusSelect");
+    const internalSection = document.getElementById("internalSection");
+    const externalSection = document.getElementById("externalSection");
+    const pdfUploadSection = document.getElementById("pdfUploadSection");
+    const currentOffice = window.authUser.office?.office_name || null;
+
+    officeSelect?.addEventListener("change", (e) => {
+      const selected = e.target.value;
+
+      internalSection?.classList.toggle("hidden", selected !== currentOffice);
+      externalSection?.classList.toggle(
+        "hidden",
+        selected === currentOffice || !selected
+      );
+
+      if (selected === currentOffice) {
+        fetch("/api/users")
+          .then((res) => res.json())
+          .then((users) => {
+            const filtered = users.filter(
+              (u) => u.office?.office_name === currentOffice
+            );
+            userSelect.innerHTML =
+              `<option value="">Select User</option>` +
+              filtered
+                .map((u) => `<option value="${u.id}">${u.name}</option>`)
+                .join("");
+            approvalSelect.innerHTML = `<option value="">Select Approval Type</option><option value="pre-approval">Pre-approval</option><option value="final-approval">final-approval</option>`;
+          });
+      }
+    });
+
+    statusSelect?.addEventListener("change", (e) => {
+      pdfUploadSection?.classList.toggle(
+        "hidden",
+        e.target.value !== "approved"
+      );
+    });
+  }
+
+  // ----------------------------
+  // Initialization
+  // ----------------------------
+  getDocs();
+  initEventListeners();
+}
+
 // Expose to global
+window.initdocumentcontroller = initdocumentcontroller;
 window.populateDocumentModal = populateDocumentModal;
 window.initZoomFunction = initZoomFunction;

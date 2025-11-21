@@ -40,7 +40,7 @@ function loadSlidesFromArray(slides = []) {
  * --------------------------------------------- */
 let glideInstance = null;
 
-function initGlide() {
+window.initGlide = function initGlide() {
   if (glideInstance) glideInstance.destroy();
 
   glideInstance = new Glide("#galleryGlide", {
@@ -60,7 +60,7 @@ function initGlide() {
   document
     .querySelector(".slide-next")
     .addEventListener("click", () => glideInstance.go(">"));
-}
+};
 
 /* ---------------------------------------------
  * EXTRACT IMAGES FROM PDF AND RETURN SLIDE HTML

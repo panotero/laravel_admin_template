@@ -32,12 +32,12 @@ function initNotificationStream() {
     }));
     // 🔥 Only call getDocs() if unread count changed
     if (unreadCount !== lastUnreadCount) {
-      console.log(
-        "Notification count changed:",
-        lastUnreadCount,
-        "→",
-        unreadCount
-      );
+      //   console.log(
+      //     "Notification count changed:",
+      //     lastUnreadCount,
+      //     "→",
+      //     unreadCount
+      //   );
 
       if (typeof window.getDocs === "function") {
         window.getDocs();
@@ -54,14 +54,14 @@ function initNotificationStream() {
   };
 
   evtSource.onerror = (err) => {
-    console.error("SSE error:", err);
+    // console.error("SSE error:", err);
   };
   // Mark all as read when notification icon is clicked
   notifIcon.addEventListener("click", async () => {
     if (allNotificationIds.length === 0) return;
 
     try {
-      console.log("icon button clicked");
+      //   console.log("icon button clicked");
       const res = await fetch("/api/notifications/mark-read", {
         method: "POST",
         headers: {
@@ -91,6 +91,7 @@ function populateNotifications(notificationsArray) {
   if (!container) return;
 
   container.innerHTML = ""; // clear existing
+  const additionalMessage = "";
 
   notificationsArray.forEach((notification) => {
     const li = document.createElement("div");
@@ -103,11 +104,6 @@ function populateNotifications(notificationsArray) {
     li.innerHTML = `
   <div class="flex items-start space-x-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
       <!-- Icon/avatar -->
-      <div class="flex-shrink-0">
-          <span class="inline-block w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-semibold">
-              ${notification.message.charAt(0).toUpperCase()}
-          </span>
-      </div>
 
       <!-- Notification content -->
       <div class="flex-1 min-w-0">
@@ -134,9 +130,14 @@ function populateNotifications(notificationsArray) {
 
 function formatNotificationMessage(msg) {
   msg = msg.toLowerCase();
+  //   console.log(msg);
 
   if (msg.includes("uploaded")) return "Uploaded a file";
-  if (msg.includes("routed")) return "Routed a file to you";
+  if (msg.includes("approval")) {
+    return "Routed a document for your approval";
+  } else if (msg.includes("routed")) {
+    return "Routed a document to you";
+  }
   if (msg.includes("remanded")) return "Remanded a file";
   if (msg.includes("signed")) return "Signed a file";
   if (msg.includes("approved")) return "Approved the file";

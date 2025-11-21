@@ -18,6 +18,8 @@ class Notification extends Model
         'routed_to',
         'document_id',
         'user_id',
+
+        'from_user_id',
         'message',
         'is_read',
     ];

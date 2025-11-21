@@ -17,6 +17,7 @@ use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\DocumentTypeController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RoutingController;
+use App\Http\Controllers\ApprovalsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -64,6 +65,7 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/notifications/stream', [NotificationController::class, 'stream']);
     Route::post('/notifications/mark-read', [NotificationController::class, 'markRead']);
     Route::post('/documents/route', [RoutingController::class, 'routeDocument']);
+    Route::get('/approvals', [ApprovalsController::class, 'getMyApprovals']);
 });
 Route::post('/activities', [ActivityController::class, 'store'])
     ->name('api.activities.store');

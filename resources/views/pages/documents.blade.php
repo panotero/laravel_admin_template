@@ -294,6 +294,48 @@
                         <div id="activityLog" class="space-y-2 max-h-48 lg:h-48 overflow-y-auto">
                         </div>
                     </div>
+                    <!-- Activity History -->
+                    <div class="pt-4 border-t border-gray-200 dark:border-gray-700 relative">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-medium text-gray-800 dark:text-gray-100 mb-3">
+                                Activity History
+                            </h3>
+
+                            <!-- Eye Icon (Toggle Full Logs) -->
+                            <button id="toggleFullLogBtn"
+                                class="text-gray-600 dark:text-gray-300 hover:text-blue-600">
+                                <!-- Lucide Eye Icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                        d="M1.5 12s4-7.5 10.5-7.5S22.5 12 22.5 12s-4 7.5-10.5 7.5S1.5 12 1.5 12z" />
+                                    <circle cx="12" cy="12" r="3" stroke="currentColor"
+                                        stroke-width="1.5" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        {{-- <!-- Important Activities Container -->
+                        <div id="activityLog" class="space-y-2 max-h-48 lg:h-48 overflow-y-auto">
+                            <!-- Filled by JS -->
+                        </div> --}}
+
+                        <!-- Full Logs Container (Hidden by Default) -->
+                        <!-- Floating Full Logs Panel -->
+                        <!-- Floating Full Logs Panel -->
+                        <div id="fullActivityLogContainer"
+                            class="hidden absolute bottom-full left-0 w-full border border-gray-300 dark:border-gray-700
+               rounded-lg p-3 bg-white dark:bg-gray-800 shadow-xl z-50">
+
+                            <h4 class="text-md font-medium mb-2 text-gray-700 dark:text-gray-200">
+                                Full Activity Log
+                            </h4>
+
+                            <div id="fullActivityLog" class="space-y-2 max-h-60 overflow-y-auto">
+                                <!-- Full logs inserted here -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -399,13 +441,13 @@
             <!-- Internal Routing Section -->
             <div id="internalSection" class="hidden space-y-2">
                 <label class="text-gray-700 dark:text-gray-300 font-medium text-sm">Select User</label>
-                <select required id="userSelect"
+                <select required id="routeUserSelect"
                     class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
                     <option value="">Loading users...</option>
                 </select>
 
                 <label class="text-gray-700 dark:text-gray-300 font-medium text-sm">Select Approval Type</label>
-                <select required id="approvalSelect"
+                <select required id="routeApprovalSelect"
                     class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
                     <option value="">Select Approval Type</option>
                     <option value="pre-approval">Pre-approval</option>
@@ -417,7 +459,7 @@
             <div id="externalSection" class="hidden space-y-4">
                 <div class="space-y-2">
                     <label class="text-gray-700 dark:text-gray-300 font-medium text-sm">Select Status</label>
-                    <select id="statusSelect"
+                    <select id="routeStatusSelect"
                         class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
                         <option value="">Select Status</option>
                         <option value="approved">Approved</option>
@@ -439,7 +481,7 @@
                             Drag & drop a PDF file here or
                             <span class="text-blue-600 dark:text-blue-400 underline">click to browse</span>
                         </p>
-                        <input type="file" accept="application/pdf" class="hidden" id="routefileInput" />
+                        <input type="file" accept="application/pdf" class="" id="routefileInput" />
                     </div>
                     <div id="routefileInfo" class="mt-2 text-sm text-gray-600 dark:text-gray-300"></div>
                     <button id="clearrouteSelectionBtn"
@@ -450,7 +492,7 @@
             <!-- Remarks -->
             <div class="space-y-2">
                 <label class="text-gray-700 dark:text-gray-300 font-medium text-sm">Remarks</label>
-                <textarea id="routeremarks"
+                <textarea id="routeRemarks"
                     class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
                     rows="3" placeholder="Enter remarks..."></textarea>
             </div>
@@ -473,5 +515,9 @@
 <script>
     (function() {
         initdocumentcontroller();
+        document.getElementById("toggleFullLogBtn").addEventListener("click", () => {
+            const panel = document.getElementById("fullActivityLogContainer");
+            panel.classList.toggle("hidden");
+        });
     })();
 </script>

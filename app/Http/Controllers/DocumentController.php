@@ -159,13 +159,14 @@ class DocumentController extends Controller
             })
             ->get();
         // dd($admin_users);
-        foreach ($admin_users as $user) {
+        foreach ($admin_users as $adminuser) {
             DB::table('notifications')->insert([
                 'document_id'        => $document->document_id,
                 'office_origin'      => $request->office_origin,
                 'destination_office' => $request->destination_office,
                 'routed_to'          => $request->routed_to,
-                'user_id'            => $user->id,
+                'from_user_id' => $request->user_id,
+                'user_id'            => $adminuser->id,
                 'message'            => "New document uploaded: {$document->document_code}",
                 'is_read'            => 0,
                 'created_at'         => now(),

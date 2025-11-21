@@ -48,7 +48,7 @@ async function populateDocumentModal(documentId) {
     // ------------------------
     // Populate Activity Log
     // ------------------------
-    populateActivityLog(data.activities || []);
+    populateActivityLog(data || []);
   } catch (error) {
     console.error("Failed to populate document modal:", error);
   }
@@ -149,24 +149,108 @@ async function openPdfModal(filePath) {
 // ------------------------
 // Populate Activity Log
 // ------------------------
-function populateActivityLog(activities) {
-  const activityLog = document.getElementById("activityLog");
-  activityLog.innerHTML = "";
+function populateActivityLog(data) {
+  const activityLog = document.getElementById("activityLog"); // important logs only
+  const fullActivityLog = document.getElementById("fullActivityLog"); // full log history
 
-  if (!activities.length) {
-    activityLog.innerHTML = `<div class="text-sm text-gray-500 dark:text-gray-400">No activity yet.</div>`;
+  activityLog.innerHTML = "";
+  fullActivityLog.innerHTML = "";
+
+  if (!data.activities.length) {
+    activityLog.innerHTML = `
+            <div class="text-sm text-gray-500 dark:text-gray-400">
+                No activity yet.
+            </div>
+        `;
+
+    fullActivityLog.innerHTML = `
+            <div class="text-sm text-gray-500 dark:text-gray-400">
+                No logs available.
+            </div>
+        `;
     return;
   }
 
-  activities.forEach((act) => {
-    const div = document.createElement("div");
-    div.classList.add("text-sm", "text-gray-700", "dark:text-gray-300");
+  data.activities.forEach((act) => {
+    const importantDiv = document.createElement("div");
+    const fullDiv = document.createElement("div");
 
-    const userName = act.user_id ? `User ${act.user_id}` : "Unknown";
+    importantDiv.classList.add(
+      "text-sm",
+      "text-gray-700",
+      "dark:text-gray-300"
+    );
+    fullDiv.classList.add("text-sm", "text-gray-600", "dark:text-gray-300");
+
     const timeAgo = new Date(act.created_at).toLocaleString();
+    const fromUser = act.from_user_id ? `User ${act.from_user_id}` : "Unknown";
 
-    div.innerHTML = `<p><span class="font-semibold">${userName}</span> ${act.action}ed the document <span class="text-gray-500 text-xs">${timeAgo}</span></p>`;
-    activityLog.appendChild(div);
+    let displayText = "";
+
+    // ----------------------------------------
+    // ROUTE ACTION
+    // ----------------------------------------
+    if (act.action === "route") {
+      let routeTarget = "";
+
+      if (act.to_external == 1) {
+        routeTarget = data.destination_office
+          ? data.destination_office
+          : "Unknown Office";
+      } else {
+        routeTarget = act.routed_to
+          ? `User ${act.routed_to}`
+          : "Unknown Recipient";
+      }
+
+      displayText = `
+                <p>
+                    <span class="font-semibold">${fromUser}</span>
+                    routed the document to
+                    <span class="font-semibold">${routeTarget}</span>
+                    <span class="text-gray-500 text-xs">${timeAgo}</span>
+                </p>
+            `;
+
+      // ROUTE is considered an IMPORTANT activity → show in main list
+      importantDiv.innerHTML = displayText;
+      activityLog.appendChild(importantDiv);
+    }
+
+    // ----------------------------------------
+    // OTHER ACTIONS
+    // ----------------------------------------
+    else {
+      const userName = act.user_id ? `User ${act.user_id}` : "Unknown";
+
+      displayText = `
+                <p>
+                    <span class="font-semibold">${userName}</span>
+                    ${act.action}ed the document
+                    <span class="text-gray-500 text-xs">${timeAgo}</span>
+                </p>
+            `;
+
+      // Only APPROVED / RECEIVED / REJECTED etc. should appear in important logs
+      const importantActions = [
+        "approve",
+        "reject",
+        "receive",
+        "returned",
+        "review",
+      ];
+
+      if (importantActions.includes(act.action)) {
+        importantDiv.innerHTML = displayText;
+        activityLog.appendChild(importantDiv);
+      }
+    }
+
+    // ----------------------------------------
+    // FULL LOG ALWAYS GETS EVERY ENTRY
+    // ----------------------------------------
+    fullDiv.innerHTML = displayText;
+    fullActivityLog.appendChild(fullDiv);
   });
 }
 
@@ -232,10 +316,10 @@ function initdocumentcontroller() {
     tr.dataset.documentControlNumber = item.document_control_number;
     tr.dataset.userId = item.user_id || "";
     tr.dataset.status = item.status;
-
+    // console.log(item.document_control_number);
     tr.innerHTML = `
             <td class="px-4 py-2">${item.document_code}</td>
-            <td class="px-4 py-2">${item.documentControlNumber}</td>
+            <td class="px-4 py-2">${item.document_control_number}</td>
             <td class="px-4 py-2">
                 <select class="border rounded px-2 py-1 text-xs labeldropdown">
                     <option ${
@@ -530,9 +614,9 @@ function initdocumentcontroller() {
 
     // Office change logic
     const officeSelect = document.getElementById("routeOfficeSelect");
-    const userSelect = document.getElementById("userSelect");
+    const userSelect = document.getElementById("routeUserSelect");
     const approvalSelect = document.getElementById("approvalSelect");
-    const statusSelect = document.getElementById("statusSelect");
+    const statusSelect = document.getElementById("routeStatusSelect");
     const internalSection = document.getElementById("internalSection");
     const externalSection = document.getElementById("externalSection");
     const pdfUploadSection = document.getElementById("pdfUploadSection");

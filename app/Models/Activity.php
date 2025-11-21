@@ -16,6 +16,8 @@ class Activity extends Model
         'final_approval',
         'document_control_number',
         'to_external',
+
+        'from_user_id',
         'user_id',
         'routed_to',
         'final_remarks',

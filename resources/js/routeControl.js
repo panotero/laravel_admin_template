@@ -6,27 +6,40 @@ function initroute() {
       const documentId = document.getElementById("docId").value; // hidden input
       const destinationOffice =
         document.getElementById("routeOfficeSelect").value;
-      const recipientUserId =
-        document.getElementById("userSelect").value || null;
-      const approvalType =
-        document.getElementById("approvalSelect").value || null;
-      const remarks = document.getElementById("remarks").value;
+      const recipientUserId = document.getElementById("routeUserSelect").value;
+      //   console.log(recipientUserId);
+      const approvalType = document.getElementById("routeApprovalSelect").value;
+      const routeStatusSelect =
+        document.getElementById("routeStatusSelect").value;
+      const remarks = document.getElementById("routeRemarks").value;
+      const routedPdfFile = document.getElementById("routefileInput");
+      if (routedPdfFile.files && routedPdfFile.files.length > 0) {
+        console.log("File is selected");
+      } else {
+        console.log("No file selected");
+      }
 
       try {
+        // Use FormData for text + file upload
+        const formData = new FormData();
+        formData.append("document_id", documentId);
+        formData.append("destination_office", destinationOffice);
+        formData.append("recipient_user_id", recipientUserId);
+        formData.append("approval_type", approvalType);
+        formData.append("status", routeStatusSelect);
+        formData.append("remarks", remarks);
+
+        if (routedPdfFile.files.length > 0) {
+          formData.append("pdf_file", routedPdfFile.files[0]);
+        }
+
         const res = await fetch("/api/documents/route", {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
             "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')
               .content,
           },
-          body: JSON.stringify({
-            document_id: documentId,
-            destination_office: destinationOffice,
-            recipient_user_id: recipientUserId,
-            approval_type: approvalType,
-            remarks: remarks,
-          }),
+          body: formData, // DO NOT USE JSON HERE
         });
 
         const data = await res.json();

@@ -15,21 +15,19 @@ class MenusController extends Controller
     {
         $user = Auth::user();
 
-        // Log::info('Authenticated user:', [
-        //     'id' => $user->id,
-        //     'email' => $user->email,
-        //     'role' => $user->role, // should show "superadmin"
-        // ]);
-
         // Fetch menus ordered by parent and order
         $menus = NavMenu::orderBy('parent_menu', 'asc')
             ->orderBy('menu_order', 'asc')
             ->get();
+        // dd($menus);
 
-        // Filter by allowed_roles
+        // Filter by allowed_roles AND allowed_offices
         $filtered = $menus->filter(function ($menu) use ($user) {
             $allowedRoles = json_decode($menu->allowed_roles, true) ?? [];
-            return in_array($user->role, $allowedRoles);
+            $allowedOffices = json_decode($menu->allowed_office, true) ?? [];
+
+            return in_array($user->role, $allowedRoles) &&
+                in_array($user->office->office_name, $allowedOffices);
         })->values();
 
         // Build nested parent-child structure
@@ -42,17 +40,14 @@ class MenusController extends Controller
                 'link' => $parent->link,
                 'menu_order' => $parent->menu_order,
                 'allowed_roles' => $parent->allowed_roles,
+                'allowed_offices' => $parent->allowed_offices,
                 'children' => $children
             ];
         })->values();
 
-        // Log::info('Filtered and grouped menus:', [
-        //     'total' => $grouped->count(),
-        //     'menus' => $grouped
-        // ]);
-
         return response()->json($grouped);
     }
+
 
     public function menulist()
     {
@@ -73,6 +68,7 @@ class MenusController extends Controller
                 'icon' => 'nullable|string',
                 'link' => 'nullable|string',
                 'allowed_roles' => 'nullable',
+                'allowed_offices' => 'nullable',
                 'parent_menu' => 'nullable|integer',
                 'menu_order' => 'nullable|integer',
             ]);
@@ -116,7 +112,6 @@ class MenusController extends Controller
         }
     }
 
-
     public function update(Request $request, $id)
     {
         Log::info('UPDATE request received', [
@@ -132,16 +127,33 @@ class MenusController extends Controller
                 'icon' => 'nullable|string',
                 'link' => 'nullable|string',
                 'allowed_roles' => 'nullable',
+                'allowed_office' => 'nullable|string',
                 'parent_menu' => 'nullable|integer',
             ]);
 
+            // Update parent menu first
             $menu->update($data);
 
             Log::info('UPDATE success', ['updated_menu' => $menu]);
 
+            // Update all child menus to inherit allowed_office from parent
+            $childMenus = NavMenu::where('parent_menu', $id)->get();
+
+            foreach ($childMenus as $child) {
+                $child->update([
+                    'allowed_office' => $menu->allowed_office,
+                    'allowed_roles' => $menu->allowed_roles
+                ]);
+            }
+
+            Log::info('Child menus updated', [
+                'parent_id' => $id,
+                'child_count' => $childMenus->count()
+            ]);
+
             return response()->json([
                 'success' => true,
-                'message' => 'Menu updated successfully',
+                'message' => 'Menu updated successfully (including child menus)',
                 'data' => $menu
             ]);
         } catch (\Exception $e) {
@@ -158,6 +170,7 @@ class MenusController extends Controller
             ], 500);
         }
     }
+
 
     public function destroy($id)
     {

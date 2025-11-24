@@ -1,30 +1,19 @@
-<div class="min-h-screen bg-gray-50 text-gray-800">
+<div class="max-h-[75vh] overflow-y-auto bg-gray-50 text-gray-800 p-5">
 
 
     <!-- Content -->
-    <div class="container mx-auto py-5">
+    <div class="h-full container mx-auto py-5 ">
         <!-- Table 1: Assigned to You -->
-        <div><button id="btnNewDocument"
-                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition modal-open">
-                + New Document
-            </button>
-            <h2 class="text-lg font-semibold text-gray-700 mb-3">
-                Assigned to You
-            </h2>
+        <div class=" mb-5">
+            <div class="w-full flex justify-between mb-5">
 
-            <!-- Filters -->
-            <div class="flex flex-wrap gap-3 mb-4">
-                <select class="rounded-full border-gray-300 text-sm px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option>Filter by Office</option>
-                </select>
-                <select class="rounded-full border-gray-300 text-sm px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option>Filter by Status</option>
-                </select>
-                <select class="rounded-full border-gray-300 text-sm px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option>Filter by File Type</option>
-                </select>
-                <input type="text" placeholder="Search..."
-                    class="rounded-full border-gray-300 px-4 py-2 text-sm w-64 focus:ring-blue-500 focus:border-blue-500" />
+                <h2 class="text-lg font-semibold text-gray-700">
+                    Assigned to You
+                </h2>
+                <button id="btnNewDocument"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition modal-open">
+                    + New Document
+                </button>
             </div>
 
             <!-- Table -->
@@ -52,28 +41,10 @@
         </div>
 
         <!-- Table 2: All Office Documents -->
-        <div>
-            <h2 class="text-lg font-semibold text-gray-700 mb-3">
+        <div class="h-full">
+            <h2 class="text-lg font-semibold text-gray-700">
                 All Documents
             </h2>
-
-            <!-- Filters -->
-            <div class="flex flex-wrap gap-3 mb-4">
-                <select
-                    class="rounded-full border-gray-300 text-sm px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option>Filter by Office</option>
-                </select>
-                <select
-                    class="rounded-full border-gray-300 text-sm px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option>Filter by Status</option>
-                </select>
-                <select
-                    class="rounded-full border-gray-300 text-sm px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option>Filter by File Type</option>
-                </select>
-                <input type="text" placeholder="Search..."
-                    class="rounded-full border-gray-300 px-4 py-2 text-sm w-64 focus:ring-blue-500 focus:border-blue-500" />
-            </div>
 
             <!-- Table -->
             <div class="overflow-x-auto bg-white rounded-xl shadow">
@@ -177,8 +148,7 @@
                     </div>
                     <div>
                         <label class="text-sm text-gray-600">Document Date</label>
-                        <input id="document_date" type="date"
-                            class="w-full border-gray-300 rounded-lg px-3 py-2" />
+                        <input id="document_date" type="date" class="w-full border-gray-300 rounded-lg px-3 py-2" />
                     </div>
                     <div>
                         <label class="text-sm text-gray-600">Due Date</label>

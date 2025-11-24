@@ -1,5 +1,5 @@
 <!-- User Config Table -->
-<div class="w-full h-screen bg-white dark:bg-gray-800 rounded-2xl shadow-md p-5">
+<div class="w-full h-auto bg-white dark:bg-gray-800 rounded-2xl shadow-md p-5">
     <div class="w-full flex justify-between p-5">
 
         <h2 class="text-xl font-semibold mb-4">User List</h2>
@@ -7,7 +7,7 @@
             + New User
         </button>
     </div>
-    <div class="overflow-x-auto">
+    <div class="overflow-y-auto max-h-[75vh]">
         <table class="min-w-full text-sm border-collapse" id="userTable">
             <thead class="bg-gray-100">
                 <tr class="bg-gray-100 dark:bg-gray-700 text-left">
@@ -21,9 +21,11 @@
             </thead>
             <tbody id="userTableBody"></tbody>
         </table>
+
         <!-- Mobile Card Container -->
-        <div id="userCardList" class="hidden md:hidden overflow-y-auto max-h-[400px] p-3 space-y-3"></div>s
+        <div id="userCardList" class="hidden md:hidden overflow-y-auto max-h-[400px] p-3 space-y-3"></div>
     </div>
+
 </div>
 
 <!-- Modal -->
@@ -87,7 +89,7 @@
         const apiUsers = "/api/users";
         const apiOffices = "/api/offices";
         const apiConfigs = "/api/userconfigs";
-        const patchsaveinfo = "/api/save_user";
+        const patchsaveinfo = "/api/users/save";
 
         // ==========================
         // DOM Elements
@@ -143,6 +145,7 @@
                 });
 
                 logTableContent();
+                initDataTables();
             } catch (error) {
                 console.error("Error loading users:", error);
             }

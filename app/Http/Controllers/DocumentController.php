@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use App\Models\Activity;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -68,7 +69,7 @@ class DocumentController extends Controller
         // GENERATE DOCUMENT CONTROL NUMBER
         // -------------------------------
         $today  = Carbon::now()->format('dmY');
-        $prefix = "0101{$today}-";
+        $prefix = "{$today}-";
 
         $lastDoc = DB::table('documents')
             ->where('document_control_number', 'like', $prefix . '%')
@@ -85,8 +86,14 @@ class DocumentController extends Controller
         $documentControlNumber = $prefix . $sequence;
 
         $involved_office = [];
+
+        // Always include origin
         $involved_office[] = $request->office_origin;
-        $involved_office[] = $request->destination_office;
+
+        // Only include destination if different from origin
+        if ($request->destination_office !== $request->office_origin) {
+            $involved_office[] = $request->destination_office;
+        }
         // -------------------------------
         // CREATE DOCUMENT RECORD
         // -------------------------------
@@ -173,6 +180,20 @@ class DocumentController extends Controller
                 'updated_at'         => now(),
             ]);
         }
+
+
+
+        $activityData = [
+            'action'                  => 'upload',
+            'document_id'             => $document->document_id,
+            'final_approval'          => 0,
+            'document_control_number' => $documentControlNumber,
+            'user_id'                 => $request->routed_to,
+            'from_user_id' => $request->user_id,
+            'routed_to'               => null,
+            'final_remarks'           => $validated['remarks'] ?? null,
+        ];
+        Activity::create($activityData);
 
         return response()->json([
             'message' => 'Document created successfully ' . $admin_users,

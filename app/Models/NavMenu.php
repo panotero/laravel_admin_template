@@ -13,6 +13,7 @@ class NavMenu extends Model
         'icon',
         'link',
         'allowed_roles',
+        'allowed_office',
         'parent_menu',
     ];
 }

@@ -1,7 +1,7 @@
 <div class="lg:m-5 p-5 rounded-lg bg-white">
     <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-semibold">Navigation Menus</h2>
-        <button id="addMenuBtn" onclick="add_menu()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+        <button id="addMenuBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
             + Add New Menu
         </button>
     </div>
@@ -11,7 +11,6 @@
         <thead class="bg-gray-200 text-black">
             <tr>
                 <th class="p-2 border">Title</th>
-                <th class="p-2 border">Icon</th>
                 <th class="p-2 border">Page</th>
                 <th class="p-2 border">Allowed Roles</th>
                 <th class="p-2 border">Parent</th>
@@ -58,6 +57,12 @@
                     <!-- Checkboxes will be injected here -->
                 </div>
             </div>
+            <div>
+                <label class="block font-medium">Allowed Office</label>
+                <div id="menuOfficeContainer" class="grid grid-cols-2 gap-2 text-black">
+                    <!-- Checkboxes will be injected here -->
+                </div>
+            </div>
 
             <div>
                 <label class="block font-medium">Parent Menu</label>
@@ -87,6 +92,7 @@
             icon: document.getElementById("menuIcon"),
             link: document.getElementById("menuLink"),
             rolesContainer: document.getElementById("menuRolesContainer"),
+            officeCheckBoxFiller: document.getElementById("menuOfficeContainer"),
             parent: document.getElementById("menuParent"),
         };
 
@@ -101,7 +107,7 @@
         function openModal(mode = "Add", menu = null) {
             modalTitle.textContent = mode === "Add" ? "Add New Menu" : "Modify Menu";
             saveBtn.textContent = mode === "Add" ? "Save" : "Modify";
-
+            console.log(mode);
             if (menu) {
                 fields.id.value = menu.id;
                 fields.title.value = menu.title || "";
@@ -113,6 +119,11 @@
                 document.querySelectorAll(".roleCheckbox").forEach(cb => {
                     cb.checked = allowedRoles.includes(cb.value);
                     cb.disabled = menu.parent_menu !== 0;
+                });
+                const allowedOffices = JSON.parse(menu.allowed_office || "[]");
+                document.querySelectorAll(".officeCheckbox").forEach(office => {
+                    office.checked = allowedOffices.includes(office.value);
+                    office.disabled = menu.parent_menu !== 0;
                 });
             } else {
                 fields.id.value = "";
@@ -170,6 +181,52 @@
                     .checked);
             });
         }
+
+        // --------------------- LOAD OFFICES ---------------------
+        async function loadOffices() {
+            const res = await fetch(`${window.APP_URL}/api/offices`, {
+                headers: {
+                    Accept: "application/json"
+                }
+            });
+
+            const offices = await res.json();
+            const container = fields.officeCheckBoxFiller;
+            container.innerHTML = "";
+
+            // --- Check All ---
+            const checkAllWrapper = document.createElement("label");
+            checkAllWrapper.classList.add("flex", "items-center", "gap-2", "mb-2");
+            checkAllWrapper.innerHTML = `
+        <input type="checkbox" id="checkAllOffices" class="cursor-pointer">
+        <span class="font-medium text-gray-700">Check All</span>
+    `;
+            container.appendChild(checkAllWrapper);
+
+            // --- Individual Office Checkboxes ---
+            offices.forEach(office => {
+                const wrapper = document.createElement("label");
+                wrapper.classList.add("flex", "items-center", "gap-2");
+
+                wrapper.innerHTML = `
+            <input type="checkbox"
+                   value="${office.office_name}"
+                   data-office-name="${office.office_name}"
+                   class="officeCheckbox cursor-pointer">
+            <span>${office.office_name}</span>
+        `;
+
+                container.appendChild(wrapper);
+            });
+
+            // --- Check All Logic ---
+            const checkAllBox = container.querySelector("#checkAllOffices");
+            checkAllBox.addEventListener("change", () => {
+                container.querySelectorAll(".officeCheckbox").forEach(cb => {
+                    cb.checked = checkAllBox.checked;
+                });
+            });
+        }
         // --------------------- LOAD MENUS ---------------------
         async function loadMenus() {
             const res = await fetch(`${window.APP_URL}/api/nav_menus/list`, {
@@ -215,7 +272,6 @@
 
                     tr.innerHTML = `
                 <td class="border p-2">${indent}${menu.title}</td>
-                <td class="border p-2">${menu.icon || ""}</td>
                 <td class="border p-2">${targetpage || ""}</td>
                 <td class="border p-2">${roles || ""}</td>
                 <td class="border p-2">${parentName}</td>
@@ -262,6 +318,11 @@
                         const allowedRoles = JSON.parse(menu.allowed_roles || "[]");
                         document.querySelectorAll('.roleCheckbox').forEach(cb => {
                             cb.checked = allowedRoles.includes(cb.value);
+                        });
+
+                        const allowedOffice = JSON.parse(menu.allowed_office || "[]");
+                        document.querySelectorAll('.officeCheckbox').forEach(cb => {
+                            cb.checked = allowedOffice.includes(cb.value);
                         });
 
                         modal.classList.remove("hidden");
@@ -315,13 +376,22 @@
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
 
-            let checkedRoles = Array.from(document.querySelectorAll(".roleCheckbox:checked")).map(cb =>
-                cb.value);
+            // Collect selected roles
+            let checkedRoles = Array.from(document.querySelectorAll(".roleCheckbox:checked"))
+                .map(cb => cb.value);
+
+            // Collect selected offices
+            let checkedOffices = Array.from(document.querySelectorAll(".officeCheckbox:checked"))
+                .map(cb => cb.value);
+
             const parentId = parseInt(fields.parent.value);
 
+            // Inherit from parent menu if a parent is selected
             if (parentId !== 0) {
                 const parentMenu = menusData.find(m => m.id === parentId);
+
                 checkedRoles = parentMenu ? JSON.parse(parentMenu.allowed_roles || "[]") : [];
+                checkedOffices = parentMenu ? JSON.parse(parentMenu.allowed_office || "[]") : [];
             }
 
             const payload = {
@@ -329,6 +399,7 @@
                 icon: fields.icon.value,
                 link: fields.link.value,
                 allowed_roles: JSON.stringify(checkedRoles),
+                allowed_office: JSON.stringify(checkedOffices),
                 parent_menu: fields.parent.value,
             };
 
@@ -340,6 +411,7 @@
                 method = "PUT";
             }
 
+            // Send request to backend
             const res = await fetch(url, {
                 method,
                 headers: {
@@ -349,29 +421,11 @@
                 body: JSON.stringify(payload)
             });
 
-            if (fields.id.value) {
-                const updatedMenu = await res.json();
-                menusData.forEach(async m => {
-                    if (m.parent_menu === parseInt(fields.id.value)) {
-                        await fetch(`${window.APP_URL}/api/nav_menus/${m.id}`, {
-                            method: "PUT",
-                            headers: {
-                                "Content-Type": "application/json",
-                                Accept: "application/json"
-                            },
-                            body: JSON.stringify({
-                                ...m,
-                                allowed_roles: updatedMenu.data
-                                    .allowed_roles
-                            })
-                        });
-                    }
-                });
-            }
-
+            // Close modal and reload menus/roles/offices
             closeModal();
             await loadMenus();
             await loadRoles();
+            await loadOffices();
         });
 
         // --------------------- TABLE BUTTON ACTIONS ---------------------
@@ -435,5 +489,6 @@
         // --------------------- INITIAL LOAD ---------------------
         loadRoles();
         loadMenus();
+        loadOffices();
     })();
 </script>

@@ -1,4 +1,4 @@
-function fillOfficeDropdown() {
+function fillOfficeDropdown(otherofficetb = null) {
   const officedropdown = document.querySelectorAll(".officeSelect");
 
   officedropdown.forEach((officeoption) => {
@@ -13,24 +13,25 @@ function fillOfficeDropdown() {
               (o) =>
                 `<option value="${o.office_name}">${o.office_name}</option>`
             )
-            .join("");
+            .join("") +
+          `<option value="Other">Other</option>`;
       });
   });
 }
-function fillDocType() {
-  const officedropdown = document.querySelectorAll(".docTypeSelect");
+function fillDocType(otherdocumenttb = null) {
+  const documentdropdown = document.querySelectorAll(".docTypeSelect");
 
-  officedropdown.forEach((officeoption) => {
+  documentdropdown.forEach((documentoption) => {
     // Fetch offices
     fetch("/api/documenttypes")
       .then((res) => res.json())
-      .then((offices) => {
-        officeoption.innerHTML =
-          `<option value="">Select Office</option>` +
-          offices
+      .then((doctype) => {
+        documentoption.innerHTML =
+          `<option value="">Select Document Type</option>` +
+          doctype
             .map(
-              (o) =>
-                `<option value="${o.office_name}">${o.office_name}</option>`
+              (dt) =>
+                `<option value="${dt.document_type}">${dt.document_type}</option>`
             )
             .join("");
       });
@@ -63,3 +64,4 @@ async function fetchAuthUser() {
 fetchAuthUser();
 window.fetchAuthUser = fetchAuthUser;
 window.fillOfficeDropdown = fillOfficeDropdown;
+window.fillDocType = fillDocType;

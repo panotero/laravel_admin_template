@@ -41,7 +41,7 @@
         </div>
         <!-- Document Details Modal -->
         <div id="approvalDocumentModal"
-            class="fixed inset-0 hidden z-50 flex items-center justify-center bg-black/50 px-2 sm:px-4 modal modal-open">
+            class="fixed inset-0 hidden z-40 flex items-center justify-center bg-black/50 px-2 sm:px-4 modal modal-open">
             <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-6xl max-h-[95vh] overflow-y-auto">
 
                 <!-- Header -->
@@ -113,6 +113,10 @@
                                     class="text-gray-900 dark:text-gray-100 text-right break-all"></span>
                             </div>
 
+                            <div class="flex justify-between">
+                                <span class="text-gray-600 dark:text-gray-400">Document ID:</span>
+                                <span id="document_id" class="text-gray-900 dark:text-gray-100"></span>
+                            </div>
                             <div class="flex justify-between gap-3">
                                 <span class="text-gray-600 dark:text-gray-400">Document Code:</span>
                                 <span id="docCode"
@@ -181,8 +185,7 @@
 
                 <!-- FOOTER BUTTONS -->
                 <div
-                    class="border-t border-gray-200 dark:border-gray-700 px-4 sm:px-6 py-4
-        flex flex-wrap justify-end gap-2 sm:gap-3">
+                    class="border-t border-gray-200 dark:border-gray-700 px-4 sm:px-6 py-4 flex flex-wrap justify-end gap-2 sm:gap-3">
 
                     <button id="modalApproveBtn"
                         class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium w-full sm:w-auto modal-open">
@@ -190,7 +193,7 @@
                     </button>
 
                     <button id="modalDisapproveBtn"
-                        class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium w-full sm:w-auto">
+                        class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium w-full sm:w-auto modal-open">
                         Disapprove
                     </button>
 
@@ -209,100 +212,71 @@
             </div>
         </div>
 
+        <!-- Approval Modal -->
+        <div id="approvalModal"
+            class="fixed inset-0 hidden z-50 flex items-center justify-center bg-black/30 px-4 sm:px-6">
+
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto p-6 relative">
 
 
-        <!-- PDF Preview Modal -->
-        <div id="pdfPreviewModal"
-            class="fixed inset-0 hidden z-50 flex items-center justify-center bg-black/50 px-4 modal">
-            <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col">
-                <div class="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 px-6 py-3">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">PDF Preview</h3>
+                <!-- Modal Header -->
+                <h2 class="text-xl font-semibold text-gray-900 mb-5">Approval Details</h2>
 
+                <!-- Hidden Approval ID -->
+                <input type="hidden" id="approval_id">
+
+                <!-- Next Approver -->
+                <div class="mb-5">
+                    <label for="nextApproverSelect" class="block text-gray-700 font-medium mb-2">Next Approver</label>
+                    <select id="nextApproverSelect"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                        <option value="">-- Select Approver --</option>
+                        <option value="23" data-approval-type="pre-approval">Manager (Pre-Approval)</option>
+                        <option value="45" data-approval-type="final-approval">Director (Final Approval)</option>
+                    </select>
+                </div>
+
+                <!-- User Select (Hidden Initially, shown for pre-approval) -->
+                <div id="userSelectWrapper" class="mb-5 hidden">
+                    <label for="userSelect" class="block text-gray-700 font-medium mb-2">Select User</label>
+                    <select id="userSelect"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                        <!-- Options populated dynamically via JS -->
+                    </select>
+                </div>
+
+                <!-- Remarks (Hidden Initially) -->
+                <div id="remarksWrapper" class="mb-5 hidden">
+                    <label for="remarksTextarea" class="block text-gray-700 font-medium mb-2">Remarks</label>
+                    <textarea id="remarksTextarea"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                        rows="4" placeholder="Enter remarks..."></textarea>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex flex-col sm:flex-row sm:justify-end gap-3">
+                    <button id="confirmApprovalBtn"
+                        class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg w-full sm:w-auto">
+                        Confirm
+                    </button>
                     <button
-                        class="modal-close border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 px-5 py-2 rounded-lg text-sm font-medium">
+                        class="modal-close w-full sm:w-auto border border-gray-200 text-gray-700 hover:bg-gray-50 px-6 py-3 rounded-xl transition">
                         Cancel
                     </button>
                 </div>
-                <div class="flex-1 overflow-hidden">
-                    <iframe id="pdfViewer" src="" class="w-full h-full rounded-b-2xl "></iframe>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Approval Modal Background -->
-<div id="approvalModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50">
-
-    <!-- Modal Box -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md p-6">
-
-        <!-- Header -->
-        <div class="mb-5">
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                Approval Confirmation
-            </h2>
-            <p class="text-sm text-gray-600 dark:text-gray-400">
-                Add remarks or additional instructions before approving this document.
-            </p>
-        </div>
-
-        <!-- Document Info -->
-        <div class="mb-4 bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
-            <div class="flex justify-between text-sm mb-2">
-                <span class="text-gray-600 dark:text-gray-300">Control Number:</span>
-                <span id="modalapprovalDocControlNumber" class="text-gray-900 dark:text-gray-100 font-medium"></span>
-            </div>
-
-            <div class="flex justify-between text-sm">
-                <span class="text-gray-600 dark:text-gray-300">Status:</span>
-                <span id="modalapproveDocStatus" class="text-gray-900 dark:text-gray-100 font-medium"></span>
             </div>
         </div>
 
-        <!-- Remarks Input -->
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Remarks / Additional Instructions
-        </label>
 
-        <textarea id="approvalRemarks" rows="4"
-            class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-xl
-                         focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500
-                         bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
-                         resize-none"></textarea>
 
-        <!-- Footer Buttons -->
-        <div class="flex justify-end mt-5 gap-3">
 
-            <!-- Cancel -->
-            <button type="button" id="approvalCancelBtn"
-                class="px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600
-                           text-gray-700 dark:text-gray-200 hover:bg-gray-100
-                           dark:hover:bg-gray-700 transition">
-                Cancel
-            </button>
-
-            <!-- Submit -->
-            <button type="button" id="approvalModal"
-                class="px-5 py-2 rounded-xl bg-gray-900 text-white
-                           hover:bg-gray-700 transition">
-                Approve
-            </button>
-        </div>
     </div>
 </div>
 
 
 <script>
     (function() {
-
         const tableBody = document.querySelector("#approvaltable tbody");
-        const modalApproveBtn = document.getElementById("modalApproveBtn");
-        modalApproveBtn.addEventListener("click", () => {
-
-            initModal({
-                modalId: "approvalDocumentModal"
-            });
-        })
         async function loadApprovals() {
             try {
                 const res = await fetch("api/approvals");
@@ -321,7 +295,7 @@
 
             approvals.forEach(app => {
                 const doc = app.document;
-                const approvalinfo = app
+
 
                 const tr = document.createElement("tr");
                 tr.classList.add("border-t", "hover:bg-gray-50", "cursor-pointer");
@@ -360,13 +334,15 @@
         }
 
         async function loadModal(doc) {
-            console.log(doc);
+            // console.log(doc);
+
             // HEADER
             document.getElementById("modalapprovalDocControlNumber").innerText = doc.document_control_number;
             document.getElementById("modalapproveDocStatus").innerText = doc.status;
 
             // Document Modal Fields
             document.getElementById("docTitle").innerText = doc.particular ?? "";
+            document.getElementById("document_id").innerText = doc.document_id ?? "";
             document.getElementById("docCode").innerText = doc.document_code ?? "";
             document.getElementById("docForm").innerText = doc.document_form ?? "";
             document.getElementById("docType").innerText = doc.document_type ?? "";
@@ -378,7 +354,6 @@
                 ""; // If you want actual username, return it from backend
             document.getElementById("docDate").innerText = doc.date_received ?? "";
             document.getElementById("docRemarks").innerText = doc.remarks ?? "";
-
 
             const baseUrl = window.location.origin;
             const pdfUrl = `${baseUrl}/${doc.files[0].file_path}`;
@@ -417,6 +392,7 @@
 
         // Init loader
         loadApprovals();
+        initApprovalHandler();
 
     })();
 </script>

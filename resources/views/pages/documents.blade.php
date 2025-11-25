@@ -172,6 +172,7 @@
 
     <!-- Document Details Modal -->
     <div id="DocumentModal" class="fixed inset-0 hidden z-50 flex items-center justify-center bg-black/50 px-4 modal">
+
         <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh overflow-y-auto">
 
             <!-- Header -->
@@ -254,6 +255,10 @@
                         <div
                             class="border border-gray-200 dark:border-gray-700 rounded-lg max-h-48 lg:h-48 overflow-y-auto">
                             <ul id="fileVersionsList" class="divide-y divide-gray-200 dark:divide-gray-700">
+                                <div id="spinner" class="flex items-center justify-center">
+                                    <div class="w-10 h-10 border-2 border-gray-200 border-t-2 border-t-gray-800 rounded-full animate-spin"
+                                        role="status" aria-label="Loading"></div>
+                                </div>
                             </ul>
                         </div>
                     </div>
@@ -262,14 +267,15 @@
                     <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
                         <h3 class="text-lg font-medium text-gray-800 dark:text-gray-100 mb-3">Activity History</h3>
                         <div id="activityLog" class="space-y-2 max-h-48 lg:h-48 overflow-y-auto">
+                            <div id="spinner" class="flex items-center justify-center">
+                                <div class="w-10 h-10 border-2 border-gray-200 border-t-2 border-t-gray-800 rounded-full animate-spin"
+                                    role="status" aria-label="Loading"></div>
+                            </div>
                         </div>
                     </div>
                     <!-- Activity History -->
                     <div class="pt-4 border-t border-gray-200 dark:border-gray-700 relative">
                         <div class="flex items-center justify-between">
-                            <h3 class="text-lg font-medium text-gray-800 dark:text-gray-100 mb-3">
-                                Activity History
-                            </h3>
 
                             <!-- Eye Icon (Toggle Full Logs) -->
                             <button id="toggleFullLogBtn"
@@ -285,14 +291,6 @@
                             </button>
                         </div>
 
-                        {{-- <!-- Important Activities Container -->
-                        <div id="activityLog" class="space-y-2 max-h-48 lg:h-48 overflow-y-auto">
-                            <!-- Filled by JS -->
-                        </div> --}}
-
-                        <!-- Full Logs Container (Hidden by Default) -->
-                        <!-- Floating Full Logs Panel -->
-                        <!-- Floating Full Logs Panel -->
                         <div id="fullActivityLogContainer"
                             class="hidden absolute bottom-full left-0 w-full border border-gray-300 dark:border-gray-700
                rounded-lg p-3 bg-white dark:bg-gray-800 shadow-xl z-50">
@@ -315,6 +313,22 @@
                     class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium routeBtn">
                     Route Document
                 </button>
+                <div class="approvalButtons hidden">
+                    <button id="modalApproveBtn"
+                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium w-full sm:w-auto modal-open">
+                        Approve
+                    </button>
+
+                    <button id="modalDisapproveBtn"
+                        class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium w-full sm:w-auto">
+                        Disapprove
+                    </button>
+
+                    <button id="modalRequestDiscussionBtn"
+                        class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium w-full sm:w-auto">
+                        Request for Discussion
+                    </button>
+                </div>
                 <button
                     class="modal-close border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 px-5 py-2 rounded-lg text-sm font-medium">
                     Cancel
@@ -484,6 +498,7 @@
 </div>
 <script>
     (function() {
+
         initdocumentcontroller();
         document.getElementById("toggleFullLogBtn").addEventListener("click", () => {
             const panel = document.getElementById("fullActivityLogContainer");

@@ -15,7 +15,7 @@ class UserController extends Controller
     // UserController.php
     public function index()
     {
-        return response()->json(User::with('office')->get());
+        return response()->json(User::with('office', 'userConfig')->get());
     }
 
     public function create()

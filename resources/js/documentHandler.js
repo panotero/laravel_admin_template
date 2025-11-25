@@ -33,6 +33,7 @@ async function populateDocumentModal(documentId) {
     setText("docAuthor", data.signatory || "N/A");
     setText("docDate", data.date_of_document || data.date_received || "N/A");
     setText("docCode", data.document_code || "N/A");
+    setText("document_id", data.document_id || "N/A");
     setText("docForm", data.document_form || "N/A");
     setText("docType", data.document_type || "N/A");
     setText("docDueDate", data.due_date || "N/A");
@@ -195,7 +196,7 @@ function populateActivityLog(data) {
     // ----------------------------------------
     // ROUTE ACTION
     // ----------------------------------------
-    if (act.action === "route") {
+    if (act.action === "route" || act.action === "upload") {
       let routeTarget = "";
 
       if (act.to_external == 1) {
@@ -314,6 +315,8 @@ function initdocumentcontroller() {
 
   function appendDocumentRow(tableBody, item, source = null, initTable = true) {
     if (!tableBody || !item) return;
+    const routeBtn = document.getElementById("routeDocumentBtn");
+    const approvalButtons = document.getElementById("approvalButtons");
 
     const tr = document.createElement("tr");
     tr.classList.add("border-t", "hover:bg-gray-50", "cursor-pointer");
@@ -354,16 +357,71 @@ function initdocumentcontroller() {
     tr.classList.add("modal-open");
 
     tr.addEventListener("click", (e) => {
-      const routeBtn = document.getElementById("routeDocumentBtn");
       if (e.target.classList.contains("labeldropdown")) return;
+
+      const spanIds = [
+        "docControlNumber",
+        "docStatus",
+        "docTitle",
+        "docDept",
+        "docAuthor",
+        "docDate",
+        "docCode",
+        "document_id",
+        "docForm",
+        "docType",
+        "docDueDate",
+        "docDestination",
+        "docConfidentiality",
+        "docRemarks",
+      ];
+
+      spanIds.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = "";
+      });
+
+      // Show skeleton loader for files
+      const fileList = document.getElementById("fileVersionsList");
+      if (fileList) {
+        fileList.innerHTML = `
+    <div class="p-3">
+      ${createSkeletonLoader(4)}
+    </div>
+  `;
+      }
+
+      // Show skeleton loader for activity log
+      const log = document.getElementById("activityLog");
+      if (log) {
+        log.innerHTML = `
+    <div class="p-3">
+      ${createSkeletonLoader(5)}
+    </div>
+  `;
+      }
+      function createSkeletonLoader(lines = 3) {
+        let skeleton = "";
+        for (let i = 0; i < lines; i++) {
+          skeleton += `
+      <div class="h-4 bg-gray-200 rounded shimmer mb-2"></div>
+    `;
+        }
+        return skeleton;
+      }
 
       initModal({ modalId: "DocumentModal" });
       populateDocumentModal(tr.dataset.documentId);
-
-      if (source === "all") {
+      const status = item.status.toLowerCase();
+      const recipient_id = item.recipient_id;
+      if (source === "all" || status === "for approval") {
         routeBtn.classList.add("hidden");
+        //check if the assigned user id is same with the logged user
+        if (status === "for approval" && recipient_id === window.authUser.id)
+          approvalButtons.classList.remove("hidden");
       } else {
         routeBtn.classList.remove("hidden");
+        approvalButtons.classList.add("hidden");
       }
 
       logActivity(
@@ -454,6 +512,29 @@ function initdocumentcontroller() {
     initroute();
 
     fillOfficeDropdown();
+    fillDocType();
+    // Element references
+    const destinationOfficedropdown =
+      document.getElementById("destinationOffice");
+    const originOfficedropdown = document.getElementById("originOffice");
+    const documentType = document.getElementById("documentType");
+
+    const otherdestinationoffice = document.getElementById(
+      "otherdestinationofficetb"
+    );
+    const otheroriginoffice = document.getElementById("otheroriginofficetb");
+    const otherdoctype = document.getElementById("otherdoctypetb");
+
+    // Apply toggle logic
+    toggleOtherField(destinationOfficedropdown, otherdestinationoffice);
+    toggleOtherField(originOfficedropdown, otheroriginoffice);
+    toggleOtherField(documentType, otherdoctype);
+    // Utility function for toggling the "Other" textboxes
+    function toggleOtherField(dropdown, textbox) {
+      dropdown.addEventListener("change", () => {
+        textbox.classList.toggle("hidden", dropdown.value !== "Other");
+      });
+    }
 
     const submitBtn = document.querySelector(
       "#modalNewDocument button.bg-blue-600"

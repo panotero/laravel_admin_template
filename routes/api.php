@@ -65,7 +65,14 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/notifications/stream', [NotificationController::class, 'stream']);
     Route::post('/notifications/mark-read', [NotificationController::class, 'markRead']);
     Route::post('/documents/route', [RoutingController::class, 'routeDocument']);
-    Route::get('/approvals', [ApprovalsController::class, 'getMyApprovals']);
+    Route::prefix('approvals')->group(function () {
+
+        // Get all approvals assigned to the user
+        Route::get('/', [ApprovalsController::class, 'getMyApprovals']);
+
+        // Submit an approval action (approve, disapprove, remand)
+        Route::post('/{approval_id}/action', [ApprovalsController::class, 'handleApprovalAction']);
+    });
 });
 Route::post('/activities', [ActivityController::class, 'store'])
     ->name('api.activities.store');

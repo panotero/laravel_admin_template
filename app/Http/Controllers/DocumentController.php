@@ -188,7 +188,7 @@ class DocumentController extends Controller
             'document_id'             => $document->document_id,
             'final_approval'          => 0,
             'document_control_number' => $documentControlNumber,
-            'user_id'                 => $request->routed_to,
+            'user_id'                 => $request->user_id,
             'from_user_id' => $request->user_id,
             'routed_to'               => null,
             'final_remarks'           => $validated['remarks'] ?? null,

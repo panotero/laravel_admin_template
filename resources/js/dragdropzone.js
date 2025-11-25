@@ -96,14 +96,6 @@ function initModal({ modalId }) {
     modal.classList.add("hidden");
     document.body.classList.remove("overflow-hidden");
   });
-
-  // Close modal by clicking outside
-  //   window.addEventListener("click", (e) => {
-  //     if (e.target === modal) {
-  //       modal.classList.add("hidden");
-  //       document.body.classList.remove("overflow-hidden");
-  //     }
-  //   });
 }
 window.initModal = initModal;
 window.initPDFDropzone = initPDFDropzone;

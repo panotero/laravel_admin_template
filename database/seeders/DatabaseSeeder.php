@@ -22,13 +22,13 @@ class DatabaseSeeder extends Seeder
         // ]);
         // $this->call(UserSeeder::class);
         $this->call([
-            DocumentsTableSeeder::class,
+            // DocumentsTableSeeder::class,
             // OfficesTableSeeder::class,
-            FilesTableSeeder::class,
-            ModificationsTableSeeder::class,
-            NotificationsTableSeeder::class,
+            // FilesTableSeeder::class,
+            // ModificationsTableSeeder::class,
+            // NotificationsTableSeeder::class,
             // NavMenuSeeder::class,
-            // UserSeeder::class,
+            UserSeeder::class,
             // ThemeSeeder::class,
             // Setting_roleSeeder::class
         ]);

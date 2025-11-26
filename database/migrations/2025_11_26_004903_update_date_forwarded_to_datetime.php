@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+
         Schema::table('documents', function (Blueprint $table) {
-            //
-            $table->dateTime('date_forwarded')->nullable()->change();
-            $table->integer("receipt_confirmation")->default(0)->after("date_forwarded");
+            $table->datetime('date_forwarded')->nullable()->change();
+            $table->integer("receipt_confirmed_by")->default(0)->after("receipt_confirmation");
         });
     }
 
@@ -23,8 +23,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('documents', function (Blueprint $table) {
-            //
-        });
+
+        Schema::table('documents', function (Blueprint $table) {});
     }
 };

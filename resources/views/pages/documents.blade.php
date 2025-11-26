@@ -130,6 +130,11 @@
                             required>
                             <option>Select...</option>
                         </select>
+                        <div id="otheroriginofficetb" class="hidden">
+                            <label class="text-sm text-gray-600">Specify Office</label>
+                            <input id="otheroriginoffice" type="text"
+                                class="w-full border-gray-300 rounded-lg px-3 py-2" required />
+                        </div>
                     </div>
                     <div>
                         <label class="text-sm text-gray-600">Destination Office</label>
@@ -137,18 +142,28 @@
                             required>
                             <option>Select...</option>
                         </select>
+                        <div id="otherdestinationofficetb" class="hidden">
+                            <label class="text-sm text-gray-600">Specify Office</label>
+                            <input id="otherdestinationoffice" type="text"
+                                class="w-full border-gray-300 rounded-lg px-3 py-2" required />
+                        </div>
                     </div>
                     <div>
                         <label class="text-sm text-gray-600">Document Type</label>
-                        <select id="documentType" class="w-full border-gray-300 rounded-lg px-3 py-2" required>
-                            <option>Memo</option>
-                            <option>Report</option>
-                            <option>Request</option>
+
+                        <select id="documentType" class="docTypeSelect w-full border-gray-300 rounded-lg px-3 py-2"
+                            required>
                         </select>
+                        <div id="otherdoctypetb" class="hidden">
+                            <label class="text-sm text-gray-600">Specify Document</label>
+                            <input id="otherdocument" type="text"
+                                class="w-full border-gray-300 rounded-lg px-3 py-2" required />
+                        </div>
                     </div>
                     <div>
                         <label class="text-sm text-gray-600">Document Date</label>
-                        <input id="document_date" type="date" class="w-full border-gray-300 rounded-lg px-3 py-2" />
+                        <input id="document_date" type="date"
+                            class="w-full border-gray-300 rounded-lg px-3 py-2" />
                     </div>
                     <div>
                         <label class="text-sm text-gray-600">Due Date</label>
@@ -163,7 +178,7 @@
                     class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 modal-close">
                     Cancel
                 </button>
-                <button class="px-5 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+                <button class="px-5 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 submitbtn">
                     Submit
                 </button>
             </div>
@@ -197,6 +212,7 @@
                             <span class="text-gray-600 dark:text-gray-400">Title:</span>
                             <span id="docTitle" class="text-gray-900 dark:text-gray-100">Project Proposal</span>
                         </div>
+
                         <div class="flex justify-between">
                             <span class="text-gray-600 dark:text-gray-400">Document Code:</span>
                             <span id="docCode" class="text-gray-900 dark:text-gray-100"></span>
@@ -309,11 +325,16 @@
 
             <!-- Footer Buttons anchored bottom-right -->
             <div class="border-t border-gray-200 dark:border-gray-700 px-6 py-4 mt-auto flex justify-end gap-3">
+
+                <button id="btnConfirm"
+                    class="hidden bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium routeBtn">
+                    Confirm Receipt
+                </button>
                 <button id="routeDocumentBtn"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium routeBtn">
+                    class="hidden bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium routeBtn">
                     Route Document
                 </button>
-                <div class="approvalButtons hidden">
+                <div class="approvalButtons hidden" id="approvalButtons">
                     <button id="modalApproveBtn"
                         class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium w-full sm:w-auto modal-open">
                         Approve

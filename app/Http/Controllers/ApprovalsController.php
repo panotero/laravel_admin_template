@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Approvals;
-use Illuminate\Support\Facades\Auth;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 use App\Models\Document;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ApprovalsController extends Controller
 {
@@ -20,12 +20,11 @@ class ApprovalsController extends Controller
 
         if (!$user) {
             return response()->json([
-                'status' => 'error',
+                'status'  => 'error',
                 'message' => 'Unauthorized'
             ], 401);
         }
 
-        // Fetch approvals where user_id = auth()->id()
         $approvals = Approvals::with('document')
             ->where('user_id', $user->id)
             ->where('status', 0)
@@ -33,109 +32,52 @@ class ApprovalsController extends Controller
             ->get();
 
         return response()->json([
-            'status' => 'success',
+            'status'    => 'success',
             'approvals' => $approvals
         ]);
     }
 
+    /**
+     * Process approval actions for a document
+     */
     public function handleApprovalAction(Request $request, $document_id)
     {
-        $user = User::with('office', 'userConfig')->find(Auth::id());
-        // dd($user->office->office_name);
-        $currentOffice = $user->office->office_name;
-        // $post = $request->validate([
-        //     'approval_id'   => 'required|integer|exists:approvals,id',
-        //     'action'        => 'required|in:approve,disapprove,remand',
-        //     'next_user_id'  => 'nullable|integer|exists:users,id', // required only if pre-approval
-        //     'remarks'       => 'nullable|string|max:500',          // required only if final-approval
-        // ]);
+        $user = User::with(['office', 'userConfig'])->find(Auth::id());
 
-        $action = $request->input('action');
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
 
-        // Process logic here
-        // Example:
+        $validated = $request->validate([
+            'action'       => 'required|in:approved,disapproved,remand',
+            'next_action'  => 'nullable|in:pre-approval,final-approval',
+            'next_user_id' => 'nullable|integer|exists:users,id',
+            'remarks'      => 'nullable|string|max:500',
+        ]);
+
+        $currentOffice = $user->office->office_name ?? null;
+
+        // Get current approval
         $approval = Approvals::with('document')
             ->where('document_id', $document_id)
             ->where('status', 0)
             ->firstOrFail();
+
+        $action = $validated['action'];
+
         switch ($action) {
             case 'approved':
-                $approval->remarks = 'Approved';
-                //check the next acction
-                $next_action = $request->input('next_action');
-                if ($next_action === "pre-approval") {
-                    Approvals::create([
-                        'document_id'   => $approval->document->document_id,
-                        'user_id'  => $request->next_user_id,
-                        'status'        => 0,
-                        'remarks'       => $request->remarks,
-                        'approval_type' => $request->next_action,
-                        'created_at'    => now(),
-                        'updated_at'    => now(),
-                    ]);
-                } else if ($next_action === "final-approval") {
-
-                    //get final approver from based on the office
-                    $finalApprover = User::with('userConfig', 'office')
-                        ->whereHas('userConfig', function ($query) use ($next_action) {
-                            $query->where('approval_type', $next_action);
-                        })
-                        ->whereHas('office', function ($query) use ($currentOffice) {
-                            $query->where('office_name', $currentOffice);
-                        })
-                        ->get();
-
-
-                    $approverID = $finalApprover[0]->id;
-                    //create new row on approval and route it to final approver's ID
-                    Approvals::create([
-                        'document_id'   => $approval->document->document_id,
-                        'user_id'  => $approverID,
-                        'status'        => 0,
-                        'remarks'       => $request->remarks,
-                        'approval_type' => $request->next_action,
-                        'created_at'    => now(),
-                        'updated_at'    => now(),
-                    ]);
-
-                    //create notification
-
-                    DB::table('notifications')->insert([
-                        'document_id'        => $approval->document->document_id,
-                        'office_origin'      => $user->office->office_name,
-                        'destination_office' => $user->office->office_name,
-                        'from_user_id' => $user->id,
-                        'user_id'            => $approverID,
-                        'message'            => "{$approval->document->document_control_number} has been approved by $user->name",
-                        'is_read'            => 0,
-                        'created_at'         => now(),
-                        'updated_at'         => now(),
-                    ]);
-
-                    //update the document info to recipient id to final approve'rs id
-                    Document::where('document_id', $approval->document->document_id)
-                        ->update([
-                            'recipient_id' => $approverID,
-                        ]);
-                    //update the previous approval id status to 1
-                    // dd($finalApprover[0]->id);
-                }
-                // dd($request->all());
-                //update the current approval id to 1
-                Approvals::where('id', $approval->id)
-                    ->update([
-                        'status' => 1,
-                        'updated_at' => now(),
-                    ]);
-
+                $this->processApproval($approval, $validated, $user, $currentOffice);
                 break;
 
             case 'disapproved':
-                $approval->status = 'Disapproved';
+                $approval->status  = 1;
+                $approval->remarks = 'Disapproved';
                 break;
 
             case 'remand':
-                $approval->status = 'Remanded';
+                $approval->status  = 1;
+                $approval->remarks = 'Remanded';
                 break;
         }
 
@@ -144,6 +86,105 @@ class ApprovalsController extends Controller
         return response()->json([
             'message' => 'Action completed successfully.',
             'status'  => $approval->status,
+        ]);
+    }
+
+    /**
+     * Handles logic for approval actions
+     */
+    private function processApproval($approval, $validated, $user, $currentOffice)
+    {
+        $approval->remarks = 'Approved';
+
+        $nextAction = $validated['next_action'] ?? null;
+
+        if ($nextAction === 'pre-approval') {
+            $this->createNextApproval(
+                $approval->document->document_id,
+                $validated['next_user_id'],
+                $validated['remarks'],
+                'pre-approval'
+            );
+
+            Document::where('document_id', $approval->document->document_id)
+                ->update([
+                    'recipient_id'   => $validated['next_user_id'],
+                    'date_forwarded' => now(),
+                ]);
+        } elseif ($nextAction === 'final-approval') {
+            $finalApprover = $this->getFinalApprover($currentOffice, $nextAction);
+
+            if (!$finalApprover) {
+                throw new \Exception("No final approver found.");
+            }
+
+            $this->createNextApproval(
+                $approval->document->document_id,
+                $finalApprover->id,
+                $validated['remarks'],
+                'final-approval'
+            );
+
+            $this->createNotification($approval, $user, $finalApprover->id);
+
+            Document::where('document_id', $approval->document->document_id)
+                ->update([
+                    'recipient_id'   => $finalApprover->id,
+                    'date_forwarded' => now(),
+                ]);
+        }
+
+        // Mark current approval complete
+        $approval->status = 1;
+        $approval->updated_at = now();
+    }
+
+    /**
+     * Gets final approver based on office and approval type
+     */
+    private function getFinalApprover($office, $approvalType)
+    {
+        return User::with(['userConfig', 'office'])
+            ->whereHas('userConfig', function ($query) use ($approvalType) {
+                $query->where('approval_type', $approvalType);
+            })
+            ->whereHas('office', function ($query) use ($office) {
+                $query->where('office_name', $office);
+            })
+            ->first();
+    }
+
+    /**
+     * Creates next approval entry
+     */
+    private function createNextApproval($documentId, $userId, $remarks, $approvalType)
+    {
+        Approvals::create([
+            'document_id'   => $documentId,
+            'user_id'       => $userId,
+            'status'        => 0,
+            'remarks'       => $remarks,
+            'approval_type' => $approvalType,
+            'created_at'    => now(),
+            'updated_at'    => now(),
+        ]);
+    }
+
+    /**
+     * Creates notification for final approval routing
+     */
+    private function createNotification($approval, $user, $destinationUserId)
+    {
+        DB::table('notifications')->insert([
+            'document_id'        => $approval->document->document_id,
+            'office_origin'      => $user->office->office_name,
+            'destination_office' => $user->office->office_name,
+            'from_user_id'       => $user->id,
+            'user_id'            => $destinationUserId,
+            'message'            => "{$approval->document->document_control_number} has been approved by {$user->name}",
+            'is_read'            => 0,
+            'created_at'         => now(),
+            'updated_at'         => now(),
         ]);
     }
 }

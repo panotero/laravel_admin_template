@@ -38,13 +38,18 @@ class DocumentController extends Controller
 
         return response()->json($document);
     }
-
     public function store(Request $request)
     {
-        // -------------------------------
+        // ---------------------------------------
+        // FETCH USER WITH RELATIONS
+        // ---------------------------------------
+        $user = User::with(['userConfig', 'office'])
+            ->findOrFail($request->user_id);
+
+        // ---------------------------------------
         // VALIDATION
-        // -------------------------------
-        $validator = Validator::make($request->all(), [
+        // ---------------------------------------
+        $validated = Validator::make($request->all(), [
             'document_code'        => 'required|string',
             'date_received'        => 'required|date',
             'particular'           => 'required|string',
@@ -58,45 +63,43 @@ class DocumentController extends Controller
             'signatory'            => 'required|string|max:100',
             'remarks'              => 'nullable|string',
             'file'                 => 'required|file|mimes:pdf|max:20480',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
+        ])->validate();
 
 
-        // -------------------------------
+        // ---------------------------------------
         // GENERATE DOCUMENT CONTROL NUMBER
-        // -------------------------------
-        $today  = Carbon::now()->format('dmY');
+        // ---------------------------------------
+        $today  = now()->format('dmY');
         $prefix = "{$today}-";
 
         $lastDoc = DB::table('documents')
-            ->where('document_control_number', 'like', $prefix . '%')
+            ->where('document_control_number', 'like', "$prefix%")
             ->orderByDesc('document_control_number')
             ->first();
 
-        if ($lastDoc) {
-            $lastSequence = (int)substr($lastDoc->document_control_number, strlen($prefix));
-            $sequence = str_pad($lastSequence + 1, 5, '0', STR_PAD_LEFT);
-        } else {
-            $sequence = '00001';
-        }
+        $sequence = $lastDoc
+            ? str_pad(((int)substr($lastDoc->document_control_number, strlen($prefix))) + 1, 5, '0', STR_PAD_LEFT)
+            : '00001';
 
         $documentControlNumber = $prefix . $sequence;
 
-        $involved_office = [];
 
-        // Always include origin
-        $involved_office[] = $request->office_origin;
+        // ---------------------------------------
+        // BUILD INVOLVED OFFICE LIST
+        // ---------------------------------------
+        $involved_office = [
+            $request->office_origin,
+            $user->office->office_name,
+        ];
 
-        // Only include destination if different from origin
         if ($request->destination_office !== $request->office_origin) {
             $involved_office[] = $request->destination_office;
         }
-        // -------------------------------
+
+
+        // ---------------------------------------
         // CREATE DOCUMENT RECORD
-        // -------------------------------
+        // ---------------------------------------
         $document = Document::create([
             'document_code'           => $request->document_code,
             'document_control_number' => $documentControlNumber,
@@ -106,6 +109,7 @@ class DocumentController extends Controller
             'destination_office'      => $request->destination_office,
             'involved_office'         => $involved_office,
             'user_id'                 => $request->user_id,
+            'date_forwarded'          => now(),
             'document_form'           => $request->document_form,
             'document_type'           => $request->document_type,
             'date_of_document'        => $request->date_of_document,
@@ -115,33 +119,29 @@ class DocumentController extends Controller
         ]);
 
 
-        // -------------------------------
-        // HANDLE PDF FILE UPLOAD
-        // -------------------------------
+        // ---------------------------------------
+        // HANDLE FILE UPLOAD
+        // ---------------------------------------
         if ($request->hasFile('file')) {
+            $file          = $request->file('file');
+            $officeFolder  = $document->office_origin ?? 'UnknownOffice';
 
-            $file = $request->file('file');
-            $officeFolder = $document->office_origin ?? 'UnknownOffice';
-
-            // Clean filename (remove spaces)
             $cleanOriginal = str_replace(' ', '_', $file->getClientOriginalName());
-            $fileName = uniqid() . '-' . $cleanOriginal;
+            $fileName      = uniqid() . '-' . $cleanOriginal;
 
-            // Folder path
-            $publicPath = public_path("assets/documents/$officeFolder/pdf");
+            $folderPath    = public_path("assets/documents/$officeFolder/pdf");
 
-            if (!is_dir($publicPath)) {
-                mkdir($publicPath, 0777, true);
+            if (!is_dir($folderPath)) {
+                mkdir($folderPath, 0777, true);
             }
-            // dd($document->document_id);
-            // Save file
-            $file->move($publicPath, $fileName);
-            // Path stored in DB
+
+            $file->move($folderPath, $fileName);
+
             $filePath = "assets/documents/$officeFolder/pdf/$fileName";
-            // Insert into files table
+
             DB::table('files')->insert([
                 'document_id'      => $document->document_id,
-                'file_name'      => $cleanOriginal,
+                'file_name'        => $cleanOriginal,
                 'file_path'        => $filePath,
                 'file_password'    => null,
                 'uploading_office' => $document->office_origin,
@@ -151,11 +151,9 @@ class DocumentController extends Controller
         }
 
 
-        // -------------------------------
-        // NOTIFICATION ENTRY
-        // -------------------------------
-        //get all user id base on office name
-
+        // ---------------------------------------
+        // FIND USERS TO NOTIFY
+        // ---------------------------------------
         $admin_users = User::with(['userConfig', 'office'])
             ->whereHas('userConfig', function ($q) {
                 $q->where('approval_type', 'routing')
@@ -165,15 +163,19 @@ class DocumentController extends Controller
                 $q->where('office_name', $request->destination_office);
             })
             ->get();
-        // dd($admin_users);
-        foreach ($admin_users as $adminuser) {
+
+
+        // ---------------------------------------
+        // CREATE NOTIFICATION RECORDS
+        // ---------------------------------------
+        foreach ($admin_users as $admin) {
             DB::table('notifications')->insert([
                 'document_id'        => $document->document_id,
                 'office_origin'      => $request->office_origin,
                 'destination_office' => $request->destination_office,
                 'routed_to'          => $request->routed_to,
-                'from_user_id' => $request->user_id,
-                'user_id'            => $adminuser->id,
+                'from_user_id'       => $request->user_id,
+                'user_id'            => $admin->id,
                 'message'            => "New document uploaded: {$document->document_code}",
                 'is_read'            => 0,
                 'created_at'         => now(),
@@ -182,26 +184,32 @@ class DocumentController extends Controller
         }
 
 
-
-        $activityData = [
+        // ---------------------------------------
+        // CREATE ACTIVITY LOG
+        // ---------------------------------------
+        Activity::create([
             'action'                  => 'upload',
             'document_id'             => $document->document_id,
             'final_approval'          => 0,
             'document_control_number' => $documentControlNumber,
             'user_id'                 => $request->user_id,
-            'from_user_id' => $request->user_id,
+            'from_user_id'            => $request->user_id,
             'routed_to'               => null,
             'final_remarks'           => $validated['remarks'] ?? null,
-        ];
-        Activity::create($activityData);
+        ]);
 
+
+        // ---------------------------------------
+        // RESPONSE
+        // ---------------------------------------
         return response()->json([
-            'message' => 'Document created successfully ' . $admin_users,
-            'data'    => $document,
-            'userlist' => $admin_users,
-            'docControlNumber' => $documentControlNumber,
+            'message'           => 'Document created successfully',
+            'data'              => $document,
+            'userlist'          => $admin_users,
+            'docControlNumber'  => $documentControlNumber,
         ], 201);
     }
+
 
 
 

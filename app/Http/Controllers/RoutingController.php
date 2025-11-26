@@ -135,7 +135,10 @@ class RoutingController extends Controller
 
                     DB::table('documents')
                         ->where('document_id', $document->document_id)
-                        ->update(['recipient_id' => null]);
+                        ->update([
+                            'recipient_id' => null,
+                            'date_forwarded' => now(),
+                        ]);
                 } else {
                     return "no pdf available";
                 }
@@ -155,7 +158,7 @@ class RoutingController extends Controller
                 ]);
                 DB::table('documents')
                     ->where('document_id', $document->document_id)
-                    ->update(['status' => 'For Approval']);
+                    ->update(['status' => 'For Approval', 'date_forwarded' => now(),]);
                 DB::table('approval_table')
                     ->where('user_id', $user->id)
                     ->update(['status' => 1]);

@@ -299,7 +299,6 @@ function initZoomFunction() {
 }
 
 function initdocumentcontroller() {
-  console.log("doc controller initialized");
   // ----------------------------
   // Helper Functions
   // ----------------------------
@@ -313,202 +312,144 @@ function initdocumentcontroller() {
     const diffTime = Math.abs(end - start);
     return `${Math.ceil(diffTime / (1000 * 60 * 60 * 24))} days`;
   }
+
   function appendDocumentRow(tableBody, item, source = null, initTable = true) {
     if (!tableBody || !item) return;
-
     const routeBtn = document.getElementById("routeDocumentBtn");
     const approvalButtons = document.getElementById("approvalButtons");
 
-    const {
-      document_id,
-      document_code,
-      document_control_number,
-      document_type,
-      particular,
-      office_origin,
-      destination_office,
-      date_forwarded,
-      date_of_document,
-      created_at,
-      confidentiality,
-      status,
-      recipient_id,
-    } = item;
-
     const tr = document.createElement("tr");
     tr.classList.add("border-t", "hover:bg-gray-50", "cursor-pointer");
-
-    tr.dataset.documentId = document_id;
-    tr.dataset.documentControlNumber = document_control_number;
+    tr.dataset.documentId = item.document_id;
+    tr.dataset.documentControlNumber = item.document_control_number;
     tr.dataset.userId = item.user_id || "";
-    tr.dataset.status = status;
+    tr.dataset.status = item.status;
     tr.dataset.source = source;
 
     tr.innerHTML = `
-        <td class="px-4 py-2">${document_code}</td>
-        <td class="px-4 py-2">${document_control_number}</td>
-        <td class="px-4 py-2">
-            <select class="border rounded px-2 py-1 text-xs labeldropdown">
-                <option ${
-                  document_type === "General" ? "selected" : ""
-                }>General</option>
-                <option ${
-                  document_type === "Confidential" ? "selected" : ""
-                }>Confidential</option>
-            </select>
-        </td>
-        <td class="px-4 py-2">${particular}</td>
-        <td class="px-4 py-2">${office_origin}</td>
-        <td class="px-4 py-2">${destination_office}</td>
-        <td class="px-4 py-2">${date_forwarded || "-"}</td>
-        <td class="px-4 py-2">123${calculateDuration(
-          date_of_document,
-          date_forwarded
-        )}</td>
-        <td class="px-4 py-2">${
-          created_at ? created_at.split("T")[0] : "-"
-        }</td>
-        <td class="px-4 py-2">${confidentiality || "-"}</td>
-        <td class="px-4 py-2">${status || "-"}</td>
-    `;
+    <td class="px-4 py-2">${item.document_code}</td>
+    <td class="px-4 py-2">${item.document_control_number}</td>
+    <td class="px-4 py-2">
+      <select class="border rounded px-2 py-1 text-xs labeldropdown">
+        <option ${
+          item.document_type === "General" ? "selected" : ""
+        }>General</option>
+        <option ${
+          item.document_type === "Confidential" ? "selected" : ""
+        }>Confidential</option>
+      </select>
+    </td>
+    <td class="px-4 py-2">${item.particular}</td>
+    <td class="px-4 py-2">${item.office_origin}</td>
+    <td class="px-4 py-2">${item.destination_office}</td>
+    <td class="px-4 py-2">${item.date_forwarded || "-"}</td>
+    <td class="px-4 py-2">123${calculateDuration(
+      item.date_of_document,
+      item.date_forwarded
+    )}</td>
+    <td class="px-4 py-2">${
+      item.created_at ? item.created_at.split("T")[0] : "-"
+    }</td>
+    <td class="px-4 py-2">${item.confidentiality || "-"}</td>
+    <td class="px-4 py-2">${item.status || "-"}</td>
+  `;
+
+    tr.classList.add("modal-open");
 
     tr.addEventListener("click", (e) => {
       if (e.target.classList.contains("labeldropdown")) return;
-      checkActionButtons(item.status, item.receipt_confirmation, source);
 
-      clearModalFields();
-      showSkeletonLoaders();
+      const spanIds = [
+        "docControlNumber",
+        "docStatus",
+        "docTitle",
+        "docDept",
+        "docAuthor",
+        "docDate",
+        "docCode",
+        "document_id",
+        "docForm",
+        "docType",
+        "docDueDate",
+        "docDestination",
+        "docConfidentiality",
+        "docRemarks",
+      ];
+
+      spanIds.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = "";
+      });
+
+      // Show skeleton loader for files
+      const fileList = document.getElementById("fileVersionsList");
+      if (fileList) {
+        fileList.innerHTML = `
+    <div class="p-3">
+      ${createSkeletonLoader(4)}
+    </div>
+  `;
+      }
+
+      // Show skeleton loader for activity log
+      const log = document.getElementById("activityLog");
+      if (log) {
+        log.innerHTML = `
+    <div class="p-3">
+      ${createSkeletonLoader(5)}
+    </div>
+  `;
+      }
+      function createSkeletonLoader(lines = 3) {
+        let skeleton = "";
+        for (let i = 0; i < lines; i++) {
+          skeleton += `
+      <div class="h-4 bg-gray-200 rounded shimmer mb-2"></div>
+    `;
+        }
+        return skeleton;
+      }
 
       initModal({ modalId: "DocumentModal" });
-      populateDocumentModal(document_id);
+      populateDocumentModal(tr.dataset.documentId);
+      const status = item.status.toLowerCase();
+      const recipient_id = item.recipient_id;
+      if (source === "all" || status === "for approval") {
+        routeBtn.classList.add("hidden");
+        //check if the assigned user id is same with the logged user
+        if (status === "for approval" && recipient_id === window.authUser.id)
+          approvalButtons.classList.remove("hidden");
+      } else {
+        routeBtn.classList.remove("hidden");
+        approvalButtons.classList.add("hidden");
+      }
 
-      const lowerStatus = status?.toLowerCase() || "";
-
-      //   if (source === "all" || lowerStatus === "for approval") {
-      //     routeBtn?.classList.add("hidden");
-
-      //     if (
-      //       lowerStatus === "for approval" &&
-      //       recipient_id === window.authUser.id
-      //     ) {
-      //       approvalButtons?.classList.remove("hidden");
-      //     }
-      //   } else {
-      //     routeBtn?.classList.remove("hidden");
-      //     approvalButtons?.classList.add("hidden");
-      //   }
-
-      logActivity("view", document_id, document_control_number);
+      logActivity(
+        "view",
+        tr.dataset.documentId,
+        tr.dataset.documentControlNumber
+      );
     });
 
     tableBody.appendChild(tr);
 
+    // Only initialize if requested (default: true)
     if (initTable) initDataTables();
   }
-  function checkActionButtons(
-    status = false,
-    receiptConfirmation = false,
-    source = false
-  ) {
-    const actionButtonArray = [
-      {
-        name: "approvalActions",
-        el: document.getElementById("approvalButtons"),
-      },
-      {
-        name: "confirmationActions",
-        el: document.getElementById("btnConfirm"),
-      },
-      {
-        name: "routeActions",
-        el: document.getElementById("routeDocumentBtn"),
-      },
-    ];
 
-    // First, hide all action buttons
-    actionButtonArray.forEach((item) => {
-      if (!item.el.classList.contains("hidden")) {
-        item.el.classList.add("hidden");
-      }
-    });
-    if (source === "all") {
-      return;
-    }
-
-    // Then, show the appropriate button based on the conditions
-    if (receiptConfirmation === 0) {
-      if (status === "For approval") {
-        const approvalAction = actionButtonArray.find(
-          (item) => item.name === "approvalActions"
-        );
-        if (approvalAction?.el) approvalAction.el.classList.remove("hidden");
-      } else {
-        const confirmationAction = actionButtonArray.find(
-          (item) => item.name === "confirmationActions"
-        );
-        if (confirmationAction?.el)
-          confirmationAction.el.classList.remove("hidden");
-      }
-    } else {
-      const routeAction = actionButtonArray.find(
-        (item) => item.name === "routeActions"
-      );
-      if (routeAction?.el) routeAction.el.classList.remove("hidden");
-    }
-  }
-  /* ------------ Helper Functions ------------- */
-
-  function clearModalFields() {
-    const spanIds = [
-      "docControlNumber",
-      "docStatus",
-      "docTitle",
-      "docDept",
-      "docAuthor",
-      "docDate",
-      "docCode",
-      "document_id",
-      "docForm",
-      "docType",
-      "docDueDate",
-      "docDestination",
-      "docConfidentiality",
-      "docRemarks",
-    ];
-
-    spanIds.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) el.textContent = "";
-    });
-  }
-
-  function showSkeletonLoaders() {
-    const skeleton = (lines = 3) =>
-      Array.from({ length: lines })
-        .map(() => `<div class="h-4 bg-gray-200 rounded shimmer mb-2"></div>`)
-        .join("");
-
-    const fileList = document.getElementById("fileVersionsList");
-    if (fileList) {
-      fileList.innerHTML = `<div class="p-3">${skeleton(4)}</div>`;
-    }
-
-    const log = document.getElementById("activityLog");
-    if (log) {
-      log.innerHTML = `<div class="p-3">${skeleton(5)}</div>`;
-    }
-  }
+  // ----------------------------
+  // Fetch and Render Documents
+  // ----------------------------
   window.getDocs = async function getDocs() {
-    const authUser = window.authUser;
-    if (!authUser) return;
+    if (!window.authUser) return;
 
-    const userId = authUser.id;
-    const userOfficeName = authUser.office?.office_name || null;
-    const userApprovalType = authUser.user_config?.approval_type || null;
+    const userId = window.authUser.id;
+    const userOfficeName = window.authUser.office?.office_name || null;
+    const userApprovalType = window.authUser.user_config?.approval_type || null;
 
     try {
-      const response = await fetch("/api/documents");
-      const documents = await response.json();
+      const res = await fetch("/api/documents");
+      const documents = await res.json();
 
       const allDocsTableBody = document.querySelector(
         "#allDocumentTable tbody"
@@ -516,9 +457,9 @@ function initdocumentcontroller() {
       const assignedTableBody = document.querySelector(
         "#assignedToYouDocumentTable tbody"
       );
+
       if (!allDocsTableBody || !assignedTableBody) return;
 
-      // Clear tables
       allDocsTableBody.innerHTML = "";
       assignedTableBody.innerHTML = "";
 
@@ -527,35 +468,28 @@ function initdocumentcontroller() {
           ? doc.involved_office
           : [];
 
-        // --------------------------
         // All Documents
-        // --------------------------
         const canSeeAllDocs =
           !userOfficeName ||
           userOfficeName === "ODDG-PP" ||
           involvedOffices.includes(userOfficeName);
-
-        if (canSeeAllDocs) {
+        if (canSeeAllDocs)
           appendDocumentRow(allDocsTableBody, doc, "all", false);
-        }
 
-        // --------------------------
         // Assigned To You
-        // --------------------------
         let showAssigned = false;
         const recipientId = doc.recipient_id;
 
         if (recipientId !== null) {
-          showAssigned = recipientId == userId;
+          if (recipientId == userId) showAssigned = true;
         } else {
           const isRoutingUser = userApprovalType === "routing";
           const sameOffice = userOfficeName === doc.destination_office;
-          showAssigned = isRoutingUser && sameOffice;
+          if (isRoutingUser && sameOffice) showAssigned = true;
         }
 
-        if (showAssigned) {
+        if (showAssigned)
           appendDocumentRow(assignedTableBody, doc, "assigned", false);
-        }
       });
 
       // Initialize DataTables **once** per table after all rows are appended
@@ -564,11 +498,11 @@ function initdocumentcontroller() {
       console.error("Error fetching documents:", error);
     }
   };
+
   // ----------------------------
   // Event Listeners
   // ----------------------------
   function initEventListeners() {
-    // Initialize PDF dropzones
     initPDFDropzone({
       dropzoneId: "dropzone",
       fileInputId: "fileInput",
@@ -580,95 +514,114 @@ function initdocumentcontroller() {
     fillOfficeDropdown();
     fillDocType();
 
-    // --------------------------
-    // Utility function: Toggle "Other" field visibility
-    // --------------------------
-    function toggleOtherField(dropdownId, textboxId) {
-      const dropdown = document.getElementById(dropdownId);
-      const textbox = document.getElementById(textboxId);
-      if (!dropdown || !textbox) return;
+    // Element references
+    const destinationOfficedropdown =
+      document.getElementById("destinationOffice");
+    const originOfficedropdown = document.getElementById("originOffice");
+    console.log(originOfficedropdown);
+    const documentType = document.getElementById("documentType");
 
+    const otherdestinationoffice = document.getElementById(
+      "otherdestinationofficetb"
+    );
+    const otheroriginoffice = document.getElementById("otheroriginofficetb");
+    const otherdoctype = document.getElementById("otherdoctypetb");
+
+    // Apply toggle logic
+    toggleOtherField(destinationOfficedropdown, otherdestinationoffice);
+    toggleOtherField(originOfficedropdown, otheroriginoffice);
+    toggleOtherField(documentType, otherdoctype);
+    // Utility function for toggling the "Other" textboxes
+    function toggleOtherField(dropdown, textbox) {
       dropdown.addEventListener("change", () => {
         textbox.classList.toggle("hidden", dropdown.value !== "Other");
       });
     }
 
-    toggleOtherField("destinationOffice", "otherdestinationofficetb");
-    toggleOtherField("originOffice", "otheroriginofficetb");
-    toggleOtherField("documentType", "otherdoctypetb");
-
-    // --------------------------
-    // New Document Modal
-    // --------------------------
-    const newDocBtn = document.getElementById("btnNewDocument");
-    const submitBtn = document.querySelector(".submitbtn");
+    const submitBtn = document.querySelector(
+      "#modalNewDocument button.bg-blue-600"
+    );
     const fileInput = document.getElementById("fileInput");
-    const confirmationBtn = document.getElementById("btnConfirm");
-    // console.log(submitBtn);
-
-    newDocBtn?.addEventListener("click", () => {
-      initModal({ modalId: "modalNewDocument" });
+    // Open New Document Modal
+    document.getElementById("btnNewDocument")?.addEventListener("click", () => {
+      initModal({
+        modalId: "modalNewDocument",
+      });
     });
-    submitBtn.addEventListener("click", async () => {
-      console.log("submitbttn clicked");
-      const modal = document.getElementById("modalNewDocument");
-      if (!modal) return false;
+    submitBtn?.addEventListener("click", async () => {
+      const form = document.querySelector("#modalNewDocument");
+      const invalid = form.querySelector(":invalid");
 
-      if (!fileInput?.files[0]) {
+      if (invalid) {
+        invalid.reportValidity();
+        return;
+      }
+
+      if (!fileInput.files[0]) {
         alert("Please upload a PDF file.");
         return;
       }
 
       const formData = new FormData();
-      const docFields = [
+      formData.append(
         "document_code",
-        "subject",
-        "documentType",
-        "due_date",
-        "document_date",
-        "signatory",
-        "remarks",
-      ];
-
-      docFields.forEach((id) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-
-        const value = el.value.trim();
-        if (id === "subject") formData.append("particular", value);
-        else if (id === "documentType") formData.append("document_type", value);
-        else formData.append(id, value);
-      });
-
-      // Handle Origin / Destination "Other"
+        document.getElementById("document_code").value.trim()
+      );
+      formData.append("date_received", new Date().toISOString().split("T")[0]);
+      formData.append(
+        "particular",
+        document.getElementById("subject").value.trim()
+      );
       const originDropdown = document.getElementById("originOffice");
       const destinationDropdown = document.getElementById("destinationOffice");
-      const otherOriginInput = document.getElementById("otheroriginoffice");
-      const otherDestinationInput = document.getElementById(
-        "otherdestinationoffice"
-      );
-      console.log(otherOriginInput);
-      console.log(otherDestinationInput);
 
-      let origin = "";
-      let destination = "";
-      if (originDropdown.value === "Other") {
-        origin = "OTHER - " + otherOriginInput.value;
-        formData.append("office_origin", origin);
+      const otherOriginInput = document.getElementById("otheroriginOffice");
+      const otherDestinationInput = document.getElementById(
+        "otherdestinationOffice"
+      );
+
+      let originValue = originDropdown.value.trim().toLowerCase();
+      let destinationValue = destinationDropdown.value.trim().toLowerCase();
+
+      // Process Origin
+      if (originValue === "other") {
+        formData.append(
+          "office_origin",
+          "OTHER - " + (otherOriginInput.value.trim() || "")
+        );
       } else {
         formData.append("office_origin", originDropdown.value);
       }
-      if (destinationDropdown.value === "Other") {
-        destination = "OTHER - " + otherDestinationInput.value;
-        formData.append("destination_office", destination);
+
+      // Process Destination
+      if (destinationValue === "other") {
+        formData.append(
+          "destination_office",
+          "OTHER - " + (otherDestinationInput.value.trim() || "")
+        );
       } else {
         formData.append("destination_office", destinationDropdown.value);
       }
-
       formData.append("user_id", window.authUser.id);
       formData.append("document_form", "PDF");
+      formData.append(
+        "document_type",
+        document.getElementById("documentType").value
+      );
+      formData.append("due_date", document.getElementById("due_date").value);
+      formData.append(
+        "document_date",
+        document.getElementById("document_date").value
+      );
+      formData.append(
+        "signatory",
+        document.getElementById("signatory").value.trim()
+      );
+      formData.append(
+        "remarks",
+        document.getElementById("remarks").value.trim()
+      );
       formData.append("file", fileInput.files[0]);
-      formData.append("date_received", new Date().toISOString().split("T")[0]);
 
       try {
         submitBtn.disabled = true;
@@ -678,6 +631,7 @@ function initdocumentcontroller() {
           method: "POST",
           body: formData,
         });
+
         const result = await response.json();
 
         if (!response.ok) {
@@ -686,9 +640,47 @@ function initdocumentcontroller() {
           );
           return;
         }
+        console.log(result);
 
-        resetFormModal("modalNewDocument");
-        showControlNumberModal(result.docControlNumber);
+        // Hide New Document modal
+        document.getElementById("modalNewDocument").classList.add("hidden");
+
+        const modal = document.getElementById("modalNewDocument");
+
+        if (modal) {
+          modal.querySelectorAll("input, select, textarea").forEach((el) => {
+            switch (el.type) {
+              case "checkbox":
+              case "radio":
+                el.checked = false;
+                break;
+              case "file":
+                el.value = "";
+                break;
+              default:
+                el.value = "";
+            }
+          });
+
+          // Optionally reset any custom display elements like file info
+          const fileInfo = modal.querySelector("#fileInfo");
+          const clearBtn = modal.querySelector("#clearSelectionBtn");
+          if (fileInfo) fileInfo.textContent = "";
+          if (clearBtn) clearBtn.classList.add("hidden");
+        }
+
+        // Populate and show Control Number modal
+        if (result.docControlNumber) {
+          const controlModal = document.getElementById("controlNumberModal");
+          const controlText = document.getElementById("controlNumberText");
+          controlText.textContent = Array.isArray(result.docControlNumber)
+            ? result.docControlNumber.join(", ")
+            : result.docControlNumber;
+
+          // Trigger your modal-open class to open it
+          controlModal.classList.add("modal-open");
+        }
+
         getDocs();
       } catch (err) {
         console.error(err);
@@ -699,21 +691,17 @@ function initdocumentcontroller() {
       }
     });
 
-    // --------------------------
     // PDF Preview Modal
-    // --------------------------
-    document
-      .querySelectorAll(".fileInfoButton")
-      .forEach((btn) =>
-        btn.addEventListener("click", () =>
-          initModal({ modalId: "pdfPreviewModal" })
-        )
-      );
+    document.querySelectorAll(".fileInfoButton").forEach((btn) =>
+      btn.addEventListener("click", () =>
+        initModal({
+          modalId: "pdfPreviewModal",
+        })
+      )
+    );
 
-    // --------------------------
     // Routing Modal
-    // --------------------------
-    document.querySelectorAll(".routeBtn").forEach((btn) =>
+    document.querySelectorAll(".routeBtn").forEach((btn) => {
       btn.addEventListener("click", () => {
         initPDFDropzone({
           dropzoneId: "routedropzone",
@@ -721,13 +709,13 @@ function initdocumentcontroller() {
           fileInfoId: "routefileInfo",
           clearBtnId: "clearrouteSelectionBtn",
         });
-        initModal({ modalId: "routingModal" });
-      })
-    );
+        initModal({
+          modalId: "routingModal",
+        });
+      });
+    });
 
-    // --------------------------
-    // Route Office change logic
-    // --------------------------
+    // Office change logic
     const officeSelect = document.getElementById("routeOfficeSelect");
     const userSelect = document.getElementById("routeUserSelect");
     const approvalSelect = document.getElementById("approvalSelect");
@@ -737,8 +725,9 @@ function initdocumentcontroller() {
     const pdfUploadSection = document.getElementById("pdfUploadSection");
     const currentOffice = window.authUser.office?.office_name || null;
 
-    officeSelect?.addEventListener("change", async (e) => {
+    officeSelect?.addEventListener("change", (e) => {
       const selected = e.target.value;
+
       internalSection?.classList.toggle("hidden", selected !== currentOffice);
       externalSection?.classList.toggle(
         "hidden",
@@ -746,18 +735,19 @@ function initdocumentcontroller() {
       );
 
       if (selected === currentOffice) {
-        const users = await fetch("/api/users").then((res) => res.json());
-        const filtered = users.filter(
-          (u) => u.office?.office_name === currentOffice
-        );
-        userSelect.innerHTML =
-          `<option value="">Select User</option>` +
-          filtered
-            .map((u) => `<option value="${u.id}">${u.name}</option>`)
-            .join("");
-        approvalSelect.innerHTML = `<option value="">Select Approval Type</option>
-                 <option value="pre-approval">Pre-approval</option>
-                 <option value="final-approval">Final-approval</option>`;
+        fetch("/api/users")
+          .then((res) => res.json())
+          .then((users) => {
+            const filtered = users.filter(
+              (u) => u.office?.office_name === currentOffice
+            );
+            userSelect.innerHTML =
+              `<option value="">Select User</option>` +
+              filtered
+                .map((u) => `<option value="${u.id}">${u.name}</option>`)
+                .join("");
+            approvalSelect.innerHTML = `<option value="">Select Approval Type</option><option value="pre-approval">Pre-approval</option><option value="final-approval">final-approval</option>`;
+          });
       }
     });
 
@@ -767,49 +757,6 @@ function initdocumentcontroller() {
         e.target.value !== "approved"
       );
     });
-
-    // --------------------------
-    // Helper Functions
-    // --------------------------
-    function resetFormModal(modalId) {
-      const modal = document.getElementById(modalId);
-      if (!modal) return;
-
-      modal.querySelectorAll("input, select, textarea").forEach((el) => {
-        switch (el.type) {
-          case "checkbox":
-          case "radio":
-            el.checked = false;
-            break;
-          case "file":
-            el.value = "";
-            break;
-          default:
-            el.value = "";
-        }
-      });
-
-      const fileInfo = modal.querySelector("#fileInfo");
-      const clearBtn = modal.querySelector("#clearSelectionBtn");
-      if (fileInfo) fileInfo.textContent = "";
-      if (clearBtn) clearBtn.classList.add("hidden");
-
-      modal.classList.add("hidden");
-    }
-
-    function showControlNumberModal(docControlNumber) {
-      if (!docControlNumber) return;
-
-      const controlModal = document.getElementById("controlNumberModal");
-      const controlText = document.getElementById("controlNumberText");
-      if (!controlModal || !controlText) return;
-
-      controlText.textContent = Array.isArray(docControlNumber)
-        ? docControlNumber.join(", ")
-        : docControlNumber;
-
-      controlModal.classList.add("modal-open");
-    }
   }
 
   // ----------------------------

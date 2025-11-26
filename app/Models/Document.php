@@ -33,6 +33,9 @@ class Document extends Model
         'due_date',
         'signatory',
         'remarks',
+        'receipt_confirmation',
+        'receipt_confirmed_by',
+        'date_forwarded',
     ];
 
     protected $casts = [

@@ -140,6 +140,11 @@
                                 <span id="docDueDate"
                                     class="text-gray-900 dark:text-gray-100 text-right break-all"></span>
                             </div>
+                            <div class="flex justify-between gap-3">
+                                <span class="text-gray-600 dark:text-gray-400">Approval Type:</span>
+                                <span id="approvalType"
+                                    class="text-gray-900 dark:text-gray-100 text-right break-all"></span>
+                            </div>
 
                             <div class="flex justify-between gap-3">
                                 <span class="text-gray-600 dark:text-gray-400">Destination Office:</span>
@@ -224,34 +229,28 @@
 
                 <!-- Hidden Approval ID -->
                 <input type="hidden" id="approval_id">
-
-                <!-- Next Approver -->
-                <div class="mb-5">
-                    <label for="nextApproverSelect" class="block text-gray-700 font-medium mb-2">Next Approver</label>
-                    <select id="nextApproverSelect"
-                        class="w-full border border-gray-200 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-300">
-                        <option value="">-- Select Approver --</option>
-                        <option value="23" data-approval-type="pre-approval">Manager (Pre-Approval)</option>
-                        <option value="45" data-approval-type="final-approval">Director (Final Approval)</option>
-                    </select>
+                <div id="finalApproval" class=" m-5 hidden">
+                    <h1>Confirm your approval please</h1>
                 </div>
+                <div id="preApproval">
+                    <!-- User Select (Hidden Initially, shown for pre-approval) -->
+                    <div id="userSelectWrapper" class="mb-5">
+                        <label for="userSelect" class="block text-gray-700 font-medium mb-2">Select User</label>
+                        <select id="userSelect"
+                            class="w-full border border-gray-200 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                            <!-- Options populated dynamically via JS -->
+                        </select>
+                    </div>
 
-                <!-- User Select (Hidden Initially, shown for pre-approval) -->
-                <div id="userSelectWrapper" class="mb-5 hidden">
-                    <label for="userSelect" class="block text-gray-700 font-medium mb-2">Select User</label>
-                    <select id="userSelect"
-                        class="w-full border border-gray-200 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-300">
-                        <!-- Options populated dynamically via JS -->
-                    </select>
                 </div>
-
                 <!-- Remarks (Hidden Initially) -->
-                <div id="remarksWrapper" class="mb-5 hidden">
+                <div id="remarksWrapper" class="mb-5">
                     <label for="remarksTextarea" class="block text-gray-700 font-medium mb-2">Remarks</label>
                     <textarea id="remarksTextarea"
                         class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gray-300"
                         rows="4" placeholder="Enter remarks..."></textarea>
                 </div>
+
 
                 <!-- Buttons -->
                 <div class="flex flex-col sm:flex-row sm:justify-end gap-3">
@@ -323,7 +322,7 @@
                 // Handle row click (open modal)
                 tr.addEventListener("click", (e) => {
                     if (e.target.classList.contains("labeldropdown")) return;
-                    loadModal(doc);
+                    loadModal(app);
                     initModal({
                         modalId: "approvalDocumentModal"
                     });
@@ -333,30 +332,33 @@
             });
         }
 
-        async function loadModal(doc) {
+        async function loadModal(app) {
             // console.log(doc);
 
             // HEADER
-            document.getElementById("modalapprovalDocControlNumber").innerText = doc.document_control_number;
-            document.getElementById("modalapproveDocStatus").innerText = doc.status;
+            document.getElementById("modalapprovalDocControlNumber").innerText = app.document
+                .document_control_number;
+            document.getElementById("modalapproveDocStatus").innerText = app.document.status;
 
             // Document Modal Fields
-            document.getElementById("docTitle").innerText = doc.particular ?? "";
-            document.getElementById("document_id").innerText = doc.document_id ?? "";
-            document.getElementById("docCode").innerText = doc.document_code ?? "";
-            document.getElementById("docForm").innerText = doc.document_form ?? "";
-            document.getElementById("docType").innerText = doc.document_type ?? "";
-            document.getElementById("docDueDate").innerText = doc.due_date ?? "None";
-            document.getElementById("docDestination").innerText = doc.destination_office ?? "";
-            document.getElementById("docConfidentiality").innerText = doc.confidentiality ?? "";
-            document.getElementById("docDept").innerText = doc.office_origin ?? "";
-            document.getElementById("docAuthor").innerText = doc.user_id ??
+            document.getElementById("docTitle").innerText = app.document.particular ?? "";
+            document.getElementById("document_id").innerText = app.document.document_id ?? "";
+            document.getElementById("docCode").innerText = app.document.document_code ?? "";
+            document.getElementById("docForm").innerText = app.document.document_form ?? "";
+            document.getElementById("docType").innerText = app.document.document_type ?? "";
+            document.getElementById("docDueDate").innerText = app.document.due_date ?? "None";
+            document.getElementById("approvalType").innerText = app.approval_type ?? "";
+
+            document.getElementById("docDestination").innerText = app.document.destination_office ?? "";
+            document.getElementById("docConfidentiality").innerText = app.document.confidentiality ?? "";
+            document.getElementById("docDept").innerText = app.document.office_origin ?? "";
+            document.getElementById("docAuthor").innerText = app.document.user_id ??
                 ""; // If you want actual username, return it from backend
-            document.getElementById("docDate").innerText = doc.date_received ?? "";
-            document.getElementById("docRemarks").innerText = doc.remarks ?? "";
+            document.getElementById("docDate").innerText = app.document.date_received ?? "";
+            document.getElementById("docRemarks").innerText = app.document.remarks ?? "";
 
             const baseUrl = window.location.origin;
-            const pdfUrl = `${baseUrl}/${doc.files[0].file_path}`;
+            const pdfUrl = `${baseUrl}/${app.document.files[0].file_path}`;
 
             const slides = await extractPdfImages(pdfUrl);
 
@@ -373,16 +375,26 @@
                 console.warn("initGlide() not available yet.");
             }
 
+            //check approval type
+            if (app.approval_type === "final-approval") {
+                document.getElementById("finalApproval").classList.remove("hidden");
+                document.getElementById("preApproval").classList.add("hidden");
+            } else {
+                document.getElementById("finalApproval").classList.add("hidden");
+                document.getElementById("preApproval").classList.remove("hidden");
+
+            }
+
             // RIGHT DETAILS SECTION
-            setText("modalDocCode", doc.document_code);
-            setText("modalDocType", doc.document_type);
-            setText("modalDocOrigin", doc.office_origin);
-            setText("modalDocDestination", doc.destination_office);
-            setText("modalDocRemarks", doc.remarks ?? "None");
-            setText("modalDocSignatory", doc.signatory ?? "—");
-            setText("modalDocConfidentiality", doc.confidentiality);
-            setText("modalDocDateReceived", doc.date_received);
-            setText("modalDocDueDate", doc.due_date ?? "—");
+            setText("modalDocCode", app.document.document_code);
+            setText("modalDocType", app.document.document_type);
+            setText("modalDocOrigin", app.document.office_origin);
+            setText("modalDocDestination", app.document.destination_office);
+            setText("modalDocRemarks", app.document.remarks ?? "None");
+            setText("modalDocSignatory", app.document.signatory ?? "—");
+            setText("modalDocConfidentiality", app.document.confidentiality);
+            setText("modalDocDateReceived", app.document.date_received);
+            setText("modalDocDueDate", app.document.due_date ?? "—");
         }
 
         function setText(id, value) {
@@ -393,6 +405,131 @@
         // Init loader
         loadApprovals();
         initApprovalHandler();
+
+        function initApprovalHandler(currentOffice) {
+
+            populateUsers("routing");
+
+            const userSelect = document.getElementById("userSelect");
+            const modalApproveBtn = document.getElementById("modalApproveBtn");
+            const modalDisapproveBtn = document.getElementById("modalDisapproveBtn");
+            const document_id = document.getElementById("document_id"); // hidden field
+
+            const approvalModal = document.getElementById("approvalModal");
+            const remarksWrapper = document.getElementById("remarksWrapper");
+            const remarksTextarea = document.getElementById("remarksTextarea");
+            const confirmBtn = document.getElementById("confirmApprovalBtn");
+            const approvalIdInput = document.getElementById("approval_id");
+
+            // Create user select dynamically
+            let userSelectWrapper = document.getElementById("userSelectWrapper");
+            if (!userSelectWrapper) {
+                userSelectWrapper = document.createElement("div");
+                userSelectWrapper.id = "userSelectWrapper";
+                userSelectWrapper.className = "mb-5";
+                userSelectWrapper.innerHTML = `
+            <label for="userSelect" class="block text-gray-700 font-medium mb-2">Select User</label>
+            <select id="userSelect"
+                class="w-full border border-gray-200 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-300">
+            </select>
+        `;
+            }
+
+            // BASE URL FOR APPROVAL ACTIONS
+            const baseUrl = "/api/approvals";
+            async function sendApprovalAction(
+                approvalId,
+                action,
+                next_action,
+                remarks = "",
+                nextUserId = null
+            ) {
+                try {
+                    const response = await fetch(`${baseUrl}/${approvalId}/action`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRF-TOKEN": document
+                                .querySelector('meta[name="csrf-token"]')
+                                .getAttribute("content"),
+                        },
+                        body: JSON.stringify({
+                            action,
+                            next_action,
+                            remarks,
+                            next_user_id: nextUserId,
+                        }),
+                    });
+                    const result = await response.json();
+                    console.log("Server Response:", result);
+
+                    // Hide modals if the response is OK
+                    if (response.ok) {
+                        const approvalDocumentModal = document.getElementById("approvalDocumentModal");
+                        const approvalModal = document.getElementById("approvalModal");
+
+                        if (approvalDocumentModal) approvalDocumentModal.classList.add("hidden");
+                        if (approvalModal) approvalModal.classList.add("hidden");
+                        loadApprovals();
+                    }
+
+                } catch (err) {
+                    console.error("Approval action error:", err);
+                }
+            }
+
+            // Load users from API (filter by office & approval type)
+            function populateUsers(approvalType) {
+                fetch("/api/users")
+                    .then((res) => res.json())
+                    .then((users) => {
+                        const filtered = users.filter(
+                            (u) =>
+                            u.office?.office_name === window.authUser.office.office_name &&
+                            u.user_config?.approval_type !== approvalType
+                        );
+
+                        userSelect.innerHTML =
+                            `<option value="">Select User</option>` +
+                            filtered
+                            .map((u) =>
+                                `<option value="${u.id}" data-approvalType = "${u.user_config.approval_type}">${u.name}</option>`
+                            )
+                            .join("");
+                    });
+            }
+            // Confirm button click
+            confirmBtn.addEventListener("click", function() {
+                const selectedOption = userSelect.options[userSelect.selectedIndex];
+                const approvalId = document_id.textContent;
+
+                const nextUserId = userSelect.value;
+                const remarks = remarksTextarea.value;
+
+                sendApprovalAction(
+                    approvalId,
+                    "approved",
+                    selectedOption.dataset.approvaltype,
+                    remarks,
+                    nextUserId
+                );
+            });
+
+            // APPROVE BUTTON
+            modalApproveBtn.addEventListener("click", () => {
+                initModal({
+                    modalId: "approvalModal"
+                });
+            });
+
+            // DISAPPROVE BUTTON
+            modalDisapproveBtn.addEventListener("click", () => {
+                initModal({
+                    modalId: "approvalModal"
+                });
+            });
+        };
+
 
     })();
 </script>

@@ -25,6 +25,56 @@ class DocumentController extends Controller
         return response()->json($documents);
     }
 
+    public function confirm(Request $request)
+    {
+        //content of the request must be document_id, user_id of the logged user
+        $document = Document::with('files', 'activities')
+            ->where('document_id', $request->document_id)
+            ->first();
+
+        Document::where('document_id', $request->document_id)
+            ->update([
+                'receipt_confirmation' => 1,
+                'receipt_confirmed_by' => $request->user_id,
+            ]);
+
+
+
+        //create notificaation item to the uploaded of the document
+
+        DB::table('notifications')->insert([
+            'document_id'        => $request->document_id,
+            'office_origin'      => $document->office_origin,
+            'destination_office' => $document->destination_office,
+            'from_user_id'       => $request->user_id,
+            'user_id'            => $document->user_id,
+            'message'            => "{$request->user_id} has confirmed receipt of the document",
+            'is_read'            => 0,
+            'created_at'         => now(),
+            'updated_at'         => now(),
+        ]);
+
+        //create activity log
+        $activityData = [
+            'action'                  => 'confirm',
+            'document_id'             => $document->document_id,
+            'final_approval'          => 0,
+            'document_control_number' => $document->document_control_number,
+            'user_id'                 => $request->user_id,
+            'from_user_id' => $document->user_id,
+            'routed_to'               => null,
+            'final_remarks'           => $validated['remarks'] ?? null,
+        ];
+        Activity::create($activityData);
+
+        // ---------------------------------------
+        // RESPONSE
+        // ---------------------------------------
+        return response()->json([
+            'message'           => 'Confirming receipt successfully',
+        ], 201);
+    }
+
     // GET /api/documents/{idOrControlNumber}
     public function show($id)
     {

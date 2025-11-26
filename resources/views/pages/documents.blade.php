@@ -327,7 +327,7 @@
             <div class="border-t border-gray-200 dark:border-gray-700 px-6 py-4 mt-auto flex justify-end gap-3">
 
                 <button id="btnConfirm"
-                    class="hidden bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium routeBtn">
+                    class="hidden bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium">
                     Confirm Receipt
                 </button>
                 <button id="routeDocumentBtn"
@@ -524,6 +524,29 @@
         document.getElementById("toggleFullLogBtn").addEventListener("click", () => {
             const panel = document.getElementById("fullActivityLogContainer");
             panel.classList.toggle("hidden");
+        });
+
+
+        const confirmButton = document.getElementById("btnConfirm");
+        confirmButton.addEventListener("click", async (e) => {
+            const post = {
+                document_id: confirmButton.dataset.documentId,
+                user_id: window.authUser.id
+            }
+            const response = await fetch("/api/documents/confirm", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(post),
+            });
+            const result = await response.json();
+            if (response.ok) {
+                console.log("result ok!");
+
+                document.getElementById("routeDocumentBtn").classList.remove("hidden");
+                confirmButton.classList.add("hidden");
+            }
         });
     })();
 </script>

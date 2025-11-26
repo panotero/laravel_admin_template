@@ -59,7 +59,7 @@ function initNotificationStream() {
   // Mark all as read when notification icon is clicked
   notifIcon.addEventListener("click", async () => {
     if (allNotificationIds.length === 0) return;
-
+    // console.log(Array.isArray(allNotificationIds));
     try {
       //   console.log("icon button clicked");
       const res = await fetch("/api/notifications/mark-read", {
@@ -77,6 +77,7 @@ function initNotificationStream() {
         NotifContainer.textContent = "";
 
         NotifContainer.classList.add("hidden");
+        // console.log(res);
       } else {
         console.error("Failed to mark notifications as read.");
       }

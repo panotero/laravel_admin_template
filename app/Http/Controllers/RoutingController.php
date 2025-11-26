@@ -137,6 +137,8 @@ class RoutingController extends Controller
                         ->where('document_id', $document->document_id)
                         ->update([
                             'recipient_id' => null,
+                            'receipt_confirmation' => 0,
+                            'receipt_confirmed_by' => 0,
                             'date_forwarded' => now(),
                         ]);
                 } else {

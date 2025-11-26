@@ -128,6 +128,7 @@ Route::prefix('documents')->group(function () {
     Route::get('/', [DocumentController::class, 'index']);                  // Fetch all documents
     Route::get('/{ControlNumber}', [DocumentController::class, 'show']); // Fetch by ID or control number
     Route::post('/', [DocumentController::class, 'store']);                 // Create
+    Route::post('/confirm', [DocumentController::class, 'confirm']);        // Confirm document receipt
     Route::patch('/{id}', [DocumentController::class, 'update']);           // Update
     Route::delete('/{id}', [DocumentController::class, 'destroy']);         // Delete
 });

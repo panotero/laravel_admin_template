@@ -24,6 +24,8 @@ async function populateDocumentModal(documentId) {
     document.getElementById("docId").value = data.document_id;
     setText("docControlNumber", data.document_control_number);
     setText("docStatus", data.status);
+    const confirmationButton = document.getElementById("btnConfirm");
+    confirmationButton.dataset.documentId = data.document_id;
 
     // ------------------------
     // Populate Metadata
@@ -196,9 +198,11 @@ function populateActivityLog(data) {
     // ----------------------------------------
     // ROUTE ACTION
     // ----------------------------------------
-    if (act.action === "route" || act.action === "upload") {
+    if (["route", "upload", "approved"].includes(act.action)) {
       let routeTarget = "";
+      let actionText = "";
 
+      // Determine target
       if (act.to_external == 1) {
         routeTarget = data.destination_office
           ? data.destination_office
@@ -209,17 +213,40 @@ function populateActivityLog(data) {
           : "Unknown Recipient";
       }
 
-      displayText = `
-                <p>
-                    <span class="font-semibold">${fromUser}</span>
-                    routed the document to
-                    <span class="font-semibold">${routeTarget}</span>
-                    <span class="text-gray-500 text-xs">${timeAgo}</span>
-                </p>
-                <p> <span class="font-semibold">remarks: </span> ${remarks}</p>
-            `;
+      // Determine message based on action
+      switch (act.action) {
+        case "route":
+          actionText = `routed the document to <span class="font-semibold">${routeTarget}</span>`;
+          break;
+        case "upload":
+          actionText = `uploaded a document${
+            routeTarget
+              ? ` for <span class="font-semibold">${routeTarget}</span>`
+              : ""
+          }`;
+          break;
+        case "approved":
+          actionText = `approved the document${
+            routeTarget
+              ? ` for <span class="font-semibold">${routeTarget}</span>`
+              : ""
+          }`;
+          break;
+      }
 
-      // ROUTE is considered an IMPORTANT activity → show in main list
+      displayText = `
+        <p>
+            <span class="font-semibold">${fromUser}</span> ${actionText}
+            <span class="text-gray-500 text-xs">${timeAgo}</span>
+        </p>
+        ${
+          remarks
+            ? `<p><span class="font-semibold">Remarks: </span>${remarks}</p>`
+            : ""
+        }
+    `;
+
+      // Show important activity
       importantDiv.innerHTML = displayText;
       activityLog.appendChild(importantDiv);
     }
@@ -233,7 +260,7 @@ function populateActivityLog(data) {
       displayText = `
                 <p>
                     <span class="font-semibold">${userName}</span>
-                    ${act.action}ed the document
+                    ${act.action} the document
                     <span class="text-gray-500 text-xs">${timeAgo}</span>
                 </p>
             `;
@@ -643,15 +670,18 @@ function initdocumentcontroller() {
       // Handle Origin / Destination "Other"
       const originDropdown = document.getElementById("originOffice");
       const destinationDropdown = document.getElementById("destinationOffice");
+      const documentDropdown = document.getElementById("documentType");
       const otherOriginInput = document.getElementById("otheroriginoffice");
       const otherDestinationInput = document.getElementById(
         "otherdestinationoffice"
       );
+      const otherDocumentInput = document.getElementById("otherdoctypetb");
       console.log(otherOriginInput);
       console.log(otherDestinationInput);
 
       let origin = "";
       let destination = "";
+      let documenttype = "";
       if (originDropdown.value === "Other") {
         origin = "OTHER - " + otherOriginInput.value;
         formData.append("office_origin", origin);
@@ -663,6 +693,12 @@ function initdocumentcontroller() {
         formData.append("destination_office", destination);
       } else {
         formData.append("destination_office", destinationDropdown.value);
+      }
+      if (documentDropdown.value === "Other") {
+        documenttype = "OTHER - " + documentDropdown.value;
+        formData.append("document_type", documenttype);
+      } else {
+        formData.append("document_type", otherDocumentInput.value);
       }
 
       formData.append("user_id", window.authUser.id);

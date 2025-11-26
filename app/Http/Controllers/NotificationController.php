@@ -59,23 +59,27 @@ class NotificationController extends Controller
 
     public function markRead(Request $request)
     {
-        $request->validate([
-            'ids' => 'required|array',
-            'ids.*' => 'integer'
-        ]);
+        // dd($request->ids);
 
         $user = Auth::user();
+        foreach ($request->ids as $ids) {
 
-        Notification::whereIn('id', $request->ids)
-            ->where(function ($query) use ($user) {
-                // Only mark notifications that belong to this user or are unassigned (routed_to null)
-                $query->where('routed_to', $user->id)
-                    ->orWhere(function ($sub) use ($user) {
-                        $sub->whereNull('routed_to')
-                            ->where('destination_office', $user->office->office_name);
-                    });
-            })
-            ->update(['is_read' => true]);
+            Notification::where('id', $ids)
+                ->update([
+                    'is_read' => 1,
+                ]);
+
+            // Notification::whereIn('id', $ids)
+            //     ->where(function ($query) use ($user) {
+            //         // Only mark notifications that belong to this user or are unassigned (routed_to null)
+            //         $query->where('routed_to', $user->id)
+            //             ->orWhere(function ($sub) use ($user) {
+            //                 $sub->whereNull('routed_to')
+            //                     ->where('destination_office', $user->office->office_name);
+            //             });
+            //     })
+            //     ->update(['is_read' => true]);
+        }
 
         return response()->json(['success' => true]);
     }

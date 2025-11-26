@@ -33,7 +33,8 @@ function fillDocType(otherdocumenttb = null) {
               (dt) =>
                 `<option value="${dt.document_type}">${dt.document_type}</option>`
             )
-            .join("");
+            .join("") +
+          `<option value="Other">Other</option>`;
       });
   });
 }

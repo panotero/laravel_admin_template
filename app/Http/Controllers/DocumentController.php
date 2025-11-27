@@ -32,10 +32,17 @@ class DocumentController extends Controller
             ->where('document_id', $request->document_id)
             ->first();
 
+        $user = User::with(['userConfig', 'office'])
+            ->findOrFail($request->user_id);
+        $status = "Pending";
+        if ($document->office_origin === $user->office->office_name) {
+            $status = "Complete";
+        }
         Document::where('document_id', $request->document_id)
             ->update([
                 'receipt_confirmation' => 1,
                 'receipt_confirmed_by' => $request->user_id,
+                'status' => $status,
             ]);
 
 

@@ -260,17 +260,18 @@
                 <div class="w-full lg:w-1/2 p-6 space-y-5">
                     <div class="flex items-center justify-between">
                         <h3 class="text-lg font-medium text-gray-800 dark:text-gray-100">File Versions</h3>
-                        <button id="downloadLatestBtn"
+                        <a id="downloadLatestBtn" download
                             class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg transition">
                             Download Latest
-                        </button>
+                        </a>
                     </div>
 
                     <!-- Versions List -->
                     <div class="space-y-2">
                         <div
                             class="border border-gray-200 dark:border-gray-700 rounded-lg max-h-48 lg:h-48 overflow-y-auto">
-                            <ul id="fileVersionsList" class="divide-y divide-gray-200 dark:divide-gray-700">
+                            <ul id="fileVersionsList"
+                                class="divide-y divide-gray-200 dark:divide-gray-700 flex flex-col-reverse">
                                 <div id="spinner" class="flex items-center justify-center">
                                     <div class="w-10 h-10 border-2 border-gray-200 border-t-2 border-t-gray-800 rounded-full animate-spin"
                                         role="status" aria-label="Loading"></div>
@@ -282,12 +283,12 @@
                     <!-- Activity History -->
                     <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
                         <h3 class="text-lg font-medium text-gray-800 dark:text-gray-100 mb-3">Activity History</h3>
-                        <div id="activityLog" class="space-y-2 max-h-48 lg:h-48 overflow-y-auto">
+                        <ul id="activityLog" class="space-y-2 max-h-48 lg:h-48 overflow-y-auto ">
                             <div id="spinner" class="flex items-center justify-center">
                                 <div class="w-10 h-10 border-2 border-gray-200 border-t-2 border-t-gray-800 rounded-full animate-spin"
                                     role="status" aria-label="Loading"></div>
                             </div>
-                        </div>
+                        </ul>
                     </div>
                     <!-- Activity History -->
                     <div class="pt-4 border-t border-gray-200 dark:border-gray-700 relative">
@@ -315,9 +316,9 @@
                                 Full Activity Log
                             </h4>
 
-                            <div id="fullActivityLog" class="space-y-2 max-h-60 overflow-y-auto">
+                            <ul id="fullActivityLog" class="space-y-2 max-h-60 overflow-y-auto">
                                 <!-- Full logs inserted here -->
-                            </div>
+                            </ul>
                         </div>
                     </div>
                 </div>

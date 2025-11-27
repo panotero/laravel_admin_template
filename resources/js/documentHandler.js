@@ -87,7 +87,6 @@ function populateFileList(files) {
       </li>`;
     return;
   }
-
   files.forEach((file, index) => {
     const li = document.createElement("li");
     li.classList.add(
@@ -108,31 +107,44 @@ function populateFileList(files) {
 
     li.innerHTML = `
       <div>
-        <p class="text-gray-900 dark:text-gray-100 font-medium">${
-          file.file_name
-        }.0</p>
+        <p class="text-gray-900 dark:text-gray-100 font-medium">
+          ${shortenFileName(file.file_name)}.0
+        </p>
         <p class="text-xs text-gray-500 dark:text-gray-400">
           Uploaded: ${file.uploaded_at.split(" ")[0]} by ${
       file.uploading_office
     }
         </p>
       </div>
-      <a href="${file.file_path}"
+      <a href="${file.file_path}" data-file-id="${file.file_id}"
          download
          class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg shadow hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors duration-200"
          onclick="event.stopPropagation();">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 12v8m0-8l-4 4m4-4l4 4"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 12v8m0-8l-4 4m4-4l4 4"/>
         </svg>
-        Download
       </a>
     `;
 
     // Open PDF modal on LI click
     li.addEventListener("click", () => openPdfModal(file.file_path));
-
+    const downloadlatestbutton = document.getElementById("downloadLatestBtn");
+    downloadlatestbutton.href = file.file_path;
+    downloadlatestbutton.dataset.fileId = file.file_id;
     fileList.appendChild(li);
   });
+}
+function shortenFileName(name, maxLength = 25) {
+  if (name.length <= maxLength) return name;
+
+  const extIndex = name.lastIndexOf(".");
+  if (extIndex === -1) return name.substring(0, maxLength) + "...";
+
+  const ext = name.substring(extIndex);
+  const base = name.substring(0, maxLength - ext.length - 3);
+
+  return base + "..." + ext;
 }
 
 // ------------------------
@@ -175,8 +187,8 @@ function populateActivityLog(data) {
   }
 
   data.activities.forEach((act) => {
-    const importantDiv = document.createElement("div");
-    const fullDiv = document.createElement("div");
+    const importantDiv = document.createElement("li");
+    const fullDiv = document.createElement("li");
 
     importantDiv.classList.add(
       "text-sm",
@@ -198,7 +210,7 @@ function populateActivityLog(data) {
     // ----------------------------------------
     // ROUTE ACTION
     // ----------------------------------------
-    if (["route", "upload", "approved"].includes(act.action)) {
+    if (["route", "upload", "approved", "signed"].includes(act.action)) {
       let routeTarget = "";
       let actionText = "";
 
@@ -330,16 +342,40 @@ function initdocumentcontroller() {
   // ----------------------------
   // Helper Functions
   // ----------------------------
+  function calculateDuration(dateForwarded) {
+    const start = parseDateSafe(dateForwarded);
+    const end = new Date();
 
-  // Calculate duration between two dates
-  function calculateDuration(startDate, endDate) {
-    if (!startDate || !endDate) return "-";
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    if (isNaN(start) || isNaN(end)) return "-";
-    const diffTime = Math.abs(end - start);
-    return `${Math.ceil(diffTime / (1000 * 60 * 60 * 24))} days`;
+    if (isNaN(start.getTime())) {
+      console.error("Invalid date:", dateForwarded);
+      return "Invalid date";
+    }
+
+    let diffMs = end.getTime() - start.getTime();
+    if (diffMs < 0) diffMs = 0;
+
+    const totalMinutes = Math.floor(diffMs / 60000);
+    const totalHours = Math.floor(totalMinutes / 60);
+    const days = Math.floor(totalHours / 24);
+    const hours = totalHours % 24;
+    const minutes = totalMinutes % 60;
+
+    let result = [];
+    if (days > 0) result.push(`${days} day${days > 1 ? "s" : ""}`);
+    if (hours > 0) result.push(`${hours} hour${hours > 1 ? "s" : ""}`);
+    result.push(`${minutes} min`);
+
+    return result.join(" ");
   }
+
+  function parseDateSafe(dateString) {
+    return new Date(dateString.replace(" ", "T"));
+  }
+
+  function safeDate(d) {
+    return new Date(d.replace(" ", "T"));
+  }
+
   function appendDocumentRow(tableBody, item, source = null, initTable = true) {
     if (!tableBody || !item) return;
 
@@ -388,10 +424,7 @@ function initdocumentcontroller() {
         <td class="px-4 py-2">${office_origin}</td>
         <td class="px-4 py-2">${destination_office}</td>
         <td class="px-4 py-2">${date_forwarded || "-"}</td>
-        <td class="px-4 py-2">123${calculateDuration(
-          date_of_document,
-          date_forwarded
-        )}</td>
+        <td class="px-4 py-2">${calculateDuration(date_forwarded)}</td>
         <td class="px-4 py-2">${
           created_at ? created_at.split("T")[0] : "-"
         }</td>

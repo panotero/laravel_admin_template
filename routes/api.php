@@ -31,8 +31,7 @@ use App\Http\Controllers\ApprovalsController;
 // ----------------------------------------------------------
 // 🧍 AUTHENTICATED ROUTES
 // ----------------------------------------------------------
-Route::middleware(['web', 'auth'])->group(function () {
-    Route::get('/user', fn(Request $request) => $request->user());
+Route::middleware(['auth'])->group(function () {
     Route::get('/debug_auth', function () {
         $user = auth()->user();
         if ($user) {
@@ -44,6 +43,7 @@ Route::middleware(['web', 'auth'])->group(function () {
             'user' => $user,
         ];
     });
+    Route::get('/user', fn(Request $request) => $request->user());
     Route::get('/user_info', function () {
 
         $user = auth()->user();
@@ -62,7 +62,6 @@ Route::middleware(['web', 'auth'])->group(function () {
         Route::get('/', [NotificationController::class, 'getNotifications']);
     });
 
-    Route::get('/notifications/stream', [NotificationController::class, 'stream']);
     Route::post('/notifications/mark-read', [NotificationController::class, 'markRead']);
     Route::post('/documents/route', [RoutingController::class, 'routeDocument']);
     Route::prefix('approvals')->group(function () {
@@ -73,120 +72,123 @@ Route::middleware(['web', 'auth'])->group(function () {
         // Submit an approval action (approve, disapprove, remand)
         Route::post('/{approval_id}/action', [ApprovalsController::class, 'handleApprovalAction']);
     });
-});
-Route::post('/activities', [ActivityController::class, 'store'])
-    ->name('api.activities.store');
-
-// ----------------------------------------------------------
-// OFFICES
-// ----------------------------------------------------------
-Route::prefix('offices')->group(function () {
-    Route::get('/', [OfficeController::class, 'index']);
-    Route::post('/', [OfficeController::class, 'store']);
-    Route::delete('/{id}', [OfficeController::class, 'destroy']);
-});
-
-
-// ----------------------------------------------------------
-// USER CONFIGS
-// ----------------------------------------------------------
-Route::prefix('userconfigs')->group(function () {
-    Route::get('/', [UserConfigController::class, 'index']);
-    Route::post('/', [UserConfigController::class, 'store']);
-    Route::delete('/{id}', [UserConfigController::class, 'destroy']);
-});
-
-// ----------------------------------------------------------
-// DOCUMENT TYPES
-// ----------------------------------------------------------
-Route::prefix('documenttypes')->group(function () {
-    Route::get('/', [DocumentTypeController::class, 'index']);
-    Route::post('/', [DocumentTypeController::class, 'store']);
-    Route::get('/{id}', [DocumentTypeController::class, 'show']);
-    Route::patch('/{id}', [DocumentTypeController::class, 'update']);
-    Route::delete('/{id}', [DocumentTypeController::class, 'destroy']);
-});
+    Route::get('/notifications/stream', [NotificationController::class, 'stream']);
+    // ----------------------------------------------------------
+    // DOCUMENTS
+    // ----------------------------------------------------------
+    Route::prefix('documents')->group(function () {
+        Route::get('/', [DocumentController::class, 'index']);                  // Fetch all documents
+        Route::get('/{ControlNumber}', [DocumentController::class, 'show']); // Fetch by ID or control number
+        Route::post('/', [DocumentController::class, 'store']);                 // Create
+        Route::post('/confirm', [DocumentController::class, 'confirm']);        // Confirm document receipt
+        Route::patch('/{id}', [DocumentController::class, 'update']);           // Update
+        Route::delete('/{id}', [DocumentController::class, 'destroy']);         // Delete
+    });
 
 
-// ----------------------------------------------------------
-// USERS
-// ----------------------------------------------------------
-Route::prefix('users')->group(function () {
-    Route::get('/', [UserController::class, 'index']);
-    Route::get('/{id}', [UserController::class, 'show']);
-    Route::post('/', [UserController::class, 'store']);
-    Route::patch('/save/{id}', [UserController::class, 'save_info']);
-    Route::patch('/deactivate/{id}', [UserController::class, 'deactivate']);
-    Route::patch('/reactivate/{id}', [UserController::class, 'reactivate']);
-});
+    Route::post('/activities', [ActivityController::class, 'store'])
+        ->name('api.activities.store');
+
+    // ----------------------------------------------------------
+    // OFFICES
+    // ----------------------------------------------------------
+    Route::prefix('offices')->group(function () {
+        Route::get('/', [OfficeController::class, 'index']);
+        Route::post('/', [OfficeController::class, 'store']);
+        Route::delete('/{id}', [OfficeController::class, 'destroy']);
+    });
 
 
-// ----------------------------------------------------------
-// DOCUMENTS
-// ----------------------------------------------------------
-Route::prefix('documents')->group(function () {
-    Route::get('/', [DocumentController::class, 'index']);                  // Fetch all documents
-    Route::get('/{ControlNumber}', [DocumentController::class, 'show']); // Fetch by ID or control number
-    Route::post('/', [DocumentController::class, 'store']);                 // Create
-    Route::post('/confirm', [DocumentController::class, 'confirm']);        // Confirm document receipt
-    Route::patch('/{id}', [DocumentController::class, 'update']);           // Update
-    Route::delete('/{id}', [DocumentController::class, 'destroy']);         // Delete
-});
+    // ----------------------------------------------------------
+    // USER CONFIGS
+    // ----------------------------------------------------------
+    Route::prefix('userconfigs')->group(function () {
+        Route::get('/', [UserConfigController::class, 'index']);
+        Route::post('/', [UserConfigController::class, 'store']);
+        Route::delete('/{id}', [UserConfigController::class, 'destroy']);
+    });
+
+    // ----------------------------------------------------------
+    // DOCUMENT TYPES
+    // ----------------------------------------------------------
+    Route::prefix('documenttypes')->group(function () {
+        Route::get('/', [DocumentTypeController::class, 'index']);
+        Route::post('/', [DocumentTypeController::class, 'store']);
+        Route::get('/{id}', [DocumentTypeController::class, 'show']);
+        Route::patch('/{id}', [DocumentTypeController::class, 'update']);
+        Route::delete('/{id}', [DocumentTypeController::class, 'destroy']);
+    });
 
 
+    // ----------------------------------------------------------
+    // USERS
+    // ----------------------------------------------------------
+    Route::prefix('users')->group(function () {
+        Route::get('/', [UserController::class, 'index']);
+        Route::get('/{id}', [UserController::class, 'show']);
+        Route::post('/', [UserController::class, 'store']);
+        Route::patch('/save/{id}', [UserController::class, 'save_info']);
+        Route::patch('/deactivate/{id}', [UserController::class, 'deactivate']);
+        Route::patch('/reactivate/{id}', [UserController::class, 'reactivate']);
+    });
 
 
 
-// ----------------------------------------------------------
-// ACTIVITIES
-// ----------------------------------------------------------
-Route::prefix('activities')->group(function () {
-    Route::get('/', [ActivityController::class, 'index']);
-    Route::get('/{id}', [ActivityController::class, 'show']);
-    Route::post('/', [ActivityController::class, 'store']);
-    Route::delete('/{id}', [ActivityController::class, 'destroy']);
-});
 
 
-// ----------------------------------------------------------
-// MAILER
-// ----------------------------------------------------------
-Route::post('/send-mail', [MailerController::class, 'send']);
 
 
-// ----------------------------------------------------------
-// MENUS
-// ----------------------------------------------------------
-Route::prefix('nav_menus')->group(function () {
-    Route::get('/list', [MenusController::class, 'menulist']);
-    Route::post('/', [MenusController::class, 'store']);
-    Route::put('/{id}', [MenusController::class, 'update']);
-    Route::delete('/{id}', [MenusController::class, 'destroy']);
-    Route::post('/swap', [MenusController::class, 'swapMenuOrder']);
-});
+    // ----------------------------------------------------------
+    // ACTIVITIES
+    // ----------------------------------------------------------
+    Route::prefix('activities')->group(function () {
+        Route::get('/', [ActivityController::class, 'index']);
+        Route::get('/{id}', [ActivityController::class, 'show']);
+        Route::post('/', [ActivityController::class, 'store']);
+        Route::delete('/{id}', [ActivityController::class, 'destroy']);
+    });
 
 
-// ----------------------------------------------------------
-//  LISTINGS
-// ----------------------------------------------------------
-Route::prefix('listings')->group(function () {
-    Route::get('/', [ListingController::class, 'index']);
-    Route::get('/{id}', [ListingController::class, 'show']);
-    Route::post('/', [ListingController::class, 'store'])->name('listings.store');
-    Route::put('/{id}', [ListingController::class, 'update']);
-    Route::delete('/{id}', [ListingController::class, 'destroy'])->name('listings.destroy');
-});
+    // ----------------------------------------------------------
+    // MAILER
+    // ----------------------------------------------------------
+    Route::post('/send-mail', [MailerController::class, 'send']);
 
 
-// ----------------------------------------------------------
-//  TEST / DEBUG
-// ----------------------------------------------------------
-Route::get('/roles', fn() => DB::table('setting_role')->get());
+    // ----------------------------------------------------------
+    // MENUS
+    // ----------------------------------------------------------
+    Route::prefix('nav_menus')->group(function () {
+        Route::get('/list', [MenusController::class, 'menulist']);
+        Route::post('/', [MenusController::class, 'store']);
+        Route::put('/{id}', [MenusController::class, 'update']);
+        Route::delete('/{id}', [MenusController::class, 'destroy']);
+        Route::post('/swap', [MenusController::class, 'swapMenuOrder']);
+    });
 
-Route::post('/test-api', function (Request $request) {
-    Log::info('Test API triggered', $request->all());
-    return response()->json([
-        'success' => true,
-        'message' => 'API successfully triggered!',
-    ]);
+
+    // ----------------------------------------------------------
+    //  LISTINGS
+    // ----------------------------------------------------------
+    Route::prefix('listings')->group(function () {
+        Route::get('/', [ListingController::class, 'index']);
+        Route::get('/{id}', [ListingController::class, 'show']);
+        Route::post('/', [ListingController::class, 'store'])->name('listings.store');
+        Route::put('/{id}', [ListingController::class, 'update']);
+        Route::delete('/{id}', [ListingController::class, 'destroy'])->name('listings.destroy');
+    });
+
+
+    // ----------------------------------------------------------
+    //  TEST / DEBUG
+    // ----------------------------------------------------------
+    Route::get('/roles', fn() => DB::table('setting_role')->get());
+
+    Route::post('/test-api', function (Request $request) {
+        Log::info('Test API triggered', $request->all());
+        return response()->json([
+            'success' => true,
+            'message' => 'API successfully triggered!',
+        ]);
+    });
 });

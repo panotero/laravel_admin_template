@@ -69,25 +69,25 @@ document.addEventListener("DOMContentLoaded", function () {
         headers: { Accept: "application/json" },
       });
 
-      if (!res.ok) {
+      if (res.ok) {
+        const data = await res.text();
+        contentEl.innerHTML = `<div class="dark p-4 dark:bg-gray-800 rounded shadow">${data}</div>`;
+
+        // Execute any inline/external scripts
+        const scripts = contentEl.querySelectorAll("script");
+        scripts.forEach((oldScript) => {
+          const newScript = document.createElement("script");
+          if (oldScript.src) {
+            newScript.src = oldScript.src;
+          } else {
+            newScript.textContent = oldScript.textContent;
+          }
+          document.body.appendChild(newScript);
+          document.body.removeChild(newScript);
+        });
+      } else {
         throw new Error(`Failed to load page: ${res.status} ${res.statusText}`);
       }
-
-      const data = await res.text();
-      contentEl.innerHTML = `<div class="dark p-4 dark:bg-gray-800 rounded shadow">${data}</div>`;
-
-      // Execute any inline/external scripts
-      const scripts = contentEl.querySelectorAll("script");
-      scripts.forEach((oldScript) => {
-        const newScript = document.createElement("script");
-        if (oldScript.src) {
-          newScript.src = oldScript.src;
-        } else {
-          newScript.textContent = oldScript.textContent;
-        }
-        document.body.appendChild(newScript);
-        document.body.removeChild(newScript);
-      });
     } catch (err) {
       contentEl.innerHTML = `<div class="bg-red-600 text-white rounded p-4">
       <strong>Error:</strong> ${err.message}

@@ -5,7 +5,6 @@ async function populateDocumentModal(documentId) {
   try {
     const res = await fetch(`/api/documents/${documentId}`);
     const data = await res.json();
-
     // ------------------------
     // Check if document exists
     // ------------------------
@@ -22,26 +21,28 @@ async function populateDocumentModal(documentId) {
     // Populate Header
     // ------------------------
     document.getElementById("docId").value = data.document_id;
-    setText("docControlNumber", data.document_control_number);
-    setText("docStatus", data.status);
+    // Set main document info
+    setText("docControlNumber", data.document_control_number || "N/A");
+    setText("docStatus", data.status || "N/A");
+
     const confirmationButton = document.getElementById("btnConfirm");
-    confirmationButton.dataset.documentId = data.document_id;
+    confirmationButton.dataset.documentId = data.document_id || "";
 
     // ------------------------
     // Populate Metadata
     // ------------------------
-    setText("docTitle", data.particular);
-    setText("docDept", data.office_origin);
-    setText("docAuthor", data.signatory || "N/A");
-    setText("docDate", data.date_of_document || data.date_received || "N/A");
     setText("docCode", data.document_code || "N/A");
-    setText("document_id", data.document_id || "N/A");
-    setText("docForm", data.document_form || "N/A");
+    setText("docTitle", data.particular || "N/A");
+    setText("docDept", data.office_origin || "N/A");
+    setText("docSignatory", data.signatory || "N/A");
     setText("docType", data.document_type || "N/A");
+    setText("docDate", data.date_received || "N/A");
     setText("docDueDate", data.due_date || "N/A");
-    setText("docDestination", data.destination_office || "N/A");
-    setText("docConfidentiality", data.confidentiality || "Normal");
+    setText("docStatus", data.status || "N/A");
     setText("docRemarks", data.remarks || "-");
+    setText("docConfidentiality", data.confidentiality || "None");
+    setText("created_at", data.created_at || "N/A");
+    setText("date_received", data.date_received || "N/A");
 
     // ------------------------
     // Populate Files / Versions
@@ -185,8 +186,9 @@ function populateActivityLog(data) {
         `;
     return;
   }
-
-  data.activities.forEach((act) => {
+  const activities = [...data.activities].reverse();
+  activities.forEach((act) => {
+    console.log(act);
     const importantDiv = document.createElement("li");
     const fullDiv = document.createElement("li");
 
@@ -202,7 +204,7 @@ function populateActivityLog(data) {
     fullDiv.classList.add("text-sm", "text-gray-600", "dark:text-gray-300");
 
     const timeAgo = new Date(act.created_at).toLocaleString();
-    const fromUser = act.from_user_id ? `User ${act.from_user_id}` : "Unknown";
+    const fromUser = "Unknown";
     const remarks = act.final_remarks;
 
     let displayText = "";
@@ -210,13 +212,15 @@ function populateActivityLog(data) {
     // ----------------------------------------
     // ROUTE ACTION
     // ----------------------------------------
-    if (["route", "upload", "approved", "signed"].includes(act.action)) {
+    if (
+      ["route", "upload", "approved", "signed", "confirm"].includes(act.action)
+    ) {
       let routeTarget = "";
       let actionText = "";
 
       // Determine target
       if (act.to_external == 1) {
-        routeTarget = data.destination_office
+        routeTargetOffice = data.destination_office
           ? data.destination_office
           : "Unknown Office";
       } else {
@@ -228,14 +232,16 @@ function populateActivityLog(data) {
       // Determine message based on action
       switch (act.action) {
         case "route":
-          actionText = `routed the document to <span class="font-semibold">${routeTarget}</span>`;
+          actionText = `<span>routed the document to <p class="font-semibold">${routeTarget}</p</span>`;
           break;
         case "upload":
-          actionText = `uploaded a document${
+          actionText = `<span class="font-semibold">${
+            act.user.name
+          }</span> uploaded a document ${
             routeTarget
-              ? ` for <span class="font-semibold">${routeTarget}</span>`
+              ? ` for <span class="font-semibold">${act.from_user.name}</span>`
               : ""
-          }`;
+          } <br>`;
           break;
         case "approved":
           actionText = `approved the document${
@@ -244,19 +250,22 @@ function populateActivityLog(data) {
               : ""
           }`;
           break;
+        case "confirm":
+          actionText = `<span class="font-semibold">${act.user.name}</span> confirmed receipt of document number: <p class="font-semibold">${act.document_control_number}<br></p>`;
+          break;
       }
 
       displayText = `
         <p>
-            <span class="font-semibold">${fromUser}</span> ${actionText}
+             ${actionText}
             <span class="text-gray-500 text-xs">${timeAgo}</span>
-        </p>
+
         ${
           remarks
             ? `<p><span class="font-semibold">Remarks: </span>${remarks}</p>`
             : ""
         }
-    `;
+    </p>`;
 
       // Show important activity
       importantDiv.innerHTML = displayText;
@@ -273,6 +282,8 @@ function populateActivityLog(data) {
                 <p>
                     <span class="font-semibold">${userName}</span>
                     ${act.action} the document
+                </p>
+                <p>
                     <span class="text-gray-500 text-xs">${timeAgo}</span>
                 </p>
             `;
@@ -295,9 +306,9 @@ function populateActivityLog(data) {
     // ----------------------------------------
     // FULL LOG ALWAYS GETS EVERY ENTRY
     // ----------------------------------------
-    fullDiv.innerHTML = displayText;
-    fullActivityLog.appendChild(fullDiv);
   });
+  const activityLogcont = document.getElementById("activityLog");
+  activityLogcont.scrollTop = 0;
 }
 
 // ------------------------
@@ -338,7 +349,6 @@ function initZoomFunction() {
 }
 
 function initdocumentcontroller() {
-  console.log("doc controller initialized");
   // ----------------------------
   // Helper Functions
   // ----------------------------
@@ -408,8 +418,8 @@ function initdocumentcontroller() {
     tr.dataset.source = source;
 
     tr.innerHTML = `
-        <td class="px-4 py-2">${document_code}</td>
         <td class="px-4 py-2">${document_control_number}</td>
+        <td class="px-4 py-2">${document_code}</td>
         <td class="px-4 py-2">
             <select class="border rounded px-2 py-1 text-xs labeldropdown">
                 <option ${
@@ -665,20 +675,94 @@ function initdocumentcontroller() {
     const fileInput = document.getElementById("fileInput");
     const confirmationBtn = document.getElementById("btnConfirm");
     // console.log(submitBtn);
-
     newDocBtn?.addEventListener("click", () => {
       initModal({ modalId: "modalNewDocument" });
     });
     submitBtn.addEventListener("click", async () => {
-      console.log("submitbttn clicked");
+      console.log("submitBtn clicked");
       const modal = document.getElementById("modalNewDocument");
-      if (!modal) return false;
+      if (!modal) return;
 
+      clearModalErrors(); // clear previous errors
+      const errors = [];
+
+      // Validate PDF file
       if (!fileInput?.files[0]) {
-        alert("Please upload a PDF file.");
+        errors.push("Please upload a PDF file.");
+      }
+
+      // Validate required text fields
+      const requiredFields = ["document_code", "subject", "signatory"];
+      requiredFields.forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el || !el.value.trim()) {
+          errors.push(
+            `${el?.previousElementSibling?.textContent || id} is required.`
+          );
+        }
+      });
+
+      // Dropdowns and "Other" inputs
+      const originDropdown = document.getElementById("originOffice");
+      const destinationDropdown = document.getElementById("destinationOffice");
+      const documentDropdown = document.getElementById("documentType");
+
+      const otherOriginInput = document.getElementById("otheroriginoffice");
+      const otherDestinationInput = document.getElementById(
+        "otherdestinationoffice"
+      );
+      const otherDocumentInput = document.getElementById("otherdocument");
+
+      // ORIGIN OFFICE
+      if (
+        !originDropdown.value ||
+        originDropdown.value.trim() === "" ||
+        originDropdown.value === "Select..."
+      ) {
+        errors.push("Please select an Origin Office.");
+      } else if (
+        originDropdown.value === "Other" &&
+        (!otherOriginInput || !otherOriginInput.value.trim())
+      ) {
+        errors.push("Please specify the Origin Office.");
+      }
+
+      // DESTINATION OFFICE
+      if (
+        !destinationDropdown.value ||
+        destinationDropdown.value.trim() === "" ||
+        destinationDropdown.value === "Select..."
+      ) {
+        errors.push("Please select a Destination Office.");
+      } else if (
+        destinationDropdown.value === "Other" &&
+        (!otherDestinationInput || !otherDestinationInput.value.trim())
+      ) {
+        errors.push("Please specify the Destination Office.");
+      }
+
+      // DOCUMENT TYPE
+      if (
+        !documentDropdown.value ||
+        documentDropdown.value.trim() === "" ||
+        documentDropdown.value === "Select..."
+      ) {
+        errors.push("Please select a Document Type.");
+      } else if (
+        documentDropdown.value === "Other" &&
+        (!otherDocumentInput || !otherDocumentInput.value.trim())
+      ) {
+        errors.push("Please specify the Document Type.");
+      }
+
+      // If any validation errors, show them and stop
+      if (errors.length > 0) {
+        showModalErrors(errors);
+        modal.scrollTop = 0; // scroll to top to see errors
         return;
       }
 
+      // No errors → prepare form data
       const formData = new FormData();
       const docFields = [
         "document_code",
@@ -693,47 +777,47 @@ function initdocumentcontroller() {
       docFields.forEach((id) => {
         const el = document.getElementById(id);
         if (!el) return;
+        let value = sanitizeInput(el.value.trim());
 
-        const value = el.value.trim();
         if (id === "subject") formData.append("particular", value);
         else if (id === "documentType") formData.append("document_type", value);
         else formData.append(id, value);
       });
 
-      // Handle Origin / Destination "Other"
-      const originDropdown = document.getElementById("originOffice");
-      const destinationDropdown = document.getElementById("destinationOffice");
-      const documentDropdown = document.getElementById("documentType");
-      const otherOriginInput = document.getElementById("otheroriginoffice");
-      const otherDestinationInput = document.getElementById(
-        "otherdestinationoffice"
-      );
-      const otherDocumentInput = document.getElementById("otherdoctypetb");
-      console.log(otherOriginInput);
-      console.log(otherDestinationInput);
-
-      let origin = "";
-      let destination = "";
-      let documenttype = "";
+      // Origin Office
       if (originDropdown.value === "Other") {
-        origin = "OTHER - " + otherOriginInput.value;
-        formData.append("office_origin", origin);
+        formData.append(
+          "office_origin",
+          "OTHER - " + sanitizeInput(otherOriginInput.value)
+        );
       } else {
-        formData.append("office_origin", originDropdown.value);
-      }
-      if (destinationDropdown.value === "Other") {
-        destination = "OTHER - " + otherDestinationInput.value;
-        formData.append("destination_office", destination);
-      } else {
-        formData.append("destination_office", destinationDropdown.value);
-      }
-      if (documentDropdown.value === "Other") {
-        documenttype = "OTHER - " + documentDropdown.value;
-        formData.append("document_type", documenttype);
-      } else {
-        formData.append("document_type", otherDocumentInput.value);
+        formData.append("office_origin", sanitizeInput(originDropdown.value));
       }
 
+      // Destination Office
+      if (destinationDropdown.value === "Other") {
+        formData.append(
+          "destination_office",
+          "OTHER - " + sanitizeInput(otherDestinationInput.value)
+        );
+      } else {
+        formData.append(
+          "destination_office",
+          sanitizeInput(destinationDropdown.value)
+        );
+      }
+
+      // Document Type
+      if (documentDropdown.value === "Other") {
+        formData.append(
+          "document_type",
+          "OTHER - " + sanitizeInput(otherDocumentInput.value)
+        );
+      } else {
+        formData.append("document_type", sanitizeInput(documentDropdown.value));
+      }
+
+      // Additional fields
       formData.append("user_id", window.authUser.id);
       formData.append("document_form", "PDF");
       formData.append("file", fileInput.files[0]);
@@ -742,18 +826,48 @@ function initdocumentcontroller() {
       try {
         submitBtn.disabled = true;
         submitBtn.textContent = "Submitting...";
-
+        console.log(document.querySelector('meta[name="csrf-token"]'));
         const response = await fetch("/api/documents", {
           method: "POST",
+
+          headers: {
+            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')
+              .content,
+          },
           body: formData,
         });
+
         const result = await response.json();
 
         if (!response.ok) {
-          alert(
-            "Server validation failed:\n" + JSON.stringify(result, null, 2)
-          );
+          if (response.status === 422) {
+            const invalid = result.invalid_fields;
+
+            let messages = ["Invalid input detected:"];
+
+            Object.keys(invalid).forEach((field) => {
+              invalid[field].forEach((msg) => {
+                messages.push(`${field}: ${msg}`);
+              });
+            });
+
+            showModalErrors(messages);
+            return;
+          }
+
+          // If any validation errors, show them and stop
+          if (errors.length > 0) {
+            showModalErrors(errors);
+            modal.scrollTop = 0; // scroll to top to see errors
+            return;
+          }
+
           return;
+        } else {
+          showMessage({
+            status: "success",
+            message: "Document has been uploaded",
+          });
         }
 
         resetFormModal("modalNewDocument");
@@ -761,12 +875,42 @@ function initdocumentcontroller() {
         getDocs();
       } catch (err) {
         console.error(err);
-        alert("Unexpected error.");
+        showModalErrors(["Unexpected error occurred."]);
       } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = "Submit";
       }
     });
+
+    // Helper functions
+    function sanitizeInput(str) {
+      if (typeof str !== "string") return "";
+      return str
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#x27;")
+        .replace(/\//g, "&#x2F;");
+    }
+
+    function showModalErrors(errors) {
+      const errorBox = document.getElementById("modalErrorMessage");
+      const errorList = document.getElementById("modalErrorList");
+      errorList.innerHTML = "";
+      errors.forEach((err) => {
+        const li = document.createElement("li");
+        li.textContent = err;
+        errorList.appendChild(li);
+      });
+      errorBox.classList.remove("hidden");
+    }
+
+    function clearModalErrors() {
+      const errorBox = document.getElementById("modalErrorMessage");
+      const errorList = document.getElementById("modalErrorList");
+      errorList.innerHTML = "";
+      errorBox.classList.add("hidden");
+    }
 
     // --------------------------
     // PDF Preview Modal
@@ -880,6 +1024,34 @@ function initdocumentcontroller() {
       controlModal.classList.add("modal-open");
     }
   }
+
+  document.getElementById("toggleFullLogBtn").addEventListener("click", () => {
+    const panel = document.getElementById("fullActivityLogContainer");
+    panel.classList.toggle("hidden");
+  });
+
+  const confirmButton = document.getElementById("btnConfirm");
+  confirmButton.addEventListener("click", async (e) => {
+    const post = {
+      document_id: confirmButton.dataset.documentId,
+      user_id: window.authUser.id,
+    };
+    const response = await fetch("/api/documents/confirm", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(post),
+    });
+    const result = await response.json();
+    if (response.ok) {
+      console.log("result ok!");
+
+      document.getElementById("routeDocumentBtn").classList.remove("hidden");
+      confirmButton.classList.add("hidden");
+      getDocs();
+    }
+  });
 
   // ----------------------------
   // Initialization

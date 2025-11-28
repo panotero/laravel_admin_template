@@ -1,4 +1,4 @@
-<div class="max-h-[75vh] overflow-y-auto bg-gray-50 text-gray-800 p-5">
+<div class="max-h-[75vh] overflow-y-auto bg-gray-50 text-gray-800 p-5" id="contentDashboard">
 
 
     <!-- Content -->
@@ -21,8 +21,8 @@
                 <table id="assignedToYouDocumentTable" class="w-full text-sm text-left border-collapse">
                     <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
                         <tr>
-                            <th class="px-4 py-3">Control #</th>
-                            <th class="px-4 py-3">Document Code</th>
+                            <th class="px-4 py-3">Control Number</th>
+                            <th class="px-4 py-3">Document Number</th>
                             <th class="px-4 py-3">Label</th>
                             <th class="px-4 py-3">Subject</th>
                             <th class="px-4 py-3">Origin Office</th>
@@ -52,7 +52,7 @@
                     <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
                         <tr>
                             <th class="px-4 py-3">Control #</th>
-                            <th class="px-4 py-3">Document Code</th>
+                            <th class="px-4 py-3">Document Number</th>
                             <th class="px-4 py-3">Label</th>
                             <th class="px-4 py-3">Subject</th>
                             <th class="px-4 py-3">Origin Office</th>
@@ -75,7 +75,10 @@
     <div id="modalNewDocument" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 hidden modal">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl p-6 overflow-y-auto max-h-[90vh]">
             <h2 class="text-lg font-semibold text-gray-700 mb-4">Upload New Document</h2>
-
+            <div id="modalErrorMessage"
+                class="hidden mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded text-sm">
+                <ul id="modalErrorList" class="list-disc list-inside"></ul>
+            </div>
             <!-- PDF Upload Area -->
             <div id="dropzone"
                 class="border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center p-6 text-gray-500 cursor-pointer hover:border-blue-400 transition">
@@ -103,9 +106,10 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                 <div class="space-y-4">
                     <div>
-                        <label class="text-sm text-gray-600">Document Code</label>
-                        <input id="document_code" type="text" class="w-full border-gray-300 rounded-lg px-3 py-2"
-                            required />
+                        <label class="text-sm text-gray-600">Document Number</label>
+                        <input id="document_code" type="text" maxlength="25" pattern="^[a-zA-Z0-9\-_'\]+$"
+                            title="Only letters, numbers, hyphen (-), underscore (_), single quote ('), and double quote (\") are allowed."
+                            class="w-full border-gray-300 rounded-lg px-3 py-2" required />
 
                     </div>
                     <div>
@@ -120,7 +124,7 @@
                     </div>
                     <div>
                         <label class="text-sm text-gray-600">Remarks</label>
-                        <textarea id="remarks" class="w-full border-gray-300 rounded-lg px-3 py-2" required></textarea>
+                        <textarea id="remarks" class="w-full border-gray-300 rounded-lg px-3 py-2"></textarea>
                     </div>
                 </div>
                 <div class="space-y-4">
@@ -209,49 +213,52 @@
                     <h3 class="text-lg font-medium text-gray-800 dark:text-gray-100">Document Metadata</h3>
                     <div class="space-y-2 text-md">
                         <div class="flex justify-between">
-                            <span class="text-gray-600 dark:text-gray-400">Title:</span>
-                            <span id="docTitle" class="text-gray-900 dark:text-gray-100">Project Proposal</span>
-                        </div>
-
-                        <div class="flex justify-between">
-                            <span class="text-gray-600 dark:text-gray-400">Document Code:</span>
+                            <span class="text-gray-600 dark:text-gray-400">Document Number:</span>
                             <span id="docCode" class="text-gray-900 dark:text-gray-100"></span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-600 dark:text-gray-400">Form:</span>
-                            <span id="docForm" class="text-gray-900 dark:text-gray-100"></span>
+                            <span class="text-gray-600 dark:text-gray-400">Subject:</span>
+                            <span id="docTitle" class="text-gray-900 dark:text-gray-100"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Origin Office:</span>
+                            <span id="docDept" class="text-gray-900 dark:text-gray-100"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Created By / User ID:</span>
+                            <span id="docSignatory" class="text-gray-900 dark:text-gray-100"></span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600 dark:text-gray-400">Type:</span>
                             <span id="docType" class="text-gray-900 dark:text-gray-100"></span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-600 dark:text-gray-400">Due Date:</span>
-                            <span id="docDueDate" class="text-gray-900 dark:text-gray-100"></span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600 dark:text-gray-400">Destination Office:</span>
-                            <span id="docDestination" class="text-gray-900 dark:text-gray-100"></span>
-                        </div>
-                        <div class="flex justify-between">
                             <span class="text-gray-600 dark:text-gray-400">Confidentiality:</span>
                             <span id="docConfidentiality" class="text-gray-900 dark:text-gray-100"></span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-600 dark:text-gray-400">Department:</span>
-                            <span id="docDept" class="text-gray-900 dark:text-gray-100"></span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600 dark:text-gray-400">Created By:</span>
-                            <span id="docAuthor" class="text-gray-900 dark:text-gray-100"></span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600 dark:text-gray-400">Created At:</span>
+                            <span class="text-gray-600 dark:text-gray-400">Document Date:</span>
                             <span id="docDate" class="text-gray-900 dark:text-gray-100"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Due Date:</span>
+                            <span id="docDueDate" class="text-gray-900 dark:text-gray-100"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Status:</span>
+                            <span id="docStatus" class="text-gray-900 dark:text-gray-100"></span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600 dark:text-gray-400">Remarks:</span>
                             <span id="docRemarks" class="text-gray-900 dark:text-gray-100"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Uploaded At:</span>
+                            <span id="created_at" class="text-gray-900 dark:text-gray-100"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Date Received:</span>
+                            <span id="date_received" class="text-gray-900 dark:text-gray-100"></span>
                         </div>
                     </div>
                 </div>
@@ -521,33 +528,11 @@
 <script>
     (function() {
 
+        // showMessage({
+        //     status: "success",
+        //     message: "Routing Success",
+        // });
         initdocumentcontroller();
-        document.getElementById("toggleFullLogBtn").addEventListener("click", () => {
-            const panel = document.getElementById("fullActivityLogContainer");
-            panel.classList.toggle("hidden");
-        });
 
-
-        const confirmButton = document.getElementById("btnConfirm");
-        confirmButton.addEventListener("click", async (e) => {
-            const post = {
-                document_id: confirmButton.dataset.documentId,
-                user_id: window.authUser.id
-            }
-            const response = await fetch("/api/documents/confirm", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(post),
-            });
-            const result = await response.json();
-            if (response.ok) {
-                console.log("result ok!");
-
-                document.getElementById("routeDocumentBtn").classList.remove("hidden");
-                confirmButton.classList.add("hidden");
-            }
-        });
     })();
 </script>

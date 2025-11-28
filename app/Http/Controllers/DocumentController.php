@@ -14,11 +14,14 @@ use App\Models\Activity;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 
 class DocumentController extends Controller
 {
-    //
+
+    // ---------------------------------------
     // GET /api/documents
+    // ---------------------------------------
     public function index()
     {
         $documents = Document::with('files', 'activities')->get();
@@ -27,7 +30,9 @@ class DocumentController extends Controller
 
     public function confirm(Request $request)
     {
-        //content of the request must be document_id, user_id of the logged user
+        // ---------------------------------------
+        // content of the request must be document_id, user_id of the logged user
+        // ---------------------------------------
         $document = Document::with('files', 'activities')
             ->where('document_id', $request->document_id)
             ->first();
@@ -47,7 +52,9 @@ class DocumentController extends Controller
 
 
 
-        //create notificaation item to the uploaded of the document
+        // ---------------------------------------
+        // create notificaation item to the uploaded of the document
+        // ---------------------------------------
 
         DB::table('notifications')->insert([
             'document_id'        => $request->document_id,
@@ -61,7 +68,11 @@ class DocumentController extends Controller
             'updated_at'         => now(),
         ]);
 
-        //create activity log
+        //
+
+        // ---------------------------------------
+        // CREATE ACTIVITY LOG
+        // ---------------------------------------
         $activityData = [
             'action'                  => 'confirm',
             'document_id'             => $document->document_id,
@@ -82,10 +93,18 @@ class DocumentController extends Controller
         ], 201);
     }
 
+    // ---------------------------------------
     // GET /api/documents/{idOrControlNumber}
+    // ---------------------------------------
     public function show($id)
     {
-        $document = Document::with('files', 'activities')
+        $document = Document::with(
+            'files',
+            'activities',
+            'activities.user',
+            'activities.fromUser',
+            'activities.routedUser'
+        )
             ->where('document_id', $id)
             ->first();
 
@@ -106,21 +125,72 @@ class DocumentController extends Controller
         // ---------------------------------------
         // VALIDATION
         // ---------------------------------------
-        $validated = Validator::make($request->all(), [
-            'document_code'        => 'required|string',
-            'date_received'        => 'required|date',
-            'particular'           => 'required|string',
-            'office_origin'        => 'required|string|max:100',
-            'destination_office'   => 'nullable|string|max:100',
-            'user_id'              => 'required|integer',
-            'document_form'        => 'required|string|max:50',
-            'document_type'        => 'required|string|max:50',
-            'date_of_document'     => 'nullable|date',
-            'due_date'             => 'nullable|date',
-            'signatory'            => 'required|string|max:100',
-            'remarks'              => 'nullable|string',
-            'file'                 => 'required|file|mimes:pdf|max:20480',
-        ])->validate();
+
+        $validator = Validator::make($request->all(), [
+            'document_code' => [
+                'required',
+                'string',
+                'max:25',
+                'regex:/^[a-zA-Z0-9 _-]+$/'
+            ],
+            'date_received' => 'required|date',
+            'particular' => [
+                'required',
+                'string',
+                'regex:/^[a-zA-Z0-9 ,.\'-]+$/'
+            ],
+            'office_origin' => [
+                'required',
+                'string',
+                'max:100',
+                'regex:/^[a-zA-Z0-9 -]+$/',
+                Rule::exists('office_table', 'office_name')
+            ],
+            'destination_office' => [
+                'nullable',
+                'string',
+                'max:100',
+                'regex:/^[a-zA-Z0-9 -]+$/',
+                Rule::exists('office_table', 'office_name')
+            ],
+            'user_id' => 'required|integer',
+            'document_form' => [
+                'required',
+                'string',
+                'max:50',
+                'regex:/^[a-zA-Z0-9 ,.-]+$/'
+            ],
+            'document_type' => [
+                'required',
+                'string',
+                'max:50',
+                'regex:/^[a-zA-Z0-9 &,-]+$/',
+                Rule::exists('document_types', 'document_type')
+            ],
+            'date_of_document' => 'nullable|date',
+            'due_date' => 'nullable|date',
+            'signatory' => [
+                'required',
+                'string',
+                'max:100',
+                'regex:/^[a-zA-Z0-9 .,-]+$/'
+            ],
+            'remarks' => [
+                'nullable',
+                'string',
+                'regex:/^[a-zA-Z0-9 ,.\'-]+$/'
+            ],
+            'file' => 'required|file|mimes:pdf|max:20480',
+        ]);
+
+
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Invalid input detected.',
+                'invalid_fields' => $validator->errors(), // ← shows the exact invalid fields
+            ], 422);
+        }
 
 
         // ---------------------------------------
@@ -252,7 +322,7 @@ class DocumentController extends Controller
             'user_id'                 => $request->user_id,
             'from_user_id'            => $request->user_id,
             'routed_to'               => null,
-            'final_remarks'           => $validated['remarks'] ?? null,
+            'final_remarks'           => $request->remarks ?? null,
         ]);
 
 
@@ -273,7 +343,10 @@ class DocumentController extends Controller
 
 
 
+    // ---------------------------------------
     // PUT/PATCH /api/documents/{id}
+    // ---------------------------------------
+
     public function update(Request $request, $id)
     {
         $document = Document::find($id);
@@ -286,7 +359,10 @@ class DocumentController extends Controller
         return response()->json(['message' => 'Document updated successfully', 'data' => $document]);
     }
 
+
+    // ---------------------------------------
     // DELETE /api/documents/{id}
+    // ---------------------------------------
     public function destroy($id)
     {
         $document = Document::find($id);

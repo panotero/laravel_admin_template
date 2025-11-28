@@ -120,12 +120,7 @@
             </main>
         </div>
     </div>
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            loadNotifications();
-
-        });
-    </script>
+    <script></script>
 
 
 </x-app-layout>

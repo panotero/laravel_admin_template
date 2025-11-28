@@ -26,7 +26,7 @@ Route::get('/', function () {
 });
 
 // Protected routes
-Route::middleware(['auth', 'check.status'])->group(function () {
+Route::middleware(['auth', 'check.status', 'prevent-back-history'])->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');

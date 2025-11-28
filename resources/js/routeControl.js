@@ -43,13 +43,19 @@ function initroute() {
         });
 
         const data = await res.json();
-        console.log(data);
-        window.getDocs();
+        if (res.ok) {
+          console.log(data);
+          window.getDocs();
+          const routingmodal = document.getElementById("routingModal");
+          routingmodal.classList.add("hidden");
+          const documentmodal = document.getElementById("DocumentModal");
+          documentmodal.classList.add("hidden");
 
-        const routingmodal = document.getElementById("routingModal");
-        routingmodal.classList.add("hidden");
-        const documentmodal = document.getElementById("DocumentModal");
-        documentmodal.classList.add("hidden");
+          showMessage({
+            status: "success",
+            message: "Routing Success",
+          });
+        }
 
         // optionally refresh activity log or close modal
       } catch (err) {

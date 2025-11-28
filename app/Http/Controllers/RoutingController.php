@@ -48,13 +48,12 @@ class RoutingController extends Controller
             $sameOffice        = ($destinationOffice === $user->office->office_name);
             $backToOrigin      = ($destinationOffice === $originOffice);
 
-            //
-            // 1. Build Activity Payload
-            //
-
+            // ---------------------------------------
             // If routing outside user's office, mark external
+            // ---------------------------------------
             if (!$sameOffice) {
                 $activityData['to_external'] = 1;
+                //check the office name if existing in involved office.
 
                 $admin_users = User::with(['userConfig', 'office'])
                     ->whereHas('userConfig', function ($q) {
@@ -66,25 +65,15 @@ class RoutingController extends Controller
                     })
                     ->get();
 
-                //insert the file and save to files table
-
                 // -------------------------------
                 // HANDLE PDF FILE UPLOAD
                 // -------------------------------
                 if ($request->hasFile('pdf_file') && $request->file('pdf_file')->isValid()) {
 
                     $file = $request->file('pdf_file');
-
-                    // Office folder name (fallback if null)
                     $officeFolder = $document->office_origin ?: 'UnknownOffice';
-
-                    // Clean file name (remove spaces)
                     $cleanOriginal = str_replace(' ', '_', $file->getClientOriginalName());
-
-                    // Add unique ID to avoid filename conflicts
                     $fileName = uniqid() . '-' . $cleanOriginal;
-
-                    // Folder path
                     $publicPath = public_path("assets/documents/{$officeFolder}/pdf");
 
                     // Create directory if not existing
@@ -92,13 +81,9 @@ class RoutingController extends Controller
                         mkdir($publicPath, 0777, true);
                     }
 
-                    // Move the file to the folder
                     $file->move($publicPath, $fileName);
-
-                    // Relative path saved in DB
                     $filePath = "assets/documents/{$officeFolder}/pdf/{$fileName}";
 
-                    // Save file record in files table
                     DB::table('files')->insert([
                         'document_id'      => $document->document_id,
                         'file_name'        => $cleanOriginal,
@@ -110,7 +95,6 @@ class RoutingController extends Controller
                     ]);
                     if ($document->status === "Approved") {
 
-                        // dd($admin_users);
                         foreach ($admin_users as $adminuser) {
 
                             $activityData = [
@@ -121,6 +105,7 @@ class RoutingController extends Controller
                                 'user_id'                 => $user->id,
                                 'from_user_id' => $user->id,
                                 'routed_to'               => $recipientUserId,
+                                'to_external' => 1,
                                 'final_remarks'           => $validated['remarks'] ?? null,
                             ];
                             DB::table('notifications')->insert([
@@ -145,7 +130,6 @@ class RoutingController extends Controller
                                 'date_forwarded' => now(),
                             ]);
                     } else {
-                        // dd($admin_users);
                         $activityData = [
                             'action'                  => 'route',
                             'document_id'             => $document->document_id,
@@ -153,6 +137,7 @@ class RoutingController extends Controller
                             'document_control_number' => $document->document_control_number,
                             'user_id'                 => $user->id,
                             'from_user_id' => $user->id,
+                            'to_external' => 1,
                             'routed_to'               => $recipientUserId,
                             'final_remarks'           => $validated['remarks'] ?? null,
                         ];
@@ -178,12 +163,21 @@ class RoutingController extends Controller
                                 'date_forwarded' => now(),
                             ]);
                     }
-
-                    Activity::create($activityData);
                 } else {
                     return "no pdf available";
                 }
             } else {
+                $activityData = [
+                    'action'                  => 'route',
+                    'document_id'             => $document->document_id,
+                    'final_approval'          => $sameOffice ? ($destinationOffice === $originOffice ? 1 : 0) : ($backToOrigin ? 1 : 1),
+                    'document_control_number' => $document->document_control_number,
+                    'user_id'                 => $user->id,
+                    'from_user_id' => $user->id,
+                    'to_external' => 1,
+                    'routed_to'               => $recipientUserId,
+                    'final_remarks'           => $validated['remarks'] ?? null,
+                ];
 
 
                 DB::table('notifications')->insert([
@@ -213,20 +207,17 @@ class RoutingController extends Controller
                     'status' => 0,
                 ]);
             }
+            Activity::create($activityData);
 
 
 
-            //
-            // 3. Update Document
-            //
+            // Update Document
             $document->update([
                 'destination_office' => $destinationOffice,
                 'recipient_id'       => $recipientUserId,
             ]);
 
-            //
-            // 4. Final Response Message
-            //
+            // Final Response Message
             if ($sameOffice) {
                 return response()->json([
                     'status'  => 'success',

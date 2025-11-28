@@ -8,7 +8,7 @@
         </button>
     </div>
     <div class="overflow-y-auto max-h-[75vh]">
-        <table class="min-w-full text-sm border-collapse" id="userTable">
+        <table class="min-w-full text-sm border-collapse  p-5" id="userTable">
             <thead class="bg-gray-100">
                 <tr class="bg-gray-100 dark:bg-gray-700 text-left">
                     <th class="text-left px-6 py-3 text-sm font-semibold text-gray-600">ID</th>

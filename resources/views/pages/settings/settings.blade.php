@@ -16,7 +16,7 @@
             </button>
         </div>
         <div class="overflow-x-auto">
-            <table class="min-w-full text-sm border-collapse" id="officeTable">
+            <table class="min-w-full text-sm border-collapse  p-5" id="officeTable">
                 <thead>
                     <tr class="bg-gray-100 dark:bg-gray-700 text-left">
                         <th class="p-3">ID</th>
@@ -42,7 +42,7 @@
             </button>
         </div>
         <div class="overflow-x-auto">
-            <table class="min-w-full text-sm border-collapse" id="userTable">
+            <table class="min-w-full text-sm border-collapse  p-5" id="userTable">
                 <thead>
                     <tr class="bg-gray-100 dark:bg-gray-700 text-left">
                         <th class="p-3">ID</th>
@@ -67,7 +67,7 @@
             </button>
         </div>
         <div class="overflow-x-auto">
-            <table class="min-w-full text-sm border-collapse" id="documentTable">
+            <table class="min-w-full text-sm border-collapse  p-5" id="documentTable">
                 <thead>
                     <tr class="bg-gray-100 dark:bg-gray-700 text-left">
                         <th class="p-3">ID</th>

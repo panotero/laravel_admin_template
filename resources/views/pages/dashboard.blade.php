@@ -168,7 +168,7 @@
                     <span class="text-xs ">By priority</span>
                 </div>
 
-                <table class="w-full text-sm">
+                <table class="w-full text-sm  p-5">
                     <thead class="text-xs -b -white/6">
                         <tr>
                             <th class="py-2 text-left">File</th>

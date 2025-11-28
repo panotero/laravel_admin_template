@@ -7,7 +7,7 @@
     </div>
 
     <!-- ✅ Table -->
-    <table class="w-full border" id="navMenuTable">
+    <table class="w-full border  p-5" id="navMenuTable">
         <thead class="bg-gray-200 text-black">
             <tr>
                 <th class="p-2 border">Title</th>

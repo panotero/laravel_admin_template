@@ -19,7 +19,7 @@
 
             <!-- Table -->
             <div class="overflow-x-auto bg-white rounded-xl shadow">
-                <table id="approvaltable" class="w-full text-sm text-left border-collapse responsive-table">
+                <table id="approvaltable" class="w-full text-sm text-left border-collapse responsive-table  p-5">
                     <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
                         <tr>
                             <th class="px-4 py-3">Control #</th>

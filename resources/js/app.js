@@ -22,3 +22,4 @@ import "./pdftoimageConverter";
 import "./pdf.worker.min.mjs";
 import "./routeControl";
 import "./approvalHandler";
+import "./flatpicker";

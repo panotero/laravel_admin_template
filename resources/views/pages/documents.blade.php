@@ -1,4 +1,4 @@
-<div class="max-h-[75vh] overflow-y-auto bg-gray-50 text-gray-800 p-5" id="contentDashboard">
+<div class="max-h-screen overflow-y-auto bg-gray-50 text-gray-800 p-5" id="contentDashboard">
 
 
     <!-- Content -->

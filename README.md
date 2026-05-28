@@ -1,150 +1,270 @@
-# Document Tracking & Finance Management System
+````md
+# Laravel Management System Template
 
-A Laravel 10 application for **document tracking and management**, including **finance tracking**.
+A responsive blank management system template built with Laravel 10 and MySQL.
 
----
-
-## Tech Stack
-
-- **PHP:** 8.2 or later
-- **MySQL:** 5.7 or higher
-- **Composer** (PHP dependency manager)
-- **Node.js** (v16+ recommended)
-- **Laravel:** 10
-- **Frontend build tools:** npm (for assets compilation)
+This template is designed as a starting point for building custom management systems and admin panels. It includes responsive layouts, role management, dark mode support, dynamic navigation management, and SMTP mail configuration.
 
 ---
 
-## Application Overview
+# Features
 
-This application allows users to:
-
-- Track documents within an organization
-- Manage approvals, status, and destinations
-- Keep finance records linked to documents
-- Generate reports on both documents and finance transactions
+- Laravel 10
+- MySQL Database
+- Responsive Design
+- Automatic Dark Mode Support
+- User Role Management
+- Dynamic Navigation Menu Management
+- SMTP Mailer Configuration
+- Database Session Support
+- Database Queue Support
+- Sanctum Domain Binding Support
 
 ---
 
-## Installation / Migration Procedure
+# Installation
 
-After pulling the repository:
+## 1. Clone the Repository
 
-1. **Install PHP dependencies**
+```bash
+git clone YOUR_REPOSITORY_URL
+```
+````
+
+---
+
+## 2. Navigate to Project Directory
+
+```bash
+cd YOUR_PROJECT_NAME
+```
+
+---
+
+## 3. Install PHP Dependencies
 
 ```bash
 composer install
+```
 
-Install Node.js dependencies
+---
+
+## 4. Install Node Dependencies
+
+```bash
 npm install
+```
 
-Run database migrations
-php artisan migrate
+---
 
-Build frontend assets
-npm run build
+## 5. Configure Environment File
 
-Seed the database (creates the first admin/user to initialize the system)
-php artisan db:seed
+Copy the `.env.example` file:
 
-You are now ready to access the application.
+```bash
+cp .env.example .env
+```
 
-the initial user is
-user: superadmin@email.com
-password: Testing123
+Generate application key:
 
-Deployment File Structure
-Important: Run npm run build before restructuring files for deployment.
+```bash
+php artisan key:generate
+```
 
-root/
-│
-├─ app_core/           <-- All Laravel framework files
-│   ├─ app/
-│   ├─ bootstrap/
-│   ├─ config/
-│   ├─ database/
-│   ├─ resources/
-│   ├─ routes/
-│   ├─ storage/
-│   ├─ vendor/
-│   └─ ...other Laravel files
-│
-└─ public/             <-- Frontend entry point
-    ├─ index.php
-    ├─ css/
-    ├─ js/
-    └─ ...other public assets
-Notes:
+---
 
-app_core contains all backend logic and Laravel files
+# Environment Configuration
 
-public/ should be accessible at the web root
+Update the following `.env` values:
 
-public/index.php update the /../ to /app_core/ to point it to right folder.
+```env
+APP_URL=http://localhost:8000
 
-"Do not include node_modules, .git folder and ENV when uploading to the hosting! thank you!"
+BROADCAST_DRIVER=log
+CACHE_DRIVER=database
+FILESYSTEM_DISK=local
+QUEUE_CONNECTION=database
+SESSION_DRIVER=database
+SESSION_LIFETIME=120
 
-Always run npm run build before moving files
+SANCTUM_STATEFUL_DOMAINS=
+SESSION_DOMAIN=null
+```
 
-Environment Setup (Production)
-Create a .env file on the production server only. Do not push .env to Git.
+---
 
-Sample .env structure:
+## Important Notes
 
-APP_NAME=DocumentTrackingApp
-APP_ENV=production
-APP_KEY=base64:GENERATE_YOUR_KEY
-APP_DEBUG=false
-APP_URL=https://your-domain.com
-ASSET_URL=https://your-domain.com //this is crucial becuase the template need to point to your domain in order to get the js and css from build.
+### APP_URL
 
-LOG_CHANNEL=stack
+Make sure to update the `APP_URL` with your own local URL or domain.
 
+Example:
+
+```env
+APP_URL=http://localhost:8000
+```
+
+This is important to avoid component and asset loading issues.
+
+---
+
+### Sanctum Domain Configuration
+
+```env
+SANCTUM_STATEFUL_DOMAINS=
+SESSION_DOMAIN=null
+```
+
+These configurations allow you to bind your own domain or local URL properly and help prevent unauthorized external access.
+
+---
+
+# Database Setup
+
+Update your database credentials inside `.env`.
+
+Example:
+
+```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=your_database_name
-DB_USERNAME=your_database_user
-DB_PASSWORD=your_database_password
-
-BROADCAST_DRIVER=log
-CACHE_DRIVER=file
-QUEUE_CONNECTION=sync
-SESSION_DRIVER=file
-SESSION_LIFETIME=120
-Use php artisan key:generate on the server to generate a secure APP_KEY.
-
-Git Guidelines
-Do not push your .env file
-
-Always pull from origin/main before starting work:
-
-git pull origin main
-Commit changes with descriptive messages
-
-git add .
-git commit -m "Feature: Added document status filter"
-git push origin main
-For large changes, consider creating a feature branch first
-
-First-time Setup Checklist (Quick Start)
-git clone <repository-url>
-cd <project-folder>
-composer install
-npm install
-php artisan migrate
-npm run build
-php artisan db:seed
-After this, your application should be ready to run.
-
-
-This version is **fully GitHub Markdown compatible** and includes:
-
-- Installation & migration steps
-- Deployment file structure diagram
-- `.env` instructions
-- Git guidelines
-- Quick-start checklist
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
 ---
+
+# Run Database Migration
+
+```bash
+php artisan migrate
+```
+
+---
+
+# Seed Default Data
+
+```bash
+php artisan db:seed
+```
+
+This will generate the default roles and required initial data.
+
+---
+
+# Default User Roles
+
+The system comes with the following default roles:
+
+```php
+['id' => 1, 'role_name' => 'superadmin'],
+['id' => 2, 'role_name' => 'admin'],
+['id' => 3, 'role_name' => 'user'],
+['id' => 4, 'role_name' => 'developer'],
+```
+
+---
+
+# Default Navigation Menus
+
+## Dashboard
+
+The main dashboard page of the system.
+
+Used for displaying summaries, widgets, statistics, and other system overviews.
+
+---
+
+## User Management
+
+This section is used for managing system users.
+
+Features include:
+
+- Create Users
+- Edit Users
+- Assign Roles
+- Manage User Accounts
+
+---
+
+## Developer
+
+The developer section contains advanced system configuration tools.
+
+### Mailer
+
+Used to configure SMTP mail settings.
+
+This configuration is used for:
+
+- Notifications
+- Email Verification
+- Password Reset Emails
+- Other email-related activities
+
+---
+
+### Menus
+
+Used to manage navigation menus.
+
+Important Notes:
+
+- Navigation menu creation is NOT automated.
+- Every additional menu item must also have its corresponding Laravel web route manually created.
+
+Example:
+
+```php
+Route::get('/sample-page', function () {
+    return view('sample-page');
+});
+```
+
+---
+
+# Dark Mode Support
+
+The template automatically detects the browser theme.
+
+If the user's browser or operating system is in dark mode, the application will automatically switch to dark mode as well.
+
+---
+
+# Running the Application
+
+Start the Laravel server:
+
+```bash
+php artisan serve
+```
+
+Run Vite:
+
+```bash
+npm run dev
+```
+
+---
+
+# Tech Stack
+
+- Laravel 10
+- PHP
+- MySQL
+- Tailwind CSS
+- Vite
+
+---
+
+# License
+
+This template is open for customization and project development.
+
+```
+
 ```

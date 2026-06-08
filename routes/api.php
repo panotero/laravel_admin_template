@@ -15,6 +15,7 @@ use App\Http\Controllers\ApprovalsController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\OptionController;
 use App\Http\Controllers\ListOfValueController;
+use App\Http\Controllers\Api\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,118 +26,125 @@ use App\Http\Controllers\ListOfValueController;
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth'])->group(function () {
-    Route::get('/debug_auth', function () {
-        $user = auth()->user();
-        if ($user) {
-            $user->load('office');
-        }
+// Route::middleware(['auth'])->group(function () {
+//     Route::get('/debug_auth', function () {
+//         $user = auth()->user();
+//         if ($user) {
+//             $user->load('office');
+//         }
 
-        return [
-            'isLoggedIn' => auth()->check(),
-            'user' => $user,
-        ];
-    });
-    Route::get('/user', fn(Request $request) => $request->user());
-    Route::get('/user_info', function () {
+//         return [
+//             'isLoggedIn' => auth()->check(),
+//             'user' => $user,
+//         ];
+//     });
+//     Route::get('/user', fn(Request $request) => $request->user());
+//     Route::get('/user_info', function () {
 
-        $user = auth()->user();
-        if ($user) {
-            $user->load('office', 'userConfig');
-        }
+//         $user = auth()->user();
+//         if ($user) {
+//             $user->load('office', 'userConfig');
+//         }
 
-        return [
-            'isLoggedIn' => auth()->check(),
-            'user' => $user,
-        ];
-    });
+//         return [
+//             'isLoggedIn' => auth()->check(),
+//             'user' => $user,
+//         ];
+//     });
 
-    Route::get('/load_menu', [MenusController::class, 'index']);
-    Route::prefix('notifications')->group(function () {
-        Route::get('/', [NotificationController::class, 'getNotifications']);
-    });
-
-
-    Route::post('/notifications/mark-read', [NotificationController::class, 'markRead']);
-    Route::post('/documents/route', [RoutingController::class, 'routeDocument']);
-    Route::prefix('approvals')->group(function () {
-        Route::get('/', [ApprovalsController::class, 'getMyApprovals']);
-        Route::post('/{approval_id}/action', [ApprovalsController::class, 'handleApprovalAction']);
-    });
-    Route::get('/notifications/stream', [NotificationController::class, 'stream']);
-    Route::get('/OfficeDocs', [DocumentController::class, 'OfficeDocs']);
+//     Route::get('/load_menu', [MenusController::class, 'index']);
+//     Route::prefix('notifications')->group(function () {
+//         Route::get('/', [NotificationController::class, 'getNotifications']);
+//     });
 
 
+//     Route::post('/notifications/mark-read', [NotificationController::class, 'markRead']);
+//     Route::post('/documents/route', [RoutingController::class, 'routeDocument']);
+//     Route::prefix('approvals')->group(function () {
+//         Route::get('/', [ApprovalsController::class, 'getMyApprovals']);
+//         Route::post('/{approval_id}/action', [ApprovalsController::class, 'handleApprovalAction']);
+//     });
+//     Route::get('/notifications/stream', [NotificationController::class, 'stream']);
+//     Route::get('/OfficeDocs', [DocumentController::class, 'OfficeDocs']);
 
 
 
 
 
-    Route::prefix('users')->group(function () {
-        Route::get('/', [UserController::class, 'index']);
-        Route::get('/{id}', [UserController::class, 'show']);
-        Route::get('/reports/{office_code}', [UserController::class, 'getUsersWithDocs']);
-        Route::post('/', [UserController::class, 'store']);
-        Route::patch('/save/{id}', [UserController::class, 'save_info']);
-        Route::patch('/deactivate/{id}', [UserController::class, 'deactivate']);
-        Route::patch('/reactivate/{id}', [UserController::class, 'reactivate']);
-        Route::get('/reports/{officename}', [UserController::class, 'reports']);
-    });
 
 
-    Route::post('/send-mail', [MailerController::class, 'send']);
+//     Route::prefix('users')->group(function () {
+//         Route::get('/', [UserController::class, 'index']);
+//         Route::get('/{id}', [UserController::class, 'show']);
+//         Route::get('/reports/{office_code}', [UserController::class, 'getUsersWithDocs']);
+//         Route::post('/', [UserController::class, 'store']);
+//         Route::patch('/save/{id}', [UserController::class, 'save_info']);
+//         Route::patch('/deactivate/{id}', [UserController::class, 'deactivate']);
+//         Route::patch('/reactivate/{id}', [UserController::class, 'reactivate']);
+//         Route::get('/reports/{officename}', [UserController::class, 'reports']);
+//     });
 
 
-    Route::prefix('nav_menus')->group(function () {
-        Route::get('/list', [MenusController::class, 'menulist']);
-        Route::post('/', [MenusController::class, 'store']);
-        Route::put('/{id}', [MenusController::class, 'update']);
-        Route::delete('/{id}', [MenusController::class, 'destroy']);
-        Route::post('/swap', [MenusController::class, 'swapMenuOrder']);
-    });
+//     Route::post('/send-mail', [MailerController::class, 'send']);
 
 
-
-    Route::prefix('options')->group(function () {
-        Route::get('/', [OptionController::class, 'index']);
-        Route::post('/', [OptionController::class, 'store']);
-        Route::get('/{id}', [OptionController::class, 'show']);
-        Route::put('/{id}', [OptionController::class, 'update']);
-        Route::delete('/', [OptionController::class, 'destroy']);
-
-        Route::get('/{optionId}/values', [ListOfValueController::class, 'byOption']);
-        Route::post('/{optionId}/values', [ListOfValueController::class, 'storeByOption']);
-    });
-
-
-    // Global LOV routes (if you still want independent access)
-    Route::prefix('lov')->group(function () {
-
-        Route::get('/', [ListOfValueController::class, 'index']);
-        Route::post('/', [ListOfValueController::class, 'store']);
-        Route::get('/{id}', [ListOfValueController::class, 'show']);
-        Route::put('/{id}', [ListOfValueController::class, 'update']);
-        Route::delete('/', [ListOfValueController::class, 'destroy']);
-    });
-
-    Route::prefix('companies')->group(function () {
-
-        Route::get('/', [CompanyController::class, 'index']);
-        Route::post('/', [CompanyController::class, 'store']);
-        Route::get('/{id}', [CompanyController::class, 'show']);
-        Route::put('/{id}', [CompanyController::class, 'update']);
-        Route::delete('/{id}', [CompanyController::class, 'destroy']);
-    });
+//     Route::prefix('nav_menus')->group(function () {
+//         Route::get('/list', [MenusController::class, 'menulist']);
+//         Route::post('/', [MenusController::class, 'store']);
+//         Route::put('/{id}', [MenusController::class, 'update']);
+//         Route::delete('/{id}', [MenusController::class, 'destroy']);
+//         Route::post('/swap', [MenusController::class, 'swapMenuOrder']);
+//     });
 
 
 
-    Route::get('/roles', fn() => DB::table('setting_role')->get());
+//     Route::prefix('options')->group(function () {
+//         Route::get('/', [OptionController::class, 'index']);
+//         Route::post('/', [OptionController::class, 'store']);
+//         Route::get('/{id}', [OptionController::class, 'show']);
+//         Route::put('/{id}', [OptionController::class, 'update']);
+//         Route::delete('/', [OptionController::class, 'destroy']);
 
-    Route::post('/test-api', function (Request $request) {
-        Log::info('Test API triggered', $request->all());
-        return response()->json([
-            'success' => true,
-            'message' => 'API successfully triggered!',
-        ]);
-    });
+//         Route::get('/{optionId}/values', [ListOfValueController::class, 'byOption']);
+//         Route::post('/{optionId}/values', [ListOfValueController::class, 'storeByOption']);
+//     });
+
+
+//     // Global LOV routes (if you still want independent access)
+//     Route::prefix('lov')->group(function () {
+
+//         Route::get('/', [ListOfValueController::class, 'index']);
+//         Route::post('/', [ListOfValueController::class, 'store']);
+//         Route::get('/{id}', [ListOfValueController::class, 'show']);
+//         Route::put('/{id}', [ListOfValueController::class, 'update']);
+//         Route::delete('/', [ListOfValueController::class, 'destroy']);
+//     });
+
+//     Route::prefix('companies')->group(function () {
+
+//         Route::get('/', [CompanyController::class, 'index']);
+//         Route::post('/', [CompanyController::class, 'store']);
+//         Route::get('/{id}', [CompanyController::class, 'show']);
+//         Route::put('/{id}', [CompanyController::class, 'update']);
+//         Route::delete('/{id}', [CompanyController::class, 'destroy']);
+//     });
+
+
+
+//     Route::get('/roles', fn() => DB::table('setting_role')->get());
+
+//     Route::post('/test-api', function (Request $request) {
+//         Log::info('Test API triggered', $request->all());
+//         return response()->json([
+//             'success' => true,
+//             'message' => 'API successfully triggered!',
+//         ]);
+//     });
+// });
+
+Route::post('/login', [AuthController::class, 'login']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/me', [AuthController::class, 'me']);
+    Route::post('/logout', [AuthController::class, 'logout']);
 });

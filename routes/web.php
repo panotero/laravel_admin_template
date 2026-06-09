@@ -9,6 +9,7 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\MailerController;
 use App\Http\Middleware\CheckUserStatus;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\QrCodeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -72,6 +73,10 @@ Route::middleware(['auth', 'check.status', 'prevent-back-history'])->group(funct
     Route::post('/mailer/send', [MailerController::class, 'send'])->name('mailer.send');
 
 
+
+    Route::get('/page_qrgen', [PageController::class, 'page_qrgen']);
+
+
     Route::resource('users', UserController::class)->middleware('can:isSuperAdmin');
 
     Route::prefix('notifications')->group(function () {
@@ -79,3 +84,4 @@ Route::middleware(['auth', 'check.status', 'prevent-back-history'])->group(funct
     });
 });
 require __DIR__ . '/auth.php';
+Route::get('/qr/generate', [QrCodeController::class, 'generate']);

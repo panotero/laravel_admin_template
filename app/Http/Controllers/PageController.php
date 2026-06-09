@@ -120,4 +120,9 @@ class PageController extends Controller
     {
         return view('pages.settings.lookupVal');
     }
+
+    public function page_qrgen()
+    {
+        return view('pages.qrgen');
+    }
 }

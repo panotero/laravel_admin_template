@@ -8,13 +8,9 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\MailerController;
 use App\Http\Controllers\MenusController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\RoutingController;
-use App\Http\Controllers\ApprovalsController;
-use App\Http\Controllers\CompanyController;
-use App\Http\Controllers\OptionController;
-use App\Http\Controllers\ListOfValueController;
+
+use App\Http\Controllers\QrCodeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -58,13 +54,6 @@ Route::middleware(['auth'])->group(function () {
 
 
     Route::post('/notifications/mark-read', [NotificationController::class, 'markRead']);
-    Route::post('/documents/route', [RoutingController::class, 'routeDocument']);
-    Route::prefix('approvals')->group(function () {
-        Route::get('/', [ApprovalsController::class, 'getMyApprovals']);
-        Route::post('/{approval_id}/action', [ApprovalsController::class, 'handleApprovalAction']);
-    });
-    Route::get('/notifications/stream', [NotificationController::class, 'stream']);
-    Route::get('/OfficeDocs', [DocumentController::class, 'OfficeDocs']);
 
 
 
@@ -97,37 +86,8 @@ Route::middleware(['auth'])->group(function () {
 
 
 
-    Route::prefix('options')->group(function () {
-        Route::get('/', [OptionController::class, 'index']);
-        Route::post('/', [OptionController::class, 'store']);
-        Route::get('/{id}', [OptionController::class, 'show']);
-        Route::put('/{id}', [OptionController::class, 'update']);
-        Route::delete('/', [OptionController::class, 'destroy']);
 
-        Route::get('/{optionId}/values', [ListOfValueController::class, 'byOption']);
-        Route::post('/{optionId}/values', [ListOfValueController::class, 'storeByOption']);
-    });
-
-
-    // Global LOV routes (if you still want independent access)
-    Route::prefix('lov')->group(function () {
-
-        Route::get('/', [ListOfValueController::class, 'index']);
-        Route::post('/', [ListOfValueController::class, 'store']);
-        Route::get('/{id}', [ListOfValueController::class, 'show']);
-        Route::put('/{id}', [ListOfValueController::class, 'update']);
-        Route::delete('/', [ListOfValueController::class, 'destroy']);
-    });
-
-    Route::prefix('companies')->group(function () {
-
-        Route::get('/', [CompanyController::class, 'index']);
-        Route::post('/', [CompanyController::class, 'store']);
-        Route::get('/{id}', [CompanyController::class, 'show']);
-        Route::put('/{id}', [CompanyController::class, 'update']);
-        Route::delete('/{id}', [CompanyController::class, 'destroy']);
-    });
-
+    Route::post('/qr/generate', [QrCodeController::class, 'generate']);
 
 
     Route::get('/roles', fn() => DB::table('setting_role')->get());
